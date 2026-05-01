@@ -1,0 +1,538 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String   @db.VarChar(255)
+  slug       String   @unique @db.VarChar(100)
+  plan       String?  @default("starter") @db.VarChar(50)
+  settings   Json?    @default("{}")
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  organizations        Organization[]
+  business_units       BusinessUnit[]
+  applications         Application[]
+  application_costs    ApplicationCost[]
+  capability_nodes     CapabilityNode[]
+  application_capabilities ApplicationCapability[]
+  interfaces           Interface[]
+  technology_components TechnologyComponent[]
+  saas_applications    SaaSApplication[]
+  users                User[]
+  roles                Role[]
+  audit_logs           AuditLog[]
+  comments             Comment[]
+  notifications        Notification[]
+  import_jobs          ImportJob[]
+  export_jobs          ExportJob[]
+  email_logs           EmailLog[]
+
+  @@map("tenants")
+}
+
+model Organization {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  name           String   @db.VarChar(255)
+  parent_org_id  String?  @db.Uuid
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  tenant         Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  parent_org     Organization?  @relation("OrgToOrg", fields: [parent_org_id], references: [id])
+  child_orgs     Organization[] @relation("OrgToOrg")
+  business_units BusinessUnit[]
+
+  @@map("organizations")
+}
+
+model BusinessUnit {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenant_id       String   @db.Uuid
+  organization_id String?  @db.Uuid
+  name            String   @db.VarChar(255)
+  description     String?
+  parent_unit_id  String?  @db.Uuid
+  created_at      DateTime @default(now()) @db.Timestamptz
+
+  tenant          Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  organization    Organization?  @relation(fields: [organization_id], references: [id])
+  parent_unit     BusinessUnit?  @relation("BUToBU", fields: [parent_unit_id], references: [id])
+  child_units     BusinessUnit[] @relation("BUToBU")
+  applications    Application[]
+  user_roles      UserRole[]
+
+  @@map("business_units")
+}
+
+model Application {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  name                  String    @db.VarChar(255)
+  description           String?
+  vendor                String?   @db.VarChar(255)
+  version               String?   @db.VarChar(100)
+  technology_type       String?   @db.VarChar(100)
+  custom_attributes     Json?     @default("{}")
+  owner_id              String?   @db.Uuid
+  business_unit_id      String?   @db.Uuid
+  lifecycle_state       String    @default("Planning") @db.VarChar(50)
+  lifecycle_changed_at  DateTime? @db.Timestamptz
+  lifecycle_changed_by  String?   @db.Uuid
+  lifecycle_reason      String?
+  risk_score            Int       @default(0)
+  eol_date              DateTime? @db.Date
+  cloud_readiness_score Int?
+  deployment_model      String?   @db.VarChar(50)
+  cloud_provider        String?   @db.VarChar(50)
+  migration_pattern     String?   @db.VarChar(50)
+  migration_complexity  String?   @db.VarChar(20)
+  data_classification   String    @default("Internal") @db.VarChar(50)
+  processes_pii         Boolean   @default(false)
+  processes_phi         Boolean   @default(false)
+  is_shadow_it          Boolean   @default(false)
+  is_approved           Boolean   @default(true)
+  created_by            String?   @db.Uuid
+  created_at            DateTime  @default(now()) @db.Timestamptz
+  updated_by            String?   @db.Uuid
+  updated_at            DateTime  @default(now()) @db.Timestamptz
+  deleted_at            DateTime? @db.Timestamptz
+  deleted_by            String?   @db.Uuid
+
+  tenant                Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  owner                 User?          @relation("AppOwner", fields: [owner_id], references: [id])
+  business_unit         BusinessUnit?  @relation(fields: [business_unit_id], references: [id])
+  creator               User?          @relation("AppCreator", fields: [created_by], references: [id])
+  updater               User?          @relation("AppUpdater", fields: [updated_by], references: [id])
+  deleter               User?          @relation("AppDeleter", fields: [deleted_by], references: [id])
+
+  costs                 ApplicationCost[]
+  capabilities          ApplicationCapability[]
+  interfaces_as_source  Interface[]    @relation("SourceApp")
+  interfaces_as_target  Interface[]    @relation("TargetApp")
+  technology_components ApplicationComponent[]
+  saas_application      SaaSApplication?
+
+  @@unique([tenant_id, name])
+  @@map("applications")
+}
+
+model ApplicationCost {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  application_id String   @db.Uuid
+  cost_type      String   @db.VarChar(50)
+  amount         Decimal  @db.Decimal(15, 2)
+  currency       String?  @default("USD") @db.VarChar(3)
+  billing_cycle  String?  @default("Annual") @db.VarChar(20)
+  total_seats    Int?
+  used_seats     Int?
+  effective_date DateTime @db.Date
+  end_date       DateTime? @db.Date
+  notes          String?
+  created_by     String?  @db.Uuid
+  created_at     DateTime @default(now()) @db.Timestamptz
+  updated_at     DateTime @updatedAt @db.Timestamptz
+
+  tenant         Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application    Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  creator        User?       @relation(fields: [created_by], references: [id])
+
+  @@map("application_costs")
+}
+
+model CapabilityNode {
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenant_id            String    @db.Uuid
+  parent_id            String?   @db.Uuid
+  name                 String    @db.VarChar(255)
+  description          String?
+  level                Int
+  owner_id             String?   @db.Uuid
+  strategic_importance String    @default("Medium") @db.VarChar(20)
+  is_locked            Boolean   @default(false)
+  review_cadence       String?   @db.VarChar(20)
+  last_reviewed_at     DateTime? @db.Timestamptz
+  next_review_at       DateTime? @db.Timestamptz
+  custom_attributes    Json?     @default("{}")
+  created_by           String?   @db.Uuid
+  created_at           DateTime  @default(now()) @db.Timestamptz
+  updated_at           DateTime  @updatedAt @db.Timestamptz
+
+  tenant               Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  parent               CapabilityNode?  @relation("CapToCap", fields: [parent_id], references: [id])
+  children             CapabilityNode[] @relation("CapToCap")
+  owner                User?            @relation(fields: [owner_id], references: [id])
+  applications         ApplicationCapability[]
+
+  @@unique([tenant_id, parent_id, name])
+  @@map("capability_nodes")
+}
+
+model ApplicationCapability {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  application_id String   @db.Uuid
+  capability_id  String   @db.Uuid
+  support_level  String   @default("Supporting") @db.VarChar(20)
+  created_by     String?  @db.Uuid
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  tenant         Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application    Application    @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  capability     CapabilityNode @relation(fields: [capability_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, application_id, capability_id])
+  @@map("application_capabilities")
+}
+
+model Interface {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  name                  String    @db.VarChar(255)
+  description           String?
+  interface_type        String    @db.VarChar(50)
+  source_application_id String?   @db.Uuid
+  target_application_id String?   @db.Uuid
+  direction             String    @default("One-way") @db.VarChar(20)
+  frequency             String    @default("Real-time") @db.VarChar(30)
+  protocol              String?   @db.VarChar(50)
+  data_format           String?   @db.VarChar(50)
+  authentication_type   String?   @db.VarChar(50)
+  endpoint_url          String?
+  latency_target_ms     Int?
+  throughput_target     Int?
+  availability_target   Decimal?  @db.Decimal(5, 2)
+  records_per_day       Int?
+  avg_message_size_kb   Int?
+  processes_pii         Boolean   @default(false)
+  data_classification   String?   @db.VarChar(50)
+  status                String    @default("Active") @db.VarChar(50)
+  deprecated_at         DateTime? @db.Timestamptz
+  retirement_date       DateTime? @db.Date
+  owner_id              String?   @db.Uuid
+  custom_attributes     Json?     @default("{}")
+  created_by            String?   @db.Uuid
+  created_at            DateTime  @default(now()) @db.Timestamptz
+  updated_by            String?   @db.Uuid
+  updated_at            DateTime  @default(now()) @db.Timestamptz
+
+  tenant                Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  source_application    Application? @relation("SourceApp", fields: [source_application_id], references: [id])
+  target_application    Application? @relation("TargetApp", fields: [target_application_id], references: [id])
+  owner                 User?        @relation(fields: [owner_id], references: [id])
+
+  @@map("interfaces")
+}
+
+model TechnologyComponent {
+  id                  String    @id @default(uuid()) @db.Uuid
+  tenant_id           String    @db.Uuid
+  name                String    @db.VarChar(255)
+  component_type      String    @db.VarChar(50)
+  environment         String    @default("Production") @db.VarChar(20)
+  status              String    @default("Active") @db.VarChar(50)
+  host                String?   @db.VarChar(255)
+  ip_address          String?   @db.VarChar(50) // Prisma doesn't have INET type natively, use String
+  cloud_region        String?   @db.VarChar(100)
+  resource_specs      Json?     @default("{}")
+  software_details    Json?     @default("{}")
+  eol_date            DateTime? @db.Date
+  data_classification String?   @db.VarChar(50)
+  retention_policy    String?   @db.VarChar(100)
+  row_count_estimate  BigInt?
+  storage_size_gb     Decimal?  @db.Decimal(10, 2)
+  custom_attributes   Json?     @default("{}")
+  created_at          DateTime  @default(now()) @db.Timestamptz
+  updated_at          DateTime  @updatedAt @db.Timestamptz
+
+  tenant              Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  applications        ApplicationComponent[]
+
+  @@map("technology_components")
+}
+
+model ApplicationComponent {
+  application_id String @db.Uuid
+  component_id   String @db.Uuid
+
+  application Application         @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  component   TechnologyComponent @relation(fields: [component_id], references: [id], onDelete: Cascade)
+
+  @@id([application_id, component_id])
+  @@map("application_components")
+}
+
+model SaaSApplication {
+  id                      String    @id @default(uuid()) @db.Uuid
+  tenant_id               String    @db.Uuid
+  application_id          String?   @unique @db.Uuid
+  vendor                  String?   @db.VarChar(255)
+  product_url             String?
+  use_case                String?
+  approved_by             String?   @db.Uuid
+  approval_date           DateTime? @db.Date
+  pricing_model           String?   @db.VarChar(50)
+  annual_contract_value   Decimal?  @db.Decimal(15, 2)
+  contract_start_date     DateTime? @db.Date
+  contract_end_date       DateTime? @db.Date
+  auto_renewal            Boolean   @default(false)
+  total_seats             Int?
+  active_users            Int?
+  last_login_check_date   DateTime? @db.Timestamptz
+  data_residency          String?   @db.VarChar(100)
+  certifications          Json?     @default("[]")
+  has_dpa                 Boolean   @default(false)
+  is_shadow_it            Boolean   @default(false)
+  discovered_at           DateTime? @db.Timestamptz
+  created_at              DateTime  @default(now()) @db.Timestamptz
+  updated_at              DateTime  @updatedAt @db.Timestamptz
+
+  tenant                  Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application             Application? @relation(fields: [application_id], references: [id])
+  approver                User?        @relation(fields: [approved_by], references: [id])
+
+  @@map("saas_applications")
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenant_id       String    @db.Uuid
+  email           String    @db.VarChar(255)
+  password_hash   String?   @db.VarChar(255)
+  first_name      String?   @db.VarChar(100)
+  last_name       String?   @db.VarChar(100)
+  job_title       String?   @db.VarChar(100)
+  department      String?   @db.VarChar(100)
+  manager_id      String?   @db.Uuid
+  sso_provider    String?   @db.VarChar(50)
+  sso_subject     String?   @db.VarChar(255)
+  is_active       Boolean   @default(true)
+  last_login_at   DateTime? @db.Timestamptz
+  login_count     Int       @default(0)
+  created_by      String?   @db.Uuid
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  updated_at      DateTime  @updatedAt @db.Timestamptz
+  preferences     Json?     @default("{}")
+
+  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  manager         User?     @relation("UserManager", fields: [manager_id], references: [id])
+  subordinates    User[]    @relation("UserManager")
+  creator         User?     @relation("UserCreator", fields: [created_by], references: [id])
+  created_users   User[]    @relation("UserCreator")
+
+  owned_applications    Application[] @relation("AppOwner")
+  created_applications  Application[] @relation("AppCreator")
+  updated_applications  Application[] @relation("AppUpdater")
+  deleted_applications  Application[] @relation("AppDeleter")
+  application_costs     ApplicationCost[]
+  capability_nodes      CapabilityNode[]
+  interfaces            Interface[]
+  saas_approvals        SaaSApplication[]
+  user_roles            UserRole[]
+  audit_logs            AuditLog[]
+  comments              Comment[]
+  resolved_comments     Comment[]     @relation("CommentResolver")
+  notifications         Notification[]
+  import_jobs           ImportJob[]
+  export_jobs           ExportJob[]
+
+  @@unique([tenant_id, email])
+  @@map("users")
+}
+
+model Role {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenant_id      String?  @db.Uuid
+  name           String   @db.VarChar(100)
+  description    String?
+  is_system_role Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  tenant         Tenant?  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user_roles     UserRole[]
+  permissions    RolePermission[]
+
+  @@unique([tenant_id, name])
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(uuid()) @db.Uuid
+  resource String @db.VarChar(100)
+  action   String @db.VarChar(50)
+  scope    String @default("all") @db.VarChar(50)
+
+  roles    RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  user_id          String  @db.Uuid
+  role_id          String  @db.Uuid
+  business_unit_id String  @db.Uuid
+
+  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role             Role         @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  business_unit    BusinessUnit @relation(fields: [business_unit_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, role_id, business_unit_id])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  role_id       String @db.Uuid
+  permission_id String @db.Uuid
+
+  role       Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  @@id([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model AuditLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenant_id        String   @db.Uuid
+  user_id          String?  @db.Uuid
+  user_email       String?  @db.VarChar(255)
+  action_timestamp DateTime @default(now()) @db.Timestamptz
+  entity_type      String   @db.VarChar(100)
+  entity_id        String?  @db.Uuid
+  entity_name      String?  @db.VarChar(255)
+  action           String   @db.VarChar(20)
+  changes          Json?    @default("[]")
+  ip_address       String?  @db.VarChar(50)
+  user_agent       String?
+  session_id       String?  @db.VarChar(100)
+
+  tenant           Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user             User?    @relation(fields: [user_id], references: [id])
+
+  @@map("audit_log")
+}
+
+model Comment {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  entity_type       String    @db.VarChar(100)
+  entity_id         String    @db.Uuid
+  author_id         String    @db.Uuid
+  parent_comment_id String?   @db.Uuid
+  content           String
+  field_name        String?   @db.VarChar(100)
+  is_resolved       Boolean   @default(false)
+  resolved_by       String?   @db.Uuid
+  resolved_at       DateTime? @db.Timestamptz
+  reactions         Json?     @default("[]")
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @updatedAt @db.Timestamptz
+  deleted_at        DateTime? @db.Timestamptz
+
+  tenant            Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  author            User      @relation(fields: [author_id], references: [id])
+  parent_comment    Comment?  @relation("Thread", fields: [parent_comment_id], references: [id])
+  replies           Comment[] @relation("Thread")
+  resolver          User?     @relation("CommentResolver", fields: [resolved_by], references: [id])
+
+  @@map("comments")
+}
+
+model Notification {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  user_id               String    @db.Uuid
+  type                  String    @db.VarChar(50)
+  title                 String    @db.VarChar(255)
+  message               String
+  is_read               Boolean   @default(false)
+  read_at               DateTime? @db.Timestamptz
+  related_entity_type   String?   @db.VarChar(100)
+  related_entity_id     String?   @db.Uuid
+  metadata              Json?     @default("{}")
+  created_at            DateTime  @default(now()) @db.Timestamptz
+
+  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, user_id])
+  @@index([user_id, is_read])
+  @@map("notifications")
+}
+
+model ImportJob {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  user_id               String    @db.Uuid
+  file_name             String    @db.VarChar(255)
+  file_type             String    @db.VarChar(50)
+  status                String    @default("pending") @db.VarChar(20)
+  total_rows            Int?
+  success_rows          Int       @default(0)
+  failed_rows           Int       @default(0)
+  errors                Json?     @default("[]")
+  column_mapping        Json?     @default("{}")
+  preview_data          Json?
+  started_at            DateTime? @db.Timestamptz
+  completed_at          DateTime? @db.Timestamptz
+  notification_sent     Boolean   @default(false)
+  created_at            DateTime  @default(now()) @db.Timestamptz
+
+  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status])
+  @@map("import_jobs")
+}
+
+model ExportJob {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  user_id               String    @db.Uuid
+  export_type           String    @db.VarChar(50)
+  format                String    @db.VarChar(20)
+  status                String    @default("pending") @db.VarChar(20)
+  file_url              String?
+  file_size             Int?
+  filters               Json?     @default("{}")
+  columns               Json?     @default("[]")
+  scheduled_at          DateTime? @db.Timestamptz
+  started_at            DateTime? @db.Timestamptz
+  completed_at          DateTime? @db.Timestamptz
+  notification_sent     Boolean   @default(false)
+  created_at            DateTime  @default(now()) @db.Timestamptz
+
+  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status])
+  @@map("export_jobs")
+}
+
+model EmailLog {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  to_email              String    @db.VarChar(255)
+  subject               String    @db.VarChar(255)
+  template              String    @db.VarChar(100)
+  status                String    @db.VarChar(20)
+  error_message         String?
+  metadata              Json?     @default("{}")
+  created_at            DateTime  @default(now()) @db.Timestamptz
+
+  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, created_at])
+  @@map("email_logs")
+}
