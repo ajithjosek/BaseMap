@@ -39,6 +39,6 @@ export class MapApplicationDto {
   @IsUUID()
   application_id: string;
 
-  @IsEnum(['Primary', 'Supporting', 'Legacy'])
+  @IsEnum(['Primary', 'Supporting', 'Enabling'])
   support_level: string;
 }

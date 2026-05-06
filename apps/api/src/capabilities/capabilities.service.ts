@@ -251,11 +251,11 @@ export class CapabilitiesService {
     return { success: true, imported };
   }
 
-  async mapApplication(capabilityId: string, dto: MapApplicationDto) {
-    return this.prisma.applicationCapability.upsert({
+  async mapApplication(capabilityId: string, dto: MapApplicationDto, tenantId: string, userId: string) {
+    const record = await this.prisma.applicationCapability.upsert({
       where: {
         tenant_id_application_id_capability_id: {
-          tenant_id: (this.prisma as any).request?.tenantId || 'dummy',
+          tenant_id: tenantId,
           application_id: dto.application_id,
           capability_id: capabilityId,
         }
@@ -267,20 +267,44 @@ export class CapabilitiesService {
         application_id: dto.application_id,
         capability_id: capabilityId,
         support_level: dto.support_level,
-        tenant_id: (this.prisma as any).request?.tenantId || 'dummy',
+        tenant_id: tenantId,
       }
     });
+
+    await this.prisma.auditLog.create({
+      data: {
+        tenant_id: tenantId,
+        user_id: userId,
+        entity_type: 'ApplicationCapability',
+        action: 'CREATE/UPDATE',
+        changes: { capabilityId, applicationId: dto.application_id, support_level: dto.support_level } as any,
+      }
+    });
+
+    return record;
   }
 
-  async unmapApplication(capabilityId: string, applicationId: string) {
-    return this.prisma.applicationCapability.delete({
+  async unmapApplication(capabilityId: string, applicationId: string, tenantId: string, userId: string) {
+    const record = await this.prisma.applicationCapability.delete({
       where: {
         tenant_id_application_id_capability_id: {
-          tenant_id: (this.prisma as any).request?.tenantId || 'dummy',
+          tenant_id: tenantId,
           application_id: applicationId,
           capability_id: capabilityId,
         }
       }
     });
+
+    await this.prisma.auditLog.create({
+      data: {
+        tenant_id: tenantId,
+        user_id: userId,
+        entity_type: 'ApplicationCapability',
+        action: 'DELETE',
+        changes: { capabilityId, applicationId } as any,
+      }
+    });
+
+    return record;
   }
 }

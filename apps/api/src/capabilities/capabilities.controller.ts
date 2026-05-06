@@ -45,14 +45,13 @@ export class CapabilitiesController {
   }
 
   @Post(':id/map')
-  mapApplication(@Param('id') id: string, @Body() dto: MapApplicationDto, @Req() req: any) {
-    // Note: service uses request.tenantId which is injected differently, but here we can just pass it directly if we refactor. For now let it be.
-    return this.capabilitiesService.mapApplication(id, dto);
+  mapApplication(@Param('id') id: string, @Body() dto: MapApplicationDto, @CurrentUser() user: any) {
+    return this.capabilitiesService.mapApplication(id, dto, user.tenantId, user.id);
   }
 
   @Delete(':id/map/:appId')
-  unmapApplication(@Param('id') id: string, @Param('appId') appId: string) {
-    return this.capabilitiesService.unmapApplication(id, appId);
+  unmapApplication(@Param('id') id: string, @Param('appId') appId: string, @CurrentUser() user: any) {
+    return this.capabilitiesService.unmapApplication(id, appId, user.tenantId, user.id);
   }
 }
 
