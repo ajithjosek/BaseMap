@@ -15,6 +15,7 @@ import { ImportExportModule } from './import-export/import-export.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SaaSApplicationsModule } from './saas-applications/saas-applications.module';
 import { JobQueueModule } from './job-queue/job-queue.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JobQueueModule } from './job-queue/job-queue.module';
     NotificationsModule,
     SaaSApplicationsModule,
     JobQueueModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

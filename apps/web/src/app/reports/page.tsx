@@ -6,15 +6,14 @@ import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Download, FileSpreadsheet, FileText, Filter } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download, FileSpreadsheet, FileText, Filter, FileBarChart, PieChart as PieChartIcon, AlertTriangle, DollarSign } from 'lucide-react';
 import {
   BarChart,
   Bar,
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -27,7 +26,44 @@ const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'
 
 export default function ReportsPage() {
   const [reportType, setReportType] = useState('overview');
+  const [selectedTemplate, setSelectedTemplate] = useState('landscape');
   const queryClient = useQueryClient();
+
+  const { data: landscapeReport } = useQuery({
+    queryKey: ['report-landscape'],
+    queryFn: async () => {
+      const response = await api.get('/reports/landscape');
+      return response.data;
+    },
+    enabled: selectedTemplate === 'landscape'
+  });
+
+  const { data: coverageReport } = useQuery({
+    queryKey: ['report-coverage'],
+    queryFn: async () => {
+      const response = await api.get('/reports/capability-coverage');
+      return response.data;
+    },
+    enabled: selectedTemplate === 'coverage'
+  });
+
+  const { data: costReport } = useQuery({
+    queryKey: ['report-cost'],
+    queryFn: async () => {
+      const response = await api.get('/reports/it-cost');
+      return response.data;
+    },
+    enabled: selectedTemplate === 'cost'
+  });
+
+  const { data: eolReport } = useQuery({
+    queryKey: ['report-eol'],
+    queryFn: async () => {
+      const response = await api.get('/reports/eol-risk');
+      return response.data;
+    },
+    enabled: selectedTemplate === 'eol'
+  });
 
   const { data: executive, isLoading: isLoadingExec } = useQuery({
     queryKey: ['dashboard-executive'],
@@ -92,6 +128,7 @@ export default function ReportsPage() {
               <SelectItem value="overview">Overview</SelectItem>
               <SelectItem value="financial">Financial</SelectItem>
               <SelectItem value="risk">Risk</SelectItem>
+              <SelectItem value="templates">Standard Reports</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => handleExport('applications')}>
@@ -349,6 +386,203 @@ export default function ReportsPage() {
             </Card>
           </div>
         </>
+      )}
+
+      {reportType === 'templates' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card 
+              className={`cursor-pointer transition-all ${selectedTemplate === 'landscape' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => setSelectedTemplate('landscape')}
+            >
+              <CardHeader className="pb-2">
+                <FileBarChart className="h-8 w-8 mb-2" />
+                <CardTitle className="text-sm">Application Landscape</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500">Overview of all applications</p>
+              </CardContent>
+            </Card>
+            <Card 
+              className={`cursor-pointer transition-all ${selectedTemplate === 'coverage' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => setSelectedTemplate('coverage')}
+            >
+              <CardHeader className="pb-2">
+                <PieChartIcon className="h-8 w-8 mb-2" />
+                <CardTitle className="text-sm">Capability Coverage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500">App-to-capability mapping</p>
+              </CardContent>
+            </Card>
+            <Card 
+              className={`cursor-pointer transition-all ${selectedTemplate === 'cost' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => setSelectedTemplate('cost')}
+            >
+              <CardHeader className="pb-2">
+                <DollarSign className="h-8 w-8 mb-2" />
+                <CardTitle className="text-sm">IT Cost (TCO)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500">Total cost breakdown</p>
+              </CardContent>
+            </Card>
+            <Card 
+              className={`cursor-pointer transition-all ${selectedTemplate === 'eol' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => setSelectedTemplate('eol')}
+            >
+              <CardHeader className="pb-2">
+                <AlertTriangle className="h-8 w-8 mb-2" />
+                <CardTitle className="text-sm">EOL Risk</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500">End-of-life risk assessment</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {selectedTemplate === 'landscape' && landscapeReport && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Application Landscape Report</CardTitle>
+                <CardDescription>Generated: {new Date(landscapeReport.generated_at).toLocaleString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{landscapeReport.summary?.total || 0}</div>
+                    <div className="text-sm text-slate-500">Total Apps</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {landscapeReport.summary?.byLifecycle?.Active || 0}
+                    </div>
+                    <div className="text-sm text-slate-500">Active</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">{landscapeReport.summary?.byRiskLevel?.critical || 0}</div>
+                    <div className="text-sm text-slate-500">Critical Risk</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">
+                      ${((landscapeReport.summary as any)?.total_cost || 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-slate-500">Total Cost</div>
+                  </div>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={Object.entries(landscapeReport.summary?.byLifecycle || {}).map(([name, value]) => ({ name, value }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTemplate === 'coverage' && coverageReport && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Capability Coverage Report</CardTitle>
+                <CardDescription>Generated: {new Date(coverageReport.generated_at).toLocaleString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{coverageReport.summary?.total_capabilities || 0}</div>
+                    <div className="text-sm text-slate-500">Total Capabilities</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{coverageReport.summary?.covered || 0}</div>
+                    <div className="text-sm text-slate-500">Covered</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{coverageReport.summary?.partial || 0}</div>
+                    <div className="text-sm text-slate-500">Partial</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">{coverageReport.summary?.gaps || 0}</div>
+                    <div className="text-sm text-slate-500">Gaps</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTemplate === 'cost' && costReport && (
+            <Card>
+              <CardHeader>
+                <CardTitle>IT Cost Report (TCO)</CardTitle>
+                <CardDescription>Generated: {new Date(costReport.generated_at).toLocaleString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">${(costReport.summary?.total_cost || 0).toLocaleString()}</div>
+                    <div className="text-sm text-slate-500">Total Cost</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{costReport.summary?.application_count || 0}</div>
+                    <div className="text-sm text-slate-500">Applications</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">${Math.round(costReport.summary?.average_cost_per_app || 0).toLocaleString()}</div>
+                    <div className="text-sm text-slate-500">Avg Cost/App</div>
+                  </div>
+                </div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={Object.entries(costReport.cost_by_type || {}).map(([name, value]) => ({ name, value }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `$${Number(value).toLocaleString()}`} />
+                      <Bar dataKey="value" fill="#8b5cf6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTemplate === 'eol' && eolReport && (
+            <Card>
+              <CardHeader>
+                <CardTitle>EOL Risk Report</CardTitle>
+                <CardDescription>Generated: {new Date(eolReport.generated_at).toLocaleString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-5 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">{eolReport.summary?.critical || 0}</div>
+                    <div className="text-sm text-slate-500">Critical (&lt;30d)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-500">{eolReport.summary?.high || 0}</div>
+                    <div className="text-sm text-slate-500">High (&lt;90d)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-500">{eolReport.summary?.medium || 0}</div>
+                    <div className="text-sm text-slate-500">Medium (&lt;180d)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{eolReport.summary?.low || 0}</div>
+                    <div className="text-sm text-slate-500">Low (&gt;180d)</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-slate-600">{eolReport.summary?.past_eol || 0}</div>
+                    <div className="text-sm text-slate-500">Past EOL</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );
