@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
@@ -12,6 +12,7 @@ const menuItems = [
   { icon: Database, label: 'Capabilities', href: '/capabilities' },
   { icon: Grid3X3, label: 'C2A Heatmap', href: '/heatmap' },
   { icon: Cloud, label: 'SaaS & Cloud', href: '/saas' },
+  { icon: Network, label: 'API Catalog', href: '/interfaces' },
   { icon: BarChart, label: 'Reports', href: '/reports' },
   { icon: PenTool, label: 'Report Builder', href: '/reports/builder' },
   { icon: Users, label: 'Users', href: '/users' },
