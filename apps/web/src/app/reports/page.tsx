@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, FileSpreadsheet, FileText, Filter, FileBarChart, PieChart as PieChartIcon, AlertTriangle, DollarSign } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Filter, FileBarChart, PieChart as PieChartIcon, AlertTriangle, DollarSign, FileSignature } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -106,6 +106,23 @@ export default function ReportsPage() {
 
   const handleExport = (type: string) => {
     exportMutation.mutate(type);
+  };
+
+  const handlePdfExport = async (reportType: string) => {
+    try {
+      const response = await api.get(`/reports/${reportType}/pdf`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportType}-report.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('PDF export failed:', error);
+    }
   };
 
   const lifecycleData = risk?.lifecycle_distribution || [];
@@ -444,8 +461,15 @@ export default function ReportsPage() {
           {selectedTemplate === 'landscape' && landscapeReport && (
             <Card>
               <CardHeader>
-                <CardTitle>Application Landscape Report</CardTitle>
-                <CardDescription>Generated: {new Date(landscapeReport.generated_at).toLocaleString()}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Application Landscape Report</CardTitle>
+                    <CardDescription>Generated: {new Date(landscapeReport.generated_at).toLocaleString()}</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handlePdfExport('landscape')}>
+                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-4 gap-4 mb-6">
@@ -488,8 +512,15 @@ export default function ReportsPage() {
           {selectedTemplate === 'coverage' && coverageReport && (
             <Card>
               <CardHeader>
-                <CardTitle>Capability Coverage Report</CardTitle>
-                <CardDescription>Generated: {new Date(coverageReport.generated_at).toLocaleString()}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Capability Coverage Report</CardTitle>
+                    <CardDescription>Generated: {new Date(coverageReport.generated_at).toLocaleString()}</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handlePdfExport('capability-coverage')}>
+                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-4 gap-4 mb-6">
@@ -517,8 +548,15 @@ export default function ReportsPage() {
           {selectedTemplate === 'cost' && costReport && (
             <Card>
               <CardHeader>
-                <CardTitle>IT Cost Report (TCO)</CardTitle>
-                <CardDescription>Generated: {new Date(costReport.generated_at).toLocaleString()}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>IT Cost Report (TCO)</CardTitle>
+                    <CardDescription>Generated: {new Date(costReport.generated_at).toLocaleString()}</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handlePdfExport('it-cost')}>
+                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 mb-6">
@@ -553,8 +591,15 @@ export default function ReportsPage() {
           {selectedTemplate === 'eol' && eolReport && (
             <Card>
               <CardHeader>
-                <CardTitle>EOL Risk Report</CardTitle>
-                <CardDescription>Generated: {new Date(eolReport.generated_at).toLocaleString()}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>EOL Risk Report</CardTitle>
+                    <CardDescription>Generated: {new Date(eolReport.generated_at).toLocaleString()}</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => handlePdfExport('eol-risk')}>
+                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-5 gap-4 mb-6">
