@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3 } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
   { icon: Home, label: 'Dashboard', href: '/' },
   { icon: Layout, label: 'Applications', href: '/applications' },
   { icon: Database, label: 'Capabilities', href: '/capabilities' },
+  { icon: Grid3X3, label: 'C2A Heatmap', href: '/heatmap' },
   { icon: Cloud, label: 'SaaS & Cloud', href: '/saas' },
   { icon: BarChart, label: 'Reports', href: '/reports' },
   { icon: Users, label: 'Users', href: '/users' },

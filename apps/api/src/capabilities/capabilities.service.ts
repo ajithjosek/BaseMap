@@ -307,4 +307,98 @@ export class CapabilitiesService {
 
     return record;
   }
+
+  async getC2AMatrix(tenantId: string, filters?: { businessUnitId?: string; lifecycleState?: string; riskScore?: string }) {
+    const appWhere: any = { tenant_id: tenantId };
+    
+    if (filters?.businessUnitId) {
+      appWhere.business_unit_id = filters.businessUnitId;
+    }
+    if (filters?.lifecycleState) {
+      appWhere.lifecycle_state = filters.lifecycleState;
+    }
+    if (filters?.riskScore) {
+      const [min, max] = filters.riskScore.split('-').map(Number);
+      if (max) {
+        appWhere.risk_score = { gte: min, lte: max };
+      } else {
+        appWhere.risk_score = { gte: min };
+      }
+    }
+
+    const [applications, capabilities] = await Promise.all([
+      this.prisma.application.findMany({
+        where: appWhere,
+        select: { id: true, name: true, lifecycle_state: true, risk_score: true, business_unit_id: true },
+      }),
+      this.prisma.capabilityNode.findMany({
+        where: { tenant_id: tenantId },
+        orderBy: [{ level: 'asc' }, { name: 'asc' }],
+      }),
+    ]);
+
+    const appIds = applications.map(a => a.id);
+    const capIds = capabilities.map(c => c.id);
+
+    const mappings = await this.prisma.applicationCapability.findMany({
+      where: {
+        tenant_id: tenantId,
+        application_id: { in: appIds },
+        capability_id: { in: capIds },
+      },
+    });
+
+    const matrix: Record<string, Record<string, string>> = {};
+    
+    for (const app of applications) {
+      matrix[app.id] = {};
+      for (const cap of capabilities) {
+        matrix[app.id][cap.id] = '';
+      }
+    }
+
+    for (const mapping of mappings) {
+      if (matrix[mapping.application_id] && matrix[mapping.application_id][mapping.capability_id] !== undefined) {
+        matrix[mapping.application_id][mapping.capability_id] = mapping.support_level;
+      }
+    }
+
+    return {
+      applications,
+      capabilities,
+      matrix,
+    };
+  }
+
+  async getCapabilityCoverage(tenantId: string) {
+    const capabilities = await this.prisma.capabilityNode.findMany({
+      where: { tenant_id: tenantId },
+      include: {
+        _count: { select: { applications: true } },
+        children: {
+          include: {
+            _count: { select: { applications: true } },
+          },
+        },
+      },
+    });
+
+    const coverage: Record<string, { status: string; appCount: number }> = {};
+
+    for (const cap of capabilities) {
+      const directApps = cap._count.applications;
+      const childApps = cap.children.reduce((sum: number, child: any) => sum + child._count.applications, 0);
+      const totalApps = directApps + childApps;
+
+      if (totalApps === 0) {
+        coverage[cap.id] = { status: 'red', appCount: 0 };
+      } else if (childApps > 0 && directApps === 0) {
+        coverage[cap.id] = { status: 'yellow', appCount: totalApps };
+      } else {
+        coverage[cap.id] = { status: 'green', appCount: totalApps };
+      }
+    }
+
+    return coverage;
+  }
 }

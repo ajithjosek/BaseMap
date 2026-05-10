@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { CapabilitiesService } from './capabilities.service';
 import { CreateCapabilityDto, UpdateCapabilityDto, MapApplicationDto } from './dto/create-capability.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -27,6 +27,21 @@ export class CapabilitiesController {
   @Get('tree')
   getTree(@Req() req: any) {
     return this.capabilitiesService.getTree(req.tenantId);
+  }
+
+  @Get('c2a-matrix')
+  getC2AMatrix(
+    @Req() req: any,
+    @Query('businessUnitId') businessUnitId?: string,
+    @Query('lifecycleState') lifecycleState?: string,
+    @Query('riskScore') riskScore?: string,
+  ) {
+    return this.capabilitiesService.getC2AMatrix(req.tenantId, { businessUnitId, lifecycleState, riskScore });
+  }
+
+  @Get('coverage')
+  getCoverage(@Req() req: any) {
+    return this.capabilitiesService.getCapabilityCoverage(req.tenantId);
   }
 
   @Get(':id')

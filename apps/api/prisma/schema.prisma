@@ -8,7 +8,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Tenant {
@@ -25,6 +24,7 @@ model Tenant {
   applications         Application[]
   application_costs    ApplicationCost[]
   capability_nodes     CapabilityNode[]
+  capability_gaps     CapabilityGap[]
   application_capabilities ApplicationCapability[]
   interfaces           Interface[]
   technology_components TechnologyComponent[]
@@ -174,9 +174,34 @@ model CapabilityNode {
   children             CapabilityNode[] @relation("CapToCap")
   owner                User?            @relation(fields: [owner_id], references: [id])
   applications         ApplicationCapability[]
+  gaps                  CapabilityGap[]
 
   @@unique([tenant_id, parent_id, name])
   @@map("capability_nodes")
+}
+
+model CapabilityGap {
+  id                  String    @id @default(uuid()) @db.Uuid
+  tenant_id           String    @db.Uuid
+  capability_id       String    @db.Uuid
+  title               String    @db.VarChar(255)
+  description         String?
+  impact              String?
+  proposed_solution   String?
+  severity            String    @default("Medium") @db.VarChar(20)
+  status              String    @default("Open") @db.VarChar(20)
+  project_id          String?   @db.Uuid
+  created_by          String?   @db.Uuid
+  created_at          DateTime  @default(now()) @db.Timestamptz
+  updated_at          DateTime  @updatedAt @db.Timestamptz
+  closed_at           DateTime? @db.Timestamptz
+
+  tenant              Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  capability          CapabilityNode  @relation(fields: [capability_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, capability_id])
+  @@index([tenant_id, status])
+  @@map("capability_gaps")
 }
 
 model ApplicationCapability {
