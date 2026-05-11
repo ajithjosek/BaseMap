@@ -23,6 +23,7 @@ import { ReportsModule } from './reports/reports.module';
 import { TechnologyComponentsModule } from './technology-components/technology-components.module';
 import { EOLRiskModule } from './eol-risk/eol-risk.module';
 import { QueryBuilderModule } from './query-builder/query-builder.module';
+import { TransformationProjectsModule } from './transformation-projects/transformation-projects.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { QueryBuilderModule } from './query-builder/query-builder.module';
     TechnologyComponentsModule,
     EOLRiskModule,
     QueryBuilderModule,
+    TransformationProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

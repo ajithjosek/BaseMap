@@ -2,6 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -419,6 +422,23 @@ async function main() {
         direction: 'Bidirectional',
       },
     });
+  }
+
+  console.log('Seeding Transformation Projects...');
+  const projects = [
+    { name: 'Cloud Migration Phase 1', description: 'Migrate core ERP systems to AWS', status: 'in_progress', priority: 'critical', category: 'Infrastructure', start: '2025-01-01', end: '2025-06-30', progress: 65, budget: 2500000, owner: 'John Smith' },
+    { name: 'Legacy App Modernization', description: 'Rewrite on-premise apps to microservices', status: 'in_progress', priority: 'high', category: 'Application', start: '2025-02-01', end: '2025-12-31', progress: 40, budget: 1800000, owner: 'Sarah Johnson' },
+    { name: 'Security Zero Trust', description: 'Implement zero-trust architecture', status: 'planning', priority: 'critical', category: 'Security', start: '2025-04-01', end: '2026-03-31', progress: 10, budget: 1200000, owner: 'Mike Chen' },
+    { name: 'Data Warehouse Migration', description: 'Move from on-prem DW to Snowflake', status: 'planning', priority: 'high', category: 'Data', start: '2025-07-01', end: '2026-06-30', progress: 0, budget: 900000, owner: 'Lisa Wang' },
+    { name: 'API Gateway Implementation', description: 'Consolidate APIs through central gateway', status: 'completed', priority: 'medium', category: 'Integration', start: '2024-07-01', end: '2025-01-31', progress: 100, budget: 450000, owner: 'Tom Wilson' },
+    { name: 'DevOps Pipeline Upgrade', description: 'CI/CD modernization with GitHub Actions', status: 'in_progress', priority: 'medium', category: 'DevOps', start: '2025-03-01', end: '2025-09-30', progress: 55, budget: 350000, owner: 'Anna Brown' },
+  ];
+
+  for (const proj of projects) {
+    await prisma.$executeRaw`
+      INSERT INTO transformation_projects (id, tenant_id, name, description, status, priority, category, start_date, end_date, progress, budget, owner, created_at, updated_at)
+      VALUES (gen_random_uuid(), ${tenant.id}, ${proj.name}, ${proj.description}, ${proj.status}, ${proj.priority}, ${proj.category}, ${proj.start}, ${proj.end}, ${proj.progress}, ${proj.budget}, ${proj.owner}, NOW(), NOW())
+    `;
   }
 
   console.log('Seed finished.');
