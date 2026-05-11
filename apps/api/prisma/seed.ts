@@ -317,6 +317,110 @@ async function main() {
     });
   }
 
+  console.log('Seeding SaaS Applications...');
+  const saasApps = [
+    { vendor: 'Microsoft 365', use_case: 'Productivity', acv: 25000, seats: 150, endDate: '2026-03-15', auto_renewal: true, is_shadow: false },
+    { vendor: 'Slack', use_case: 'Communication', acv: 15000, seats: 200, endDate: '2026-06-30', auto_renewal: false, is_shadow: false },
+    { vendor: 'Salesforce', use_case: 'CRM', acv: 80000, seats: 50, endDate: '2025-12-31', auto_renewal: true, is_shadow: false },
+    { vendor: 'Zoom', use_case: 'Communication', acv: 12000, seats: 300, endDate: '2026-09-01', auto_renewal: false, is_shadow: false },
+    { vendor: 'GitHub', use_case: 'Development', acv: 8000, seats: 80, endDate: '2026-04-15', auto_renewal: true, is_shadow: false },
+    { vendor: 'Atlassian Jira', use_case: 'Project Management', acv: 5500, seats: 100, endDate: '2025-11-30', auto_renewal: false, is_shadow: false },
+    { vendor: 'Notion', use_case: 'Productivity', acv: 4000, seats: 75, endDate: '2026-07-15', auto_renewal: false, is_shadow: true },
+    { vendor: 'Figma', use_case: 'Design', acv: 6000, seats: 20, endDate: '2026-02-28', auto_renewal: true, is_shadow: false },
+    { vendor: 'DataDog', use_case: 'Monitoring', acv: 18000, seats: 15, endDate: '2025-10-15', auto_renewal: false, is_shadow: false },
+    { vendor: 'Auth0', use_case: 'Security', acv: 9000, seats: 40, endDate: '2026-05-20', auto_renewal: true, is_shadow: false },
+    { vendor: 'HubSpot', use_case: 'CRM', acv: 7000, seats: 30, endDate: '2026-08-31', auto_renewal: false, is_shadow: true },
+    { vendor: 'Zendesk', use_case: 'Support', acv: 11000, seats: 25, endDate: '2025-09-30', auto_renewal: false, is_shadow: false },
+    { vendor: 'Snowflake', use_case: 'Data', acv: 65000, seats: 10, endDate: '2026-01-15', auto_renewal: true, is_shadow: false },
+    { vendor: 'AWS', use_case: 'Cloud', acv: 150000, seats: 10, endDate: '2026-12-31', auto_renewal: true, is_shadow: false },
+    { vendor: 'Google Workspace', use_case: 'Productivity', acv: 18000, seats: 180, endDate: '2026-04-30', auto_renewal: true, is_shadow: false },
+  ];
+
+  for (const saas of saasApps) {
+    await prisma.saaSApplication.create({
+      data: {
+        tenant_id: tenant.id,
+        vendor: saas.vendor,
+        use_case: saas.use_case,
+        annual_contract_value: saas.acv,
+        total_seats: saas.seats,
+        active_users: Math.floor(saas.seats * (0.6 + Math.random() * 0.3)),
+        contract_end_date: new Date(saas.endDate),
+        contract_start_date: new Date('2024-01-01'),
+        auto_renewal: saas.auto_renewal,
+        is_shadow_it: saas.is_shadow,
+        pricing_model: 'Per-User',
+        has_dpa: true,
+        discovered_at: new Date(),
+      },
+    });
+  }
+
+  console.log('Seeding Technology Components...');
+  const components = [
+    { name: 'Prod Web Server 1', type: 'Server', env: 'Production', host: 'web-prod-01', status: 'Active', eol: '2027-12-31', region: null },
+    { name: 'Prod Web Server 2', type: 'Server', env: 'Production', host: 'web-prod-02', status: 'Active', eol: '2027-12-31', region: null },
+    { name: 'Staging Web Server', type: 'Server', env: 'Staging', host: 'web-staging-01', status: 'Active', eol: '2027-12-31', region: null },
+    { name: 'Prod App Server 1', type: 'Server', env: 'Production', host: 'app-prod-01', status: 'Active', eol: '2027-06-30', region: null },
+    { name: 'Prod App Server 2', type: 'Server', env: 'Production', host: 'app-prod-02', status: 'Active', eol: '2027-06-30', region: null },
+    { name: 'Prod MySQL Primary', type: 'Database', env: 'Production', host: 'mysql-prod-01', status: 'Active', eol: '2026-12-31', region: null },
+    { name: 'Prod MySQL Replica', type: 'Database', env: 'Production', host: 'mysql-prod-02', status: 'Active', eol: '2026-12-31', region: null },
+    { name: 'Dev PostgreSQL', type: 'Database', env: 'Development', host: 'pg-dev-01', status: 'Active', eol: '2028-06-30', region: null },
+    { name: 'AWS RDS Production', type: 'Cloud Service', env: 'Production', host: null, status: 'Active', eol: '2027-03-15', region: 'us-east-1' },
+    { name: 'AWS RDS Staging', type: 'Cloud Service', env: 'Staging', host: null, status: 'Active', eol: '2027-03-15', region: 'us-east-1' },
+    { name: 'S3 Production', type: 'Storage', env: 'Production', host: null, status: 'Active', eol: '2028-01-01', region: 'us-east-1' },
+    { name: 'CloudFront CDN', type: 'Network', env: 'Production', host: null, status: 'Active', eol: '2028-06-30', region: 'global' },
+    { name: 'Redis Cache Prod', type: 'Database', env: 'Production', host: 'redis-prod-01', status: 'Active', eol: '2027-09-30', region: null },
+    { name: 'Kubernetes Cluster', type: 'Container', env: 'Production', host: null, status: 'Active', eol: '2027-12-31', region: 'us-west-2' },
+    { name: 'ElasticSearch Prod', type: 'Database', env: 'Production', host: 'es-prod-01', status: 'Active', eol: '2026-06-30', region: null },
+    { name: 'Old Legacy Server', type: 'Server', env: 'Production', host: 'legacy-01', status: 'Maintenance', eol: '2025-06-30', region: null },
+    { name: 'Decommissioned DB', type: 'Database', env: 'Production', host: 'old-db-01', status: 'Decommissioned', eol: '2024-12-31', region: null },
+  ];
+
+  for (const comp of components) {
+    await prisma.technologyComponent.create({
+      data: {
+        tenant_id: tenant.id,
+        name: comp.name,
+        component_type: comp.type,
+        environment: comp.env,
+        status: comp.status,
+        host: comp.host,
+        cloud_region: comp.region,
+        eol_date: comp.eol ? new Date(comp.eol) : null,
+      },
+    });
+  }
+
+  console.log('Seeding API Interfaces...');
+  const interfaces = [
+    { name: 'Customer API', protocol: 'REST', status: 'Active' },
+    { name: 'Order Sync', protocol: 'REST', status: 'Active' },
+    { name: 'User Provisioning', protocol: 'SOAP', status: 'Active' },
+    { name: 'Invoice Feed', protocol: 'REST', status: 'Active' },
+    { name: 'Inventory Sync', protocol: 'REST', status: 'Active' },
+    { name: 'Support Ticket API', protocol: 'REST', status: 'Active' },
+    { name: 'Payment Gateway', protocol: 'REST', status: 'Active' },
+    { name: 'Analytics Data', protocol: 'JDBC', status: 'Active' },
+    { name: 'Legacy Integration', protocol: 'File', status: 'Deprecated' },
+    { name: 'Mobile App API', protocol: 'REST', status: 'Active' },
+    { name: 'Partner Exchange', protocol: 'REST', status: 'At Risk' },
+    { name: 'IoT Data Stream', protocol: 'MQTT', status: 'Active' },
+  ];
+
+  for (const int of interfaces) {
+    await prisma.interface.create({
+      data: {
+        tenant_id: tenant.id,
+        name: int.name,
+        interface_type: 'API',
+        protocol: int.protocol,
+        status: int.status,
+        direction: 'Bidirectional',
+      },
+    });
+  }
+
   console.log('Seed finished.');
 }
 
