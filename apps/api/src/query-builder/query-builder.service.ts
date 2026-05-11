@@ -1,12 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
 
 @Injectable()
 export class QueryBuilderService {
+  private readonly logger = new Logger(QueryBuilderService.name);
   private db: any;
+  private queryCache: Map<string, CacheEntry> = new Map();
+  private readonly CACHE_TTL = 30000;
+  private readonly MAX_CACHE_SIZE = 100;
 
   constructor(private prisma: PrismaService) {
     this.db = this.prisma as any;
+    setInterval(() => this.cleanCache(), 60000);
+  }
+
+  private getCacheKey(tenantId: string, config: any): string {
+    const key = JSON.stringify({ tenantId, ...config });
+    return Buffer.from(key).toString('base64').slice(0, 64);
+  }
+
+  private getCachedResult(key: string): any | null {
+    const entry = this.queryCache.get(key);
+    if (entry && Date.now() - entry.timestamp < this.CACHE_TTL) {
+      return entry.data;
+    }
+    this.queryCache.delete(key);
+    return null;
+  }
+
+  private setCachedResult(key: string, data: any): void {
+    if (this.queryCache.size >= this.MAX_CACHE_SIZE) {
+      const oldestKey = this.queryCache.keys().next().value;
+      this.queryCache.delete(oldestKey);
+    }
+    this.queryCache.set(key, { data, timestamp: Date.now() });
+  }
+
+  private cleanCache(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.queryCache.entries()) {
+      if (now - entry.timestamp > this.CACHE_TTL) {
+        this.queryCache.delete(key);
+      }
+    }
   }
 
   async executeQuery(tenantId: string, userId: string, config: {
@@ -20,6 +61,16 @@ export class QueryBuilderService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
+    const startTime = Date.now();
+    const cacheKey = this.getCacheKey(tenantId, config);
+    const cachedResult = this.getCachedResult(cacheKey);
+    
+    if (cachedResult) {
+      this.logger.debug(`Cache hit for query (${Date.now() - startTime}ms)`);
+      await this.saveQueryHistory(tenantId, userId, config, cachedResult.total, true);
+      return { ...cachedResult, fromCache: true };
+    }
+
     const entityConfig = this.getEntityConfig(config.entity);
     if (!entityConfig) {
       throw new NotFoundException(`Entity ${config.entity} not found`);
@@ -90,14 +141,20 @@ export class QueryBuilderService {
       total = count;
     }
 
-    await this.saveQueryHistory(tenantId, userId, config, results.length);
+    await this.saveQueryHistory(tenantId, userId, config, results.length, false);
 
-    return {
+    const response = {
       data: results,
       total,
       page: Math.floor((config.offset || 0) / (config.limit || 50)) + 1,
       pageSize: config.limit || 50,
     };
+
+    this.setCachedResult(cacheKey, response);
+    const duration = Date.now() - startTime;
+    this.logger.log(`Query executed in ${duration}ms${config.filters?.length ? ` with ${config.filters.length} filters` : ''}`);
+
+    return response;
   }
 
   async saveInsight(tenantId: string, userId: string, data: {
@@ -219,13 +276,13 @@ export class QueryBuilderService {
     }));
   }
 
-  private async saveQueryHistory(tenantId: string, userId: string, config: any, resultCount: number) {
+  private async saveQueryHistory(tenantId: string, userId: string, config: any, resultCount: number, fromCache: boolean = false) {
     await this.db.queryHistory.create({
       data: {
         tenant_id: tenantId,
         user_id: userId,
         entity_type: config.entity,
-        query_config: config,
+        query_config: { ...config, from_cache: fromCache },
         result_count: resultCount,
       },
     });

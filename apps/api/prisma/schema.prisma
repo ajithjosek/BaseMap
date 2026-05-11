@@ -132,6 +132,11 @@ model Application {
   saas_application      SaaSApplication?
 
   @@unique([tenant_id, name])
+  @@index([tenant_id, lifecycle_state])
+  @@index([tenant_id, eol_date])
+  @@index([tenant_id, risk_score])
+  @@index([tenant_id, deployment_model])
+  @@index([technology_type])
   @@map("applications")
 }
 
