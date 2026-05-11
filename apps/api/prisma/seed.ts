@@ -444,8 +444,38 @@ async function main() {
   console.log('Seed finished.');
 }
 
+async function seedAIRecommendations(tenantId: string) {
+  console.log('Seeding AI Recommendations...');
+  
+  const recommendations = [
+    { category: 'eol_risk', title: 'ElasticSearch Prod reaches EOL in 30 days', description: 'Production Elasticsearch cluster approaching end-of-life. Migration to OpenSearch or Elasticsearch 8.x recommended.', priority: 'critical', confidence: 0.95, impact_score: 100 },
+    { category: 'eol_risk', title: 'Old Legacy Server EOL in 90 days', description: 'Legacy server hosting critical finance applications needs replacement or modernization.', priority: 'high', confidence: 0.9, impact_score: 70 },
+    { category: 'underutilization', title: 'Slack has only 15% seat utilization', description: 'Slack workspace has 450 seats but only 68 active users. Potential savings of $45,000/year by reducing seats.', priority: 'high', confidence: 0.85, impact_score: 45000 },
+    { category: 'underutilization', title: 'Jira underutilized at 25%', description: 'Jira has 200 seats with 50 active users. Consider reducing to 75 seats for $15,000 annual savings.', priority: 'medium', confidence: 0.8, impact_score: 15000 },
+    { category: 'renewal', title: 'Salesforce contract expires in 45 days', description: 'Enterprise Salesforce contract ($300K/year) needs renewal negotiation. Consider multi-year discount.', priority: 'high', confidence: 0.9, impact_score: 150000 },
+    { category: 'renewal', title: 'AWS contract renewal approaching', description: 'Annual AWS commitment of $1.2M expires in 60 days. Review reserved instance strategy.', priority: 'critical', confidence: 0.95, impact_score: 600000 },
+    { category: 'security', title: 'Zero-trust implementation recommended', description: 'Current perimeter security model is outdated. Implement zero-trust for improved security posture.', priority: 'medium', confidence: 0.75, impact_score: 50000 },
+    { category: 'optimization', title: 'Kubernetes cluster rightsizing opportunity', description: 'Production K8s cluster running at 20% capacity. Right-sizing could save $80K/year.', priority: 'medium', confidence: 0.8, impact_score: 80000 },
+  ];
+
+  for (const rec of recommendations) {
+    await prisma.$executeRaw`
+      INSERT INTO ai_recommendations (id, tenant_id, category, title, description, priority, confidence, impact_score, is_resolved, created_at, updated_at)
+      VALUES (gen_random_uuid(), ${tenantId}, ${rec.category}, ${rec.title}, ${rec.description}, ${rec.priority}, ${rec.confidence}, ${rec.impact_score}, false, NOW(), NOW())
+    `;
+  }
+  
+  console.log('AI Recommendations seeded');
+}
+
 main()
-  .then(() => prisma.$disconnect())
+  .then(async () => {
+    const tenants = await prisma.tenant.findMany();
+    if (tenants.length > 0) {
+      await seedAIRecommendations(tenants[0].id);
+    }
+    await prisma.$disconnect();
+  })
   .catch((e) => {
     console.error(e);
     process.exit(1);

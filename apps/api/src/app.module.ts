@@ -24,6 +24,7 @@ import { TechnologyComponentsModule } from './technology-components/technology-c
 import { EOLRiskModule } from './eol-risk/eol-risk.module';
 import { QueryBuilderModule } from './query-builder/query-builder.module';
 import { TransformationProjectsModule } from './transformation-projects/transformation-projects.module';
+import { AIRecommendationsModule } from './ai-recommendations/ai-recommendations.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { TransformationProjectsModule } from './transformation-projects/transfor
     EOLRiskModule,
     QueryBuilderModule,
     TransformationProjectsModule,
+    AIRecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
