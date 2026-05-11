@@ -21,6 +21,7 @@ import { ScheduledTasksModule } from './scheduled-tasks/scheduled-tasks.module';
 import { JobQueueModule } from './job-queue/job-queue.module';
 import { ReportsModule } from './reports/reports.module';
 import { TechnologyComponentsModule } from './technology-components/technology-components.module';
+import { EOLRiskModule } from './eol-risk/eol-risk.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TechnologyComponentsModule } from './technology-components/technology-c
     JobQueueModule,
     ReportsModule,
     TechnologyComponentsModule,
+    EOLRiskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

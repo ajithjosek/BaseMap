@@ -28,6 +28,17 @@ export class CronService {
     }
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_8AM)
+  async handleDailyEOLAlerts() {
+    this.logger.log('Running daily EOL alert check...');
+    try {
+      await this.scheduledTasks.processEOLAlerts();
+      await this.scheduledTasks.processEOLRiskScoreCalculation();
+    } catch (error) {
+      this.logger.error('Error processing EOL alerts:', error);
+    }
+  }
+
   @Cron(CronExpression.EVERY_HOUR)
   async handleHourlyServiceNowSync() {
     this.logger.log('Running hourly ServiceNow sync check...');

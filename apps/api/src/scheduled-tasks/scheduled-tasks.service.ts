@@ -131,6 +131,164 @@ export class ScheduledTasksService {
     }
   }
 
+  async processEOLAlerts() {
+    this.logger.log('Processing EOL alerts...');
+    
+    const alerts = [
+      { days: 365, type: 'eol_12m' },
+      { days: 180, type: 'eol_6m' },
+      { days: 90, type: 'eol_3m' },
+      { days: 30, type: 'eol_1m' },
+    ];
+
+    for (const alert of alerts) {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + alert.days);
+      
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
+
+      const apps = await this.db.application.findMany({
+        where: {
+          eol_date: { not: null, gte: startOfDay, lte: endOfDay },
+        },
+        select: { id: true, name: true, eol_date: true, tenant_id: true },
+      });
+
+      for (const app of apps) {
+        const existingNotification = await this.db.notification.findFirst({
+          where: {
+            tenant_id: app.tenant_id,
+            related_entity_id: app.id,
+            type: alert.type,
+          },
+        });
+
+        if (!existingNotification) {
+          const users = await this.db.user.findMany({
+            where: { tenant_id: app.tenant_id, is_active: true },
+            take: 1,
+          });
+
+          if (users.length > 0) {
+            await this.db.notification.create({
+              data: {
+                tenant_id: app.tenant_id,
+                user_id: users[0].id,
+                type: 'eol_alert',
+                title: `EOL Alert: ${app.name}`,
+                message: `${app.name} reaches end-of-life on ${new Date(app.eol_date).toLocaleDateString()}. ${Math.floor(alert.days / 30)} month(s) remaining.`,
+                related_entity_type: 'application',
+                related_entity_id: app.id,
+              },
+            });
+            
+            this.logger.log(`Created EOL alert for ${app.name} (${alert.days} days)`);
+          }
+        }
+      }
+
+      const components = await this.db.technologyComponent.findMany({
+        where: {
+          eol_date: { not: null, gte: startOfDay, lte: endOfDay },
+        },
+        select: { id: true, name: true, eol_date: true, tenant_id: true },
+      });
+
+      for (const comp of components) {
+        const existingNotification = await this.db.notification.findFirst({
+          where: {
+            tenant_id: comp.tenant_id,
+            related_entity_id: comp.id,
+            type: alert.type + '_component',
+          },
+        });
+
+        if (!existingNotification) {
+          const users = await this.db.user.findMany({
+            where: { tenant_id: comp.tenant_id, is_active: true },
+            take: 1,
+          });
+
+          if (users.length > 0) {
+            await this.db.notification.create({
+              data: {
+                tenant_id: comp.tenant_id,
+                user_id: users[0].id,
+                type: 'eol_alert_component',
+                title: `Component EOL Alert: ${comp.name}`,
+                message: `${comp.name} reaches end-of-life on ${new Date(comp.eol_date).toLocaleDateString()}. ${Math.floor(alert.days / 30)} month(s) remaining.`,
+                related_entity_type: 'technology_component',
+                related_entity_id: comp.id,
+              },
+            });
+            
+            this.logger.log(`Created EOL alert for component ${comp.name}`);
+          }
+        }
+      }
+    }
+  }
+
+  async processEOLRiskScoreCalculation() {
+    this.logger.log('Calculating EOL risk scores...');
+    
+    const tenants = await this.db.tenant.findMany({ select: { id: true } });
+    
+    for (const tenant of tenants) {
+      await this.calculateEOLRiskScores(tenant.id);
+    }
+  }
+
+  private async calculateEOLRiskScores(tenantId: string) {
+    const apps = await this.db.application.findMany({
+      where: { tenant_id: tenantId, eol_date: { not: null } },
+      select: { id: true, eol_date: true },
+    });
+
+    const components = await this.db.technologyComponent.findMany({
+      where: { tenant_id: tenantId, eol_date: { not: null } },
+      select: { id: true, eol_date: true },
+    });
+
+    const now = new Date();
+
+    for (const app of apps) {
+      const daysRemaining = Math.ceil((new Date(app.eol_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      let riskScore = 0;
+      if (daysRemaining < 0) riskScore = 100;
+      else if (daysRemaining <= 30) riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
+      else if (daysRemaining <= 90) riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
+      else if (daysRemaining <= 180) riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
+      else riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
+
+      await this.db.application.update({
+        where: { id: app.id },
+        data: { risk_score: riskScore },
+      });
+    }
+
+    for (const comp of components) {
+      const daysRemaining = Math.ceil((new Date(comp.eol_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      let riskScore = 0;
+      if (daysRemaining < 0) riskScore = 100;
+      else if (daysRemaining <= 30) riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
+      else if (daysRemaining <= 90) riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
+      else if (daysRemaining <= 180) riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
+      else riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
+
+      const existing = await this.db.technologyComponent.findUnique({ where: { id: comp.id } });
+      const currentAttrs = existing?.custom_attributes || {};
+      
+      await this.db.technologyComponent.update({
+        where: { id: comp.id },
+        data: { custom_attributes: { ...currentAttrs, risk_score: riskScore } },
+      });
+    }
+
+    this.logger.log(`Updated EOL risk scores for tenant ${tenantId}`);
+  }
+
   async processServiceNowSync() {
     this.logger.log('Processing scheduled ServiceNow syncs...');
     
