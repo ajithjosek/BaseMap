@@ -51,6 +51,7 @@ model Tenant {
   budgetForecasts          BudgetForecast[]
   exportTemplates          ExportTemplate[]
   scheduledExports         ScheduledExport[]
+  webhookConfigs           WebhookConfig[]
 
   @@map("tenants")
 }
@@ -563,6 +564,9 @@ model AuditLog {
   tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   user   User?  @relation(fields: [user_id], references: [id])
 
+  @@index([tenant_id, action_timestamp])
+  @@index([tenant_id, entity_type, entity_id])
+  @@index([tenant_id, user_id])
   @@map("audit_log")
 }
 
@@ -935,4 +939,23 @@ model ScheduledExport {
   @@index([tenant_id, is_active])
   @@index([next_run_at])
   @@map("scheduled_exports")
+}
+
+model WebhookConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(100)
+  provider    String   @db.VarChar(50)
+  webhook_url String   @db.VarChar(500)
+  secret_key  String?  @db.VarChar(255)
+  events      Json     @default("[]")
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, provider])
+  @@index([tenant_id, is_active])
+  @@map("webhook_configs")
 }

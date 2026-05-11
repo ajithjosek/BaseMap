@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -27,6 +28,8 @@ import { TransformationProjectsModule } from './transformation-projects/transfor
 import { AIRecommendationsModule } from './ai-recommendations/ai-recommendations.module';
 import { AdvancedAnalyticsModule } from './advanced-analytics/advanced-analytics.module';
 import { ExportsModule } from './exports/exports.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -37,6 +40,7 @@ import { ExportsModule } from './exports/exports.module';
     }),
     PrismaModule,
     AuthModule,
+    HttpModule,
     ApplicationsModule,
     CostsModule,
     CapabilitiesModule,
@@ -58,6 +62,8 @@ import { ExportsModule } from './exports/exports.module';
     AIRecommendationsModule,
     AdvancedAnalyticsModule,
     ExportsModule,
+    AuditLogsModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
