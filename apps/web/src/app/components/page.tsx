@@ -201,10 +201,10 @@ export default function TechnologyComponentsPage() {
       </div>
 
       <div className="flex gap-4">
-        <Select value={filterType} onValueChange={setFilterType}>
+        <Select value={filterType || 'all'} onValueChange={(v) => setFilterType(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-48"><SelectValue placeholder="All Types" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="Server">Server</SelectItem>
             <SelectItem value="Database">Database</SelectItem>
             <SelectItem value="Cloud Service">Cloud Service</SelectItem>
@@ -212,10 +212,10 @@ export default function TechnologyComponentsPage() {
             <SelectItem value="Storage">Storage</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterEnv} onValueChange={setFilterEnv}>
+        <Select value={filterEnv || 'all'} onValueChange={(v) => setFilterEnv(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-48"><SelectValue placeholder="All Environments" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Environments</SelectItem>
+            <SelectItem value="all">All Environments</SelectItem>
             <SelectItem value="Production">Production</SelectItem>
             <SelectItem value="Staging">Staging</SelectItem>
             <SelectItem value="Development">Development</SelectItem>
