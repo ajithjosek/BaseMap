@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
@@ -17,6 +17,7 @@ const menuItems = [
   { icon: Server, label: 'Components', href: '/components' },
   { icon: Activity, label: 'EOL Risk', href: '/eol-risk' },
   { icon: FileCheck, label: 'Data Quality', href: '/data-quality' },
+  { icon: Search, label: 'Query Builder', href: '/query-builder' },
   { icon: BarChart, label: 'Reports', href: '/reports' },
   { icon: PenTool, label: 'Report Builder', href: '/reports/builder' },
   { icon: Users, label: 'Users', href: '/users' },

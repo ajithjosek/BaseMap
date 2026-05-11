@@ -43,6 +43,8 @@ model Tenant {
   serviceNowConfig         ServiceNowConfig?
   serviceNowSyncLogs       ServiceNowSyncLog[]
   componentDependencies    ComponentDependency[]
+  insights                 Insight[]
+  queryHistories           QueryHistory[]
 
   @@map("tenants")
 }
@@ -471,6 +473,8 @@ model User {
   import_jobs          ImportJob[]
   export_jobs          ExportJob[]
   custom_reports       CustomReport[]
+  insights             Insight[]
+  queryHistories       QueryHistory[]
 
   @@unique([tenant_id, email])
   @@map("users")
@@ -687,6 +691,46 @@ model CustomReport {
   @@index([tenant_id, user_id])
   @@index([tenant_id, is_shared])
   @@map("custom_reports")
+}
+
+model Insight {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenant_id    String   @db.Uuid
+  user_id      String   @db.Uuid
+  name         String   @db.VarChar(255)
+  description  String?
+  entity_type  String   @db.VarChar(50)
+  query_config Json     @default("{}")
+  chart_type   String?  @db.VarChar(20)
+  is_shared    Boolean  @default(false)
+  share_token  String?  @db.VarChar(64)
+  result_count Int      @default(0)
+  created_at   DateTime @default(now()) @db.Timestamptz
+  updated_at   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id])
+
+  @@index([tenant_id, user_id])
+  @@index([tenant_id, is_shared])
+  @@index([share_token])
+  @@map("insights")
+}
+
+model QueryHistory {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenant_id    String   @db.Uuid
+  user_id      String   @db.Uuid
+  entity_type  String   @db.VarChar(50)
+  query_config Json     @default("{}")
+  result_count Int      @default(0)
+  executed_at  DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id])
+
+  @@index([tenant_id, user_id, executed_at])
+  @@map("query_history")
 }
 
 model ServiceNowConfig {

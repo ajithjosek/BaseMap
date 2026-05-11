@@ -22,6 +22,7 @@ import { JobQueueModule } from './job-queue/job-queue.module';
 import { ReportsModule } from './reports/reports.module';
 import { TechnologyComponentsModule } from './technology-components/technology-components.module';
 import { EOLRiskModule } from './eol-risk/eol-risk.module';
+import { QueryBuilderModule } from './query-builder/query-builder.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { EOLRiskModule } from './eol-risk/eol-risk.module';
     ReportsModule,
     TechnologyComponentsModule,
     EOLRiskModule,
+    QueryBuilderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
