@@ -9,7 +9,9 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
     "husky": "^9.1.7",
+    "lightningcss": "^1.32.0",
     "prettier": "^3.2.5",
     "turbo": "^2.0.0"
   },

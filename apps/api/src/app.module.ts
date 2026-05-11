@@ -1,4 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -14,11 +15,16 @@ import { DashboardsModule } from './dashboards/dashboards.module';
 import { ImportExportModule } from './import-export/import-export.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SaaSApplicationsModule } from './saas-applications/saas-applications.module';
+import { SaaSRequestsModule } from './saas-requests/saas-requests.module';
+import { ServiceNowModule } from './service-now/service-now.module';
+import { ScheduledTasksModule } from './scheduled-tasks/scheduled-tasks.module';
 import { JobQueueModule } from './job-queue/job-queue.module';
 import { ReportsModule } from './reports/reports.module';
+import { TechnologyComponentsModule } from './technology-components/technology-components.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
@@ -34,8 +40,12 @@ import { ReportsModule } from './reports/reports.module';
     ImportExportModule,
     NotificationsModule,
     SaaSApplicationsModule,
+    SaaSRequestsModule,
+    ServiceNowModule,
+    ScheduledTasksModule,
     JobQueueModule,
     ReportsModule,
+    TechnologyComponentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

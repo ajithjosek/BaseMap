@@ -19,36 +19,40 @@ model Tenant {
   created_at DateTime @default(now()) @db.Timestamptz
   updated_at DateTime @updatedAt @db.Timestamptz
 
-  organizations        Organization[]
-  business_units       BusinessUnit[]
-  applications         Application[]
-  application_costs    ApplicationCost[]
-  capability_nodes     CapabilityNode[]
-  capability_gaps     CapabilityGap[]
+  organizations            Organization[]
+  business_units           BusinessUnit[]
+  applications             Application[]
+  application_costs        ApplicationCost[]
+  capability_nodes         CapabilityNode[]
+  capability_gaps          CapabilityGap[]
   application_capabilities ApplicationCapability[]
-  interfaces           Interface[]
-  interface_incidents  InterfaceIncident[]
-  technology_components TechnologyComponent[]
-  saas_applications    SaaSApplication[]
-  users                User[]
-  roles                Role[]
-  audit_logs           AuditLog[]
-  comments             Comment[]
-  notifications        Notification[]
-  import_jobs          ImportJob[]
-export_jobs         ExportJob[]
-  email_logs           EmailLog[]
-  custom_reports      CustomReport[]
+  interfaces               Interface[]
+  interface_incidents      InterfaceIncident[]
+  technology_components    TechnologyComponent[]
+  saas_applications        SaaSApplication[]
+  users                    User[]
+  roles                    Role[]
+  audit_logs               AuditLog[]
+  comments                 Comment[]
+  notifications            Notification[]
+  import_jobs              ImportJob[]
+  export_jobs              ExportJob[]
+  email_logs               EmailLog[]
+  custom_reports           CustomReport[]
+  saaSRequests             SaaSRequest[]
+  serviceNowConfig         ServiceNowConfig?
+  serviceNowSyncLogs       ServiceNowSyncLog[]
+  componentDependencies    ComponentDependency[]
 
   @@map("tenants")
 }
 
 model Organization {
-  id             String   @id @default(uuid()) @db.Uuid
-  tenant_id      String   @db.Uuid
-  name           String   @db.VarChar(255)
-  parent_org_id  String?  @db.Uuid
-  created_at     DateTime @default(now()) @db.Timestamptz
+  id            String   @id @default(uuid()) @db.Uuid
+  tenant_id     String   @db.Uuid
+  name          String   @db.VarChar(255)
+  parent_org_id String?  @db.Uuid
+  created_at    DateTime @default(now()) @db.Timestamptz
 
   tenant         Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   parent_org     Organization?  @relation("OrgToOrg", fields: [parent_org_id], references: [id])
@@ -67,12 +71,12 @@ model BusinessUnit {
   parent_unit_id  String?  @db.Uuid
   created_at      DateTime @default(now()) @db.Timestamptz
 
-  tenant          Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  organization    Organization?  @relation(fields: [organization_id], references: [id])
-  parent_unit     BusinessUnit?  @relation("BUToBU", fields: [parent_unit_id], references: [id])
-  child_units     BusinessUnit[] @relation("BUToBU")
-  applications    Application[]
-  user_roles      UserRole[]
+  tenant       Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  organization Organization?  @relation(fields: [organization_id], references: [id])
+  parent_unit  BusinessUnit?  @relation("BUToBU", fields: [parent_unit_id], references: [id])
+  child_units  BusinessUnit[] @relation("BUToBU")
+  applications Application[]
+  user_roles   UserRole[]
 
   @@map("business_units")
 }
@@ -111,17 +115,17 @@ model Application {
   deleted_at            DateTime? @db.Timestamptz
   deleted_by            String?   @db.Uuid
 
-  tenant                Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  owner                 User?          @relation("AppOwner", fields: [owner_id], references: [id])
-  business_unit         BusinessUnit?  @relation(fields: [business_unit_id], references: [id])
-  creator               User?          @relation("AppCreator", fields: [created_by], references: [id])
-  updater               User?          @relation("AppUpdater", fields: [updated_by], references: [id])
-  deleter               User?          @relation("AppDeleter", fields: [deleted_by], references: [id])
+  tenant        Tenant        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  owner         User?         @relation("AppOwner", fields: [owner_id], references: [id])
+  business_unit BusinessUnit? @relation(fields: [business_unit_id], references: [id])
+  creator       User?         @relation("AppCreator", fields: [created_by], references: [id])
+  updater       User?         @relation("AppUpdater", fields: [updated_by], references: [id])
+  deleter       User?         @relation("AppDeleter", fields: [deleted_by], references: [id])
 
   costs                 ApplicationCost[]
   capabilities          ApplicationCapability[]
-  interfaces_as_source  Interface[]    @relation("SourceApp")
-  interfaces_as_target  Interface[]    @relation("TargetApp")
+  interfaces_as_source  Interface[]             @relation("SourceApp")
+  interfaces_as_target  Interface[]             @relation("TargetApp")
   technology_components ApplicationComponent[]
   saas_application      SaaSApplication?
 
@@ -130,25 +134,25 @@ model Application {
 }
 
 model ApplicationCost {
-  id             String   @id @default(uuid()) @db.Uuid
-  tenant_id      String   @db.Uuid
-  application_id String   @db.Uuid
-  cost_type      String   @db.VarChar(50)
-  amount         Decimal  @db.Decimal(15, 2)
-  currency       String?  @default("USD") @db.VarChar(3)
-  billing_cycle  String?  @default("Annual") @db.VarChar(20)
+  id             String    @id @default(uuid()) @db.Uuid
+  tenant_id      String    @db.Uuid
+  application_id String    @db.Uuid
+  cost_type      String    @db.VarChar(50)
+  amount         Decimal   @db.Decimal(15, 2)
+  currency       String?   @default("USD") @db.VarChar(3)
+  billing_cycle  String?   @default("Annual") @db.VarChar(20)
   total_seats    Int?
   used_seats     Int?
-  effective_date DateTime @db.Date
+  effective_date DateTime  @db.Date
   end_date       DateTime? @db.Date
   notes          String?
-  created_by     String?  @db.Uuid
-  created_at     DateTime @default(now()) @db.Timestamptz
-  updated_at     DateTime @updatedAt @db.Timestamptz
+  created_by     String?   @db.Uuid
+  created_at     DateTime  @default(now()) @db.Timestamptz
+  updated_at     DateTime  @updatedAt @db.Timestamptz
 
-  tenant         Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  application    Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
-  creator        User?       @relation(fields: [created_by], references: [id])
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  creator     User?       @relation(fields: [created_by], references: [id])
 
   @@map("application_costs")
 }
@@ -171,35 +175,35 @@ model CapabilityNode {
   created_at           DateTime  @default(now()) @db.Timestamptz
   updated_at           DateTime  @updatedAt @db.Timestamptz
 
-  tenant               Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  parent               CapabilityNode?  @relation("CapToCap", fields: [parent_id], references: [id])
-  children             CapabilityNode[] @relation("CapToCap")
-  owner                User?            @relation(fields: [owner_id], references: [id])
-  applications         ApplicationCapability[]
-  gaps                  CapabilityGap[]
+  tenant       Tenant                  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  parent       CapabilityNode?         @relation("CapToCap", fields: [parent_id], references: [id])
+  children     CapabilityNode[]        @relation("CapToCap")
+  owner        User?                   @relation(fields: [owner_id], references: [id])
+  applications ApplicationCapability[]
+  gaps         CapabilityGap[]
 
   @@unique([tenant_id, parent_id, name])
   @@map("capability_nodes")
 }
 
 model CapabilityGap {
-  id                  String    @id @default(uuid()) @db.Uuid
-  tenant_id           String    @db.Uuid
-  capability_id       String    @db.Uuid
-  title               String    @db.VarChar(255)
-  description         String?
-  impact              String?
-  proposed_solution   String?
-  severity            String    @default("Medium") @db.VarChar(20)
-  status              String    @default("Open") @db.VarChar(20)
-  project_id          String?   @db.Uuid
-  created_by          String?   @db.Uuid
-  created_at          DateTime  @default(now()) @db.Timestamptz
-  updated_at          DateTime  @updatedAt @db.Timestamptz
-  closed_at           DateTime? @db.Timestamptz
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  capability_id     String    @db.Uuid
+  title             String    @db.VarChar(255)
+  description       String?
+  impact            String?
+  proposed_solution String?
+  severity          String    @default("Medium") @db.VarChar(20)
+  status            String    @default("Open") @db.VarChar(20)
+  project_id        String?   @db.Uuid
+  created_by        String?   @db.Uuid
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @updatedAt @db.Timestamptz
+  closed_at         DateTime? @db.Timestamptz
 
-  tenant              Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  capability          CapabilityNode  @relation(fields: [capability_id], references: [id], onDelete: Cascade)
+  tenant     Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  capability CapabilityNode @relation(fields: [capability_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, capability_id])
   @@index([tenant_id, status])
@@ -215,9 +219,9 @@ model ApplicationCapability {
   created_by     String?  @db.Uuid
   created_at     DateTime @default(now()) @db.Timestamptz
 
-  tenant         Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  application    Application    @relation(fields: [application_id], references: [id], onDelete: Cascade)
-  capability     CapabilityNode @relation(fields: [capability_id], references: [id], onDelete: Cascade)
+  tenant      Tenant         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application Application    @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  capability  CapabilityNode @relation(fields: [capability_id], references: [id], onDelete: Cascade)
 
   @@unique([tenant_id, application_id, capability_id])
   @@map("application_capabilities")
@@ -254,32 +258,32 @@ model Interface {
   updated_by            String?   @db.Uuid
   updated_at            DateTime  @updatedAt @db.Timestamptz
 
-  tenant                Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  source_application    Application?      @relation("SourceApp", fields: [source_application_id], references: [id])
-  target_application    Application?      @relation("TargetApp", fields: [target_application_id], references: [id])
-  owner                 User?             @relation(fields: [owner_id], references: [id])
-  incidents             InterfaceIncident[]
+  tenant             Tenant              @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  source_application Application?        @relation("SourceApp", fields: [source_application_id], references: [id])
+  target_application Application?        @relation("TargetApp", fields: [target_application_id], references: [id])
+  owner              User?               @relation(fields: [owner_id], references: [id])
+  incidents          InterfaceIncident[]
 
   @@map("interfaces")
 }
 
 model InterfaceIncident {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenant_id       String    @db.Uuid
-  interface_id    String    @db.Uuid
-  incident_type   String    @db.VarChar(50)
-  severity       String    @default("Medium") @db.VarChar(20)
-  title           String    @db.VarChar(255)
-  description     String?
-  status          String    @default("Open") @db.VarChar(20)
-  started_at      DateTime  @default(now()) @db.Timestamptz
-  resolved_at     DateTime? @db.Timestamptz
+  id               String    @id @default(uuid()) @db.Uuid
+  tenant_id        String    @db.Uuid
+  interface_id     String    @db.Uuid
+  incident_type    String    @db.VarChar(50)
+  severity         String    @default("Medium") @db.VarChar(20)
+  title            String    @db.VarChar(255)
+  description      String?
+  status           String    @default("Open") @db.VarChar(20)
+  started_at       DateTime  @default(now()) @db.Timestamptz
+  resolved_at      DateTime? @db.Timestamptz
   resolution_notes String?
-  created_by     String?   @db.Uuid
-  created_at     DateTime  @default(now()) @db.Timestamptz
+  created_by       String?   @db.Uuid
+  created_at       DateTime  @default(now()) @db.Timestamptz
 
-  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  interface       Interface @relation(fields: [interface_id], references: [id], onDelete: Cascade)
+  tenant    Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  interface Interface @relation(fields: [interface_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, interface_id])
   @@map("interface_incidents")
@@ -306,10 +310,31 @@ model TechnologyComponent {
   created_at          DateTime  @default(now()) @db.Timestamptz
   updated_at          DateTime  @updatedAt @db.Timestamptz
 
-  tenant              Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  applications        ApplicationComponent[]
+  tenant       Tenant                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  applications ApplicationComponent[]
+
+  dependencies_from ComponentDependency[] @relation("FromComponent")
+  dependencies_to   ComponentDependency[] @relation("ToComponent")
 
   @@map("technology_components")
+}
+
+model ComponentDependency {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenant_id         String   @db.Uuid
+  from_component_id String   @db.Uuid
+  to_component_id   String   @db.Uuid
+  dependency_type   String   @default("runtime") @db.VarChar(20)
+  description       String?
+  created_at        DateTime @default(now()) @db.Timestamptz
+
+  tenant         Tenant              @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  from_component TechnologyComponent @relation("FromComponent", fields: [from_component_id], references: [id], onDelete: Cascade)
+  to_component   TechnologyComponent @relation("ToComponent", fields: [to_component_id], references: [id], onDelete: Cascade)
+
+  @@unique([from_component_id, to_component_id])
+  @@index([tenant_id])
+  @@map("component_dependencies")
 }
 
 model ApplicationComponent {
@@ -324,78 +349,127 @@ model ApplicationComponent {
 }
 
 model SaaSApplication {
-  id                      String    @id @default(uuid()) @db.Uuid
-  tenant_id               String    @db.Uuid
-  application_id          String?   @unique @db.Uuid
-  vendor                  String?   @db.VarChar(255)
-  product_url             String?
-  use_case                String?
-  approved_by             String?   @db.Uuid
-  approval_date           DateTime? @db.Date
-  pricing_model           String?   @db.VarChar(50)
-  annual_contract_value   Decimal?  @db.Decimal(15, 2)
-  contract_start_date     DateTime? @db.Date
-  contract_end_date       DateTime? @db.Date
-  auto_renewal            Boolean   @default(false)
-  total_seats             Int?
-  active_users            Int?
-  last_login_check_date   DateTime? @db.Timestamptz
-  data_residency          String?   @db.VarChar(100)
-  certifications          Json?     @default("[]")
-  has_dpa                 Boolean   @default(false)
-  is_shadow_it            Boolean   @default(false)
-  discovered_at           DateTime? @db.Timestamptz
-  created_at              DateTime  @default(now()) @db.Timestamptz
-  updated_at              DateTime  @updatedAt @db.Timestamptz
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenant_id             String    @db.Uuid
+  application_id        String?   @unique @db.Uuid
+  vendor                String?   @db.VarChar(255)
+  product_url           String?
+  use_case              String?
+  approved_by           String?   @db.Uuid
+  approval_date         DateTime? @db.Date
+  pricing_model         String?   @db.VarChar(50)
+  annual_contract_value Decimal?  @db.Decimal(15, 2)
+  contract_start_date   DateTime? @db.Date
+  contract_end_date     DateTime? @db.Date
+  auto_renewal          Boolean   @default(false)
+  total_seats           Int?
+  active_users          Int?
+  last_login_check_date DateTime? @db.Timestamptz
+  data_residency        String?   @db.VarChar(100)
+  certifications        Json?     @default("[]")
+  has_dpa               Boolean   @default(false)
+  is_shadow_it          Boolean   @default(false)
+  business_unit         String?   @db.VarChar(100)
+  discovered_at         DateTime? @db.Timestamptz
+  created_at            DateTime  @default(now()) @db.Timestamptz
+  updated_at            DateTime  @updatedAt @db.Timestamptz
 
-  tenant                  Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  application             Application? @relation(fields: [application_id], references: [id])
-  approver                User?        @relation(fields: [approved_by], references: [id])
+  tenant      Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [application_id], references: [id])
+  approver    User?        @relation(fields: [approved_by], references: [id])
 
   @@map("saas_applications")
 }
 
+model SaaSRequest {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  requester_id      String    @db.Uuid
+  tool_name         String    @db.VarChar(255)
+  vendor            String    @db.VarChar(255)
+  use_case          String?
+  estimated_cost    Decimal?  @db.Decimal(15, 2)
+  justification     String?
+  current_state     String    @default("pending") @db.VarChar(20)
+  current_step      Int       @default(1)
+  approver_comments String?
+  approved_by       String?   @db.Uuid
+  approved_at       DateTime? @db.Timestamptz
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @updatedAt @db.Timestamptz
+
+  tenant    Tenant            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  requester User              @relation("Requester", fields: [requester_id], references: [id])
+  approver  User?             @relation("ApproverRequests", fields: [approved_by], references: [id])
+  steps     SaaSRequestStep[]
+
+  @@index([tenant_id, current_state])
+  @@map("saas_requests")
+}
+
+model SaaSRequestStep {
+  id            String    @id @default(uuid()) @db.Uuid
+  request_id    String    @db.Uuid
+  step_number   Int
+  step_name     String    @db.VarChar(50)
+  status        String    @default("pending") @db.VarChar(20)
+  approver_id   String?   @db.Uuid
+  approver_name String?
+  comments      String?
+  action_at     DateTime? @db.Timestamptz
+  created_at    DateTime  @default(now()) @db.Timestamptz
+
+  request  SaaSRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  approver User?       @relation(fields: [approver_id], references: [id])
+
+  @@index([request_id])
+  @@map("saas_request_steps")
+}
+
 model User {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenant_id       String    @db.Uuid
-  email           String    @db.VarChar(255)
-  password_hash   String?   @db.VarChar(255)
-  first_name      String?   @db.VarChar(100)
-  last_name       String?   @db.VarChar(100)
-  job_title       String?   @db.VarChar(100)
-  department      String?   @db.VarChar(100)
-  manager_id      String?   @db.Uuid
-  sso_provider    String?   @db.VarChar(50)
-  sso_subject     String?   @db.VarChar(255)
-  is_active       Boolean   @default(true)
-  last_login_at   DateTime? @db.Timestamptz
-  login_count     Int       @default(0)
-  created_by      String?   @db.Uuid
-  created_at      DateTime  @default(now()) @db.Timestamptz
-  updated_at      DateTime  @updatedAt @db.Timestamptz
-  preferences     Json?     @default("{}")
+  id            String    @id @default(uuid()) @db.Uuid
+  tenant_id     String    @db.Uuid
+  email         String    @db.VarChar(255)
+  password_hash String?   @db.VarChar(255)
+  first_name    String?   @db.VarChar(100)
+  last_name     String?   @db.VarChar(100)
+  job_title     String?   @db.VarChar(100)
+  department    String?   @db.VarChar(100)
+  manager_id    String?   @db.Uuid
+  sso_provider  String?   @db.VarChar(50)
+  sso_subject   String?   @db.VarChar(255)
+  is_active     Boolean   @default(true)
+  last_login_at DateTime? @db.Timestamptz
+  login_count   Int       @default(0)
+  created_by    String?   @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
+  preferences   Json?     @default("{}")
 
-  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  manager         User?     @relation("UserManager", fields: [manager_id], references: [id])
-  subordinates    User[]    @relation("UserManager")
-  creator         User?     @relation("UserCreator", fields: [created_by], references: [id])
-  created_users   User[]    @relation("UserCreator")
+  tenant        Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  manager       User?  @relation("UserManager", fields: [manager_id], references: [id])
+  subordinates  User[] @relation("UserManager")
+  creator       User?  @relation("UserCreator", fields: [created_by], references: [id])
+  created_users User[] @relation("UserCreator")
 
-  owned_applications    Application[] @relation("AppOwner")
-  created_applications  Application[] @relation("AppCreator")
-  updated_applications  Application[] @relation("AppUpdater")
-  deleted_applications  Application[] @relation("AppDeleter")
-  application_costs     ApplicationCost[]
-  capability_nodes      CapabilityNode[]
-  interfaces            Interface[]
-  saas_approvals        SaaSApplication[]
-  user_roles            UserRole[]
-  audit_logs            AuditLog[]
-  comments              Comment[]
-  resolved_comments     Comment[]     @relation("CommentResolver")
-  notifications         Notification[]
-  import_jobs           ImportJob[]
-  export_jobs           ExportJob[]
+  owned_applications   Application[]     @relation("AppOwner")
+  created_applications Application[]     @relation("AppCreator")
+  updated_applications Application[]     @relation("AppUpdater")
+  deleted_applications Application[]     @relation("AppDeleter")
+  application_costs    ApplicationCost[]
+  capability_nodes     CapabilityNode[]
+  interfaces           Interface[]
+  saas_approvals       SaaSApplication[]
+  saas_requests        SaaSRequest[]     @relation("Requester")
+  approved_requests    SaaSRequest[]     @relation("ApproverRequests")
+  request_steps        SaaSRequestStep[]
+  user_roles           UserRole[]
+  audit_logs           AuditLog[]
+  comments             Comment[]
+  resolved_comments    Comment[]         @relation("CommentResolver")
+  notifications        Notification[]
+  import_jobs          ImportJob[]
+  export_jobs          ExportJob[]
   custom_reports       CustomReport[]
 
   @@unique([tenant_id, email])
@@ -410,9 +484,9 @@ model Role {
   is_system_role Boolean  @default(false)
   created_at     DateTime @default(now()) @db.Timestamptz
 
-  tenant         Tenant?  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user_roles     UserRole[]
-  permissions    RolePermission[]
+  tenant      Tenant?          @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user_roles  UserRole[]
+  permissions RolePermission[]
 
   @@unique([tenant_id, name])
   @@map("roles")
@@ -424,19 +498,19 @@ model Permission {
   action   String @db.VarChar(50)
   scope    String @default("all") @db.VarChar(50)
 
-  roles    RolePermission[]
+  roles RolePermission[]
 
   @@map("permissions")
 }
 
 model UserRole {
-  user_id          String  @db.Uuid
-  role_id          String  @db.Uuid
-  business_unit_id String  @db.Uuid
+  user_id          String @db.Uuid
+  role_id          String @db.Uuid
+  business_unit_id String @db.Uuid
 
-  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  role             Role         @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  business_unit    BusinessUnit @relation(fields: [business_unit_id], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role          Role         @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  business_unit BusinessUnit @relation(fields: [business_unit_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, role_id, business_unit_id])
   @@map("user_roles")
@@ -468,8 +542,8 @@ model AuditLog {
   user_agent       String?
   session_id       String?  @db.VarChar(100)
 
-  tenant           Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user             User?    @relation(fields: [user_id], references: [id])
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [user_id], references: [id])
 
   @@map("audit_log")
 }
@@ -491,31 +565,31 @@ model Comment {
   updated_at        DateTime  @updatedAt @db.Timestamptz
   deleted_at        DateTime? @db.Timestamptz
 
-  tenant            Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  author            User      @relation(fields: [author_id], references: [id])
-  parent_comment    Comment?  @relation("Thread", fields: [parent_comment_id], references: [id])
-  replies           Comment[] @relation("Thread")
-  resolver          User?     @relation("CommentResolver", fields: [resolved_by], references: [id])
+  tenant         Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  author         User      @relation(fields: [author_id], references: [id])
+  parent_comment Comment?  @relation("Thread", fields: [parent_comment_id], references: [id])
+  replies        Comment[] @relation("Thread")
+  resolver       User?     @relation("CommentResolver", fields: [resolved_by], references: [id])
 
   @@map("comments")
 }
 
 model Notification {
-  id                    String    @id @default(uuid()) @db.Uuid
-  tenant_id             String    @db.Uuid
-  user_id               String    @db.Uuid
-  type                  String    @db.VarChar(50)
-  title                 String    @db.VarChar(255)
-  message               String
-  is_read               Boolean   @default(false)
-  read_at               DateTime? @db.Timestamptz
-  related_entity_type   String?   @db.VarChar(100)
-  related_entity_id     String?   @db.Uuid
-  metadata              Json?     @default("{}")
-  created_at            DateTime  @default(now()) @db.Timestamptz
+  id                  String    @id @default(uuid()) @db.Uuid
+  tenant_id           String    @db.Uuid
+  user_id             String    @db.Uuid
+  type                String    @db.VarChar(50)
+  title               String    @db.VarChar(255)
+  message             String
+  is_read             Boolean   @default(false)
+  read_at             DateTime? @db.Timestamptz
+  related_entity_type String?   @db.VarChar(100)
+  related_entity_id   String?   @db.Uuid
+  metadata            Json?     @default("{}")
+  created_at          DateTime  @default(now()) @db.Timestamptz
 
-  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, user_id])
   @@index([user_id, is_read])
@@ -523,94 +597,142 @@ model Notification {
 }
 
 model ImportJob {
-  id                    String    @id @default(uuid()) @db.Uuid
-  tenant_id             String    @db.Uuid
-  user_id               String    @db.Uuid
-  file_name             String    @db.VarChar(255)
-  file_type             String    @db.VarChar(50)
-  status                String    @default("pending") @db.VarChar(20)
-  total_rows            Int?
-  success_rows          Int       @default(0)
-  failed_rows           Int       @default(0)
-  errors                Json?     @default("[]")
-  column_mapping        Json?     @default("{}")
-  preview_data          Json?
-  started_at            DateTime? @db.Timestamptz
-  completed_at          DateTime? @db.Timestamptz
-  notification_sent     Boolean   @default(false)
-  created_at            DateTime  @default(now()) @db.Timestamptz
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  user_id           String    @db.Uuid
+  file_name         String    @db.VarChar(255)
+  file_type         String    @db.VarChar(50)
+  status            String    @default("pending") @db.VarChar(20)
+  total_rows        Int?
+  success_rows      Int       @default(0)
+  failed_rows       Int       @default(0)
+  errors            Json?     @default("[]")
+  column_mapping    Json?     @default("{}")
+  preview_data      Json?
+  started_at        DateTime? @db.Timestamptz
+  completed_at      DateTime? @db.Timestamptz
+  notification_sent Boolean   @default(false)
+  created_at        DateTime  @default(now()) @db.Timestamptz
 
-  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, status])
   @@map("import_jobs")
 }
 
 model ExportJob {
-  id                    String    @id @default(uuid()) @db.Uuid
-  tenant_id             String    @db.Uuid
-  user_id               String    @db.Uuid
-  export_type           String    @db.VarChar(50)
-  format                String    @db.VarChar(20)
-  status                String    @default("pending") @db.VarChar(20)
-  file_url              String?
-  file_size             Int?
-  filters               Json?     @default("{}")
-  columns               Json?     @default("[]")
-  scheduled_at          DateTime? @db.Timestamptz
-  started_at            DateTime? @db.Timestamptz
-  completed_at          DateTime? @db.Timestamptz
-  notification_sent     Boolean   @default(false)
-  created_at            DateTime  @default(now()) @db.Timestamptz
+  id                String    @id @default(uuid()) @db.Uuid
+  tenant_id         String    @db.Uuid
+  user_id           String    @db.Uuid
+  export_type       String    @db.VarChar(50)
+  format            String    @db.VarChar(20)
+  status            String    @default("pending") @db.VarChar(20)
+  file_url          String?
+  file_size         Int?
+  filters           Json?     @default("{}")
+  columns           Json?     @default("[]")
+  scheduled_at      DateTime? @db.Timestamptz
+  started_at        DateTime? @db.Timestamptz
+  completed_at      DateTime? @db.Timestamptz
+  notification_sent Boolean   @default(false)
+  created_at        DateTime  @default(now()) @db.Timestamptz
 
-  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, status])
   @@map("export_jobs")
 }
 
 model EmailLog {
-  id                    String    @id @default(uuid()) @db.Uuid
-  tenant_id             String    @db.Uuid
-  to_email              String    @db.VarChar(255)
-  subject               String    @db.VarChar(255)
-  template              String    @db.VarChar(100)
-  status                String    @db.VarChar(20)
-  error_message         String?
-  metadata              Json?     @default("{}")
-  created_at            DateTime  @default(now()) @db.Timestamptz
+  id            String   @id @default(uuid()) @db.Uuid
+  tenant_id     String   @db.Uuid
+  to_email      String   @db.VarChar(255)
+  subject       String   @db.VarChar(255)
+  template      String   @db.VarChar(100)
+  status        String   @db.VarChar(20)
+  error_message String?
+  metadata      Json?    @default("{}")
+  created_at    DateTime @default(now()) @db.Timestamptz
 
-  tenant                Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
 
   @@index([tenant_id, created_at])
   @@map("email_logs")
 }
 
 model CustomReport {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenant_id       String    @db.Uuid
-  user_id         String    @db.Uuid
-  name            String    @db.VarChar(255)
-  description     String?
-  entity_type     String    @db.VarChar(50)
-  columns         Json      @default("[]")
-  filters         Json      @default("[]")
-  group_by        Json      @default("[]")
-  aggregations    Json      @default("[]")
-  is_shared       Boolean   @default(false)
-  is_public       Boolean   @default(false)
-  schedule        String?   @db.VarChar(20)
-  schedule_time   String?   @db.VarChar(10)
-  last_run_at     DateTime? @db.Timestamptz
-  created_at      DateTime  @default(now()) @db.Timestamptz
-  updated_at      DateTime  @updatedAt @db.Timestamptz
+  id            String    @id @default(uuid()) @db.Uuid
+  tenant_id     String    @db.Uuid
+  user_id       String    @db.Uuid
+  name          String    @db.VarChar(255)
+  description   String?
+  entity_type   String    @db.VarChar(50)
+  columns       Json      @default("[]")
+  filters       Json      @default("[]")
+  group_by      Json      @default("[]")
+  aggregations  Json      @default("[]")
+  is_shared     Boolean   @default(false)
+  is_public     Boolean   @default(false)
+  schedule      String?   @db.VarChar(20)
+  schedule_time String?   @db.VarChar(10)
+  last_run_at   DateTime? @db.Timestamptz
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
 
-  tenant          Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
-  user            User      @relation(fields: [user_id], references: [id])
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id])
 
   @@index([tenant_id, user_id])
   @@index([tenant_id, is_shared])
   @@map("custom_reports")
+}
+
+model ServiceNowConfig {
+  id                  String    @id @default(uuid()) @db.Uuid
+  tenant_id           String    @db.Uuid
+  instance_url        String    @db.VarChar(255)
+  username            String    @db.VarChar(255)
+  password            String
+  client_id           String?
+  client_secret       String?
+  is_active           Boolean   @default(false)
+  field_mapping       Json      @default("{}")
+  sync_direction      String    @default("inbound") @db.VarChar(20)
+  conflict_resolution String    @default("source_wins") @db.VarChar(20)
+  schedule            String?   @db.VarChar(20)
+  last_sync_at        DateTime? @db.Timestamptz
+  last_sync_status    String?   @db.VarChar(20)
+  created_at          DateTime  @default(now()) @db.Timestamptz
+  updated_at          DateTime  @updatedAt @db.Timestamptz
+
+  tenant             Tenant              @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  serviceNowSyncLogs ServiceNowSyncLog[]
+
+  @@unique([tenant_id])
+  @@map("service_now_configs")
+}
+
+model ServiceNowSyncLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenant_id       String    @db.Uuid
+  config_id       String    @db.Uuid
+  sync_type       String    @db.VarChar(20)
+  status          String    @db.VarChar(20)
+  records_total   Int       @default(0)
+  records_created Int       @default(0)
+  records_updated Int       @default(0)
+  records_skipped Int       @default(0)
+  errors          Json      @default("[]")
+  started_at      DateTime  @db.Timestamptz
+  completed_at    DateTime? @db.Timestamptz
+  created_at      DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  config ServiceNowConfig @relation(fields: [config_id], references: [id])
+
+  @@index([tenant_id, created_at])
+  @@index([config_id, created_at])
+  @@map("service_now_sync_logs")
 }

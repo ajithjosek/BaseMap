@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bell, User, Building2, Mail, Shield, Save } from 'lucide-react';
+import { Bell, User, Building2, Mail, Shield, Save, Plug } from 'lucide-react';
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
@@ -66,6 +66,9 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="tenant" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" /> Tenant
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="flex items-center gap-2">
+            <Plug className="h-4 w-4" /> Integrations
           </TabsTrigger>
         </TabsList>
 
@@ -247,6 +250,26 @@ export default function SettingsPage() {
               <Button>
                 <Save className="mr-2 h-4 w-4" /> Save Tenant Settings
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>ServiceNow Integration</CardTitle>
+              <CardDescription>Connect to ServiceNow to sync CMDB data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">ServiceNow CMDB Sync</p>
+                  <p className="text-sm text-slate-500">Sync applications from ServiceNow</p>
+                </div>
+                <Button variant="outline" onClick={() => window.location.href = '/settings/integrations'}>
+                  Configure
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
