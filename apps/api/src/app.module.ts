@@ -25,6 +25,7 @@ import { EOLRiskModule } from './eol-risk/eol-risk.module';
 import { QueryBuilderModule } from './query-builder/query-builder.module';
 import { TransformationProjectsModule } from './transformation-projects/transformation-projects.module';
 import { AIRecommendationsModule } from './ai-recommendations/ai-recommendations.module';
+import { AdvancedAnalyticsModule } from './advanced-analytics/advanced-analytics.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AIRecommendationsModule } from './ai-recommendations/ai-recommendations
     QueryBuilderModule,
     TransformationProjectsModule,
     AIRecommendationsModule,
+    AdvancedAnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
