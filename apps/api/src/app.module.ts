@@ -26,6 +26,7 @@ import { QueryBuilderModule } from './query-builder/query-builder.module';
 import { TransformationProjectsModule } from './transformation-projects/transformation-projects.module';
 import { AIRecommendationsModule } from './ai-recommendations/ai-recommendations.module';
 import { AdvancedAnalyticsModule } from './advanced-analytics/advanced-analytics.module';
+import { ExportsModule } from './exports/exports.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { AdvancedAnalyticsModule } from './advanced-analytics/advanced-analytics
     TransformationProjectsModule,
     AIRecommendationsModule,
     AdvancedAnalyticsModule,
+    ExportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

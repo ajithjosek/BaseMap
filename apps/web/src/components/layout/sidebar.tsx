@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
@@ -20,6 +20,7 @@ const menuItems = [
   { icon: Search, label: 'Query Builder', href: '/query-builder' },
   { icon: Sparkles, label: 'AI Insights', href: '/insights' },
   { icon: TrendingUp, label: 'Advanced Analytics', href: '/advanced-analytics' },
+  { icon: FileDown, label: 'Exports', href: '/exports' },
   { icon: Map, label: 'Transformation', href: '/transformation-roadmap' },
   { icon: BarChart, label: 'Reports', href: '/reports' },
   { icon: PenTool, label: 'Report Builder', href: '/reports/builder' },
