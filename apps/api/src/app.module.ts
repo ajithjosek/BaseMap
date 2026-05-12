@@ -30,6 +30,8 @@ import { AdvancedAnalyticsModule } from './advanced-analytics/advanced-analytics
 import { ExportsModule } from './exports/exports.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { ResourceAllocationModule } from './resource-allocation/resource-allocation.module';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     ExportsModule,
     AuditLogsModule,
     WebhooksModule,
+    ResourceAllocationModule,
+    ComplianceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

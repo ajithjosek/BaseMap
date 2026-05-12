@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock, Shield, UsersRound } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
@@ -21,6 +21,8 @@ const menuItems = [
   { icon: Sparkles, label: 'AI Insights', href: '/insights' },
   { icon: TrendingUp, label: 'Advanced Analytics', href: '/advanced-analytics' },
   { icon: FileDown, label: 'Exports', href: '/exports' },
+  { icon: UsersRound, label: 'Resource Allocation', href: '/resource-allocation' },
+  { icon: Shield, label: 'Compliance', href: '/compliance' },
   { icon: Clock, label: 'Audit Logs', href: '/audit-logs' },
   { icon: Map, label: 'Transformation', href: '/transformation-roadmap' },
   { icon: BarChart, label: 'Reports', href: '/reports' },

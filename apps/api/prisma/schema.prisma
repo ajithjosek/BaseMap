@@ -52,6 +52,9 @@ model Tenant {
   exportTemplates          ExportTemplate[]
   scheduledExports         ScheduledExport[]
   webhookConfigs           WebhookConfig[]
+  resourceAllocations     ResourceAllocation[]
+  complianceFrameworks   ComplianceFramework[]
+  securityAssessments    SecurityAssessment[]
 
   @@map("tenants")
 }
@@ -490,6 +493,7 @@ model User {
   dashboardWidgets     DashboardWidget[]
   exportTemplates      ExportTemplate[]
   scheduledExports     ScheduledExport[]
+  resourceAllocations ResourceAllocation[]
 
   @@unique([tenant_id, email])
   @@map("users")
@@ -958,4 +962,86 @@ model WebhookConfig {
   @@index([tenant_id, provider])
   @@index([tenant_id, is_active])
   @@map("webhook_configs")
+}
+
+model ResourceAllocation {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  user_id         String   @db.Uuid
+  project_id      String?  @db.Uuid
+  resource_type   String   @db.VarChar(50)
+  allocation_pct Int      @default(0)
+  start_date      DateTime @db.Date
+  end_date        DateTime @db.Date
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [user_id], references: [id])
+
+  @@index([tenant_id, is_active])
+  @@index([tenant_id, user_id])
+  @@index([tenant_id, project_id])
+  @@map("resource_allocations")
+}
+
+model ComplianceFramework {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  name           String   @db.VarChar(100)
+  framework_type String   @db.VarChar(50)
+  description    String?  @db.Text
+  compliance_pct Int      @default(0)
+  last_audit     DateTime? @db.Timestamptz
+  next_audit     DateTime? @db.Timestamptz
+  is_active      Boolean  @default(true)
+  created_at     DateTime @default(now()) @db.Timestamptz
+  updated_at     DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  controls ComplianceControl[]
+
+  @@index([tenant_id, framework_type])
+  @@map("compliance_frameworks")
+}
+
+model ComplianceControl {
+  id              String   @id @default(uuid()) @db.Uuid
+  framework_id    String   @db.Uuid
+  control_id      String   @db.VarChar(50)
+  name            String   @db.VarChar(255)
+  description     String?  @db.Text
+  status          String   @default("non_compliant") @db.VarChar(20)
+  evidence        String?  @db.Text
+  risk_level      String   @default("low") @db.VarChar(20)
+  owner           String?  @db.VarChar(100)
+  due_date        DateTime? @db.Date
+  last_reviewed   DateTime? @db.Timestamptz
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @updatedAt @db.Timestamptz
+
+  framework ComplianceFramework @relation(fields: [framework_id], references: [id], onDelete: Cascade)
+
+  @@index([framework_id, status])
+  @@map("compliance_controls")
+}
+
+model SecurityAssessment {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenant_id      String   @db.Uuid
+  entity_type    String   @db.VarChar(50)
+  entity_id      String   @db.Uuid
+  assessment_type String  @db.VarChar(50)
+  score           Int      @default(0)
+  max_score       Int      @default(100)
+  findings        Json     @default("[]")
+  vulnerabilities Json     @default("[]")
+  assessed_at     DateTime @default(now()) @db.Timestamptz
+  next_assessment DateTime? @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, entity_type, entity_id])
+  @@map("security_assessments")
 }
