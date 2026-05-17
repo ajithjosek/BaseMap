@@ -32,6 +32,8 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { ResourceAllocationModule } from './resource-allocation/resource-allocation.module';
 import { ComplianceModule } from './compliance/compliance.module';
+import { Neo4jModule } from './neo4j/neo4j.module';
+import { GraphModule } from './graph/graph.module';
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { ComplianceModule } from './compliance/compliance.module';
     WebhooksModule,
     ResourceAllocationModule,
     ComplianceModule,
+    Neo4jModule,
+    GraphModule,
   ],
   controllers: [AppController],
   providers: [AppService],
