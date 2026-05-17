@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { SaaSApplicationsService } from './saas-applications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('saas-applications')
 @UseGuards(JwtAuthGuard)
@@ -9,6 +10,9 @@ export class SaaSApplicationsController {
   constructor(private readonly saasService: SaaSApplicationsService) {}
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('saas-applications-list')
+  @CacheTTL(1800000)
   findAll(@CurrentUser() user: any, @Query('search') search?: string) {
     return this.saasService.findAll(user.tenantId, search);
   }

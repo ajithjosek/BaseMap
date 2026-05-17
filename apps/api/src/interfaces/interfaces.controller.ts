@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, UseInterceptors } from '@nestjs/common';
 import { InterfacesService } from './interfaces.service';
 import { CreateInterfaceDto, UpdateInterfaceDto, CreateIncidentDto } from './dto/interface.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('interfaces')
 @UseGuards(JwtAuthGuard)
@@ -14,6 +15,9 @@ export class InterfacesController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('interfaces-list')
+  @CacheTTL(1800000)
   findAll(
     @Req() req: any,
     @Query('search') search?: string,

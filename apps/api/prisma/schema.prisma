@@ -142,6 +142,7 @@ model Application {
   saas_application      SaaSApplication?
 
   @@unique([tenant_id, name])
+  @@index([tenant_id])
   @@index([tenant_id, lifecycle_state])
   @@index([tenant_id, eol_date])
   @@index([tenant_id, risk_score])
@@ -200,6 +201,8 @@ model CapabilityNode {
   gaps         CapabilityGap[]
 
   @@unique([tenant_id, parent_id, name])
+  @@index([tenant_id])
+  @@index([tenant_id, level])
   @@map("capability_nodes")
 }
 
@@ -281,6 +284,8 @@ model Interface {
   owner              User?               @relation(fields: [owner_id], references: [id])
   incidents          InterfaceIncident[]
 
+  @@index([tenant_id])
+  @@index([tenant_id, source_application_id, target_application_id])
   @@map("interfaces")
 }
 
@@ -333,6 +338,9 @@ model TechnologyComponent {
   dependencies_from ComponentDependency[] @relation("FromComponent")
   dependencies_to   ComponentDependency[] @relation("ToComponent")
 
+  @@index([tenant_id])
+  @@index([tenant_id, component_type])
+  @@index([tenant_id, status])
   @@map("technology_components")
 }
 
@@ -395,6 +403,8 @@ model SaaSApplication {
   application Application? @relation(fields: [application_id], references: [id])
   approver    User?        @relation(fields: [approved_by], references: [id])
 
+  @@index([tenant_id])
+  @@index([tenant_id, is_shadow_it])
   @@map("saas_applications")
 }
 
