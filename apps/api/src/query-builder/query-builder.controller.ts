@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { QueryBuilderService } from './query-builder.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('query-builder')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(CacheInterceptor)
 export class QueryBuilderController {
   constructor(private readonly queryBuilderService: QueryBuilderService) {}
 
   @Get('entities')
+  @CacheKey('qb-entities')
+  @CacheTTL(3600000) // 1 hour
   getEntities(@CurrentUser() user: any) {
     return this.queryBuilderService.getEntities();
   }

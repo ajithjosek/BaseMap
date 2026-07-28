@@ -1,0 +1,41 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Application {
+  id: ID!
+  tenant_id: String!
+  name: String!
+  description: String
+  lifecycle_state: String
+  risk_score: Float
+  technology_type: String
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Capability {
+  id: ID!
+  tenant_id: String!
+  name: String!
+  description: String
+  level: Int!
+  parent_id: String
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type Query {
+  applications(tenant_id: String!): [Application!]!
+  application(id: String!): Application
+  capabilities(tenant_id: String!): [Capability!]!
+}
+
+type Subscription {
+  applicationAdded: Application!
+}

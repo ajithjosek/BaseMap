@@ -1,6 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -34,6 +34,9 @@ import { ResourceAllocationModule } from './resource-allocation/resource-allocat
 import { ComplianceModule } from './compliance/compliance.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
 import { GraphModule } from './graph/graph.module';
+import { AppGraphQLModule } from './graphql/graphql.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -41,6 +44,16 @@ import { GraphModule } from './graph/graph.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: await redisStore({
+          url: configService.get<string>('REDIS_URL') || 'redis://localhost:6379',
+        }),
+      }),
     }),
     PrismaModule,
     AuthModule,
@@ -72,6 +85,7 @@ import { GraphModule } from './graph/graph.module';
     ComplianceModule,
     Neo4jModule,
     GraphModule,
+    AppGraphQLModule,
   ],
   controllers: [AppController],
   providers: [AppService],

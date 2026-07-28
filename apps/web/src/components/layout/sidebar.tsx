@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock, Shield, UsersRound, Share2 } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock, Shield, UsersRound, Share2, Presentation, Webhook } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 
 const menuItems = [
   { icon: Home, label: 'Dashboard', href: '/' },
+  { icon: Presentation, label: 'Dashboard Stories', href: '/dashboards/stories' },
   { icon: Layout, label: 'Applications', href: '/applications' },
   { icon: Database, label: 'Capabilities', href: '/capabilities' },
   { icon: Grid3X3, label: 'C2A Heatmap', href: '/heatmap' },
@@ -15,6 +16,7 @@ const menuItems = [
   { icon: Send, label: 'SaaS Requests', href: '/saas/requests' },
   { icon: Network, label: 'API Catalog', href: '/interfaces' },
   { icon: Server, label: 'Components', href: '/components' },
+  { icon: Webhook, label: 'GraphQL API', href: 'http://localhost:4000/graphql' },
   { icon: Activity, label: 'EOL Risk', href: '/eol-risk' },
   { icon: FileCheck, label: 'Data Quality', href: '/data-quality' },
   { icon: Search, label: 'Query Builder', href: '/query-builder' },

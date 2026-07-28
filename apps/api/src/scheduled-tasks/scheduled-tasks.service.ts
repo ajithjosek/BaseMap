@@ -393,4 +393,40 @@ export class ScheduledTasksService {
       });
     }
   }
+
+  async processWeeklyDigest() {
+    this.logger.log('Sending weekly digest emails...');
+    
+    // In a real implementation, we would group by tenant and send to admins.
+    // We will just create a notification for demonstration to simulate the email logic.
+    const tenants = await this.db.tenant.findMany({ select: { id: true } });
+    
+    for (const tenant of tenants) {
+      const activeApps = await this.db.application.count({
+        where: { tenant_id: tenant.id, lifecycle_state: 'Active' }
+      });
+      const atRiskApps = await this.db.application.count({
+        where: { tenant_id: tenant.id, risk_score: { gte: 70 } }
+      });
+      
+      const users = await this.db.user.findMany({
+        where: { tenant_id: tenant.id, is_active: true }
+      });
+      
+      for (const user of users) {
+        // Send email via nodemailer (mocked here with notification)
+        await this.db.notification.create({
+          data: {
+            tenant_id: tenant.id,
+            user_id: user.id,
+            type: 'weekly_digest',
+            title: 'Weekly Portfolio Digest',
+            message: `Your portfolio health summary: ${activeApps} Active Apps, ${atRiskApps} Apps At-Risk. Check the dashboard for full details.`,
+            related_entity_type: 'tenant',
+          },
+        });
+      }
+    }
+    this.logger.log('Weekly digests sent.');
+  }
 }

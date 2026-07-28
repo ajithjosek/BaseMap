@@ -48,4 +48,14 @@ export class CronService {
       this.logger.error('Error processing ServiceNow sync:', error);
     }
   }
+
+  @Cron(CronExpression.EVERY_WEEK)
+  async handleWeeklyDigest() {
+    this.logger.log('Running weekly digest email...');
+    try {
+      await this.scheduledTasks.processWeeklyDigest();
+    } catch (error) {
+      this.logger.error('Error sending weekly digest:', error);
+    }
+  }
 }
