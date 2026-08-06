@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { CustomTreemap, CustomSankey, CustomGantt, ChartAnnotationWrapper } from '@/components/charts/AdvancedCharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,23 +32,24 @@ const ganttData = [
 
 const slides = [
   {
-    title: 'Business Unit IT Spend Allocation',
-    description: 'Current breakdown of total IT spend by business unit.',
+    titleKey: 'slide_treemap_title',
+    descriptionKey: 'slide_treemap_desc',
     component: <CustomTreemap data={treemapData} />
   },
   {
-    title: 'Infrastructure to Application Lineage',
-    description: 'Sankey diagram showing application hosting distribution.',
+    titleKey: 'slide_sankey_title',
+    descriptionKey: 'slide_sankey_desc',
     component: <CustomSankey data={sankeyData} />
   },
   {
-    title: 'Strategic Transformation Timeline',
-    description: 'Gantt chart of major upcoming strategic initiatives.',
+    titleKey: 'slide_gantt_title',
+    descriptionKey: 'slide_gantt_desc',
     component: <CustomGantt data={ganttData} />
   }
 ];
 
 export default function DashboardStoriesPage() {
+  const t = useTranslations('stories');
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const nextSlide = () => setCurrentSlide(c => (c + 1) % slides.length);
@@ -61,22 +63,22 @@ export default function DashboardStoriesPage() {
         <div>
           <h2 className="text-3xl font-bold flex items-center gap-2">
             <Presentation className="h-8 w-8" />
-            Executive Presentation
+            {t('title')}
           </h2>
-          <p className="text-muted-foreground mt-1">Interactive dashboard stories</p>
+          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={prevSlide}><ChevronLeft className="h-4 w-4 mr-2" /> Previous</Button>
+          <Button variant="outline" onClick={prevSlide}><ChevronLeft className="h-4 w-4 mr-2" /> {t('previous')}</Button>
           <span className="flex items-center px-4 font-medium">{currentSlide + 1} / {slides.length}</span>
-          <Button variant="outline" onClick={nextSlide}>Next <ChevronRight className="h-4 w-4 ml-2" /></Button>
+          <Button variant="outline" onClick={nextSlide}>{t('next')} <ChevronRight className="h-4 w-4 ml-2" /></Button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center">
         <Card className="w-full max-w-5xl shadow-xl h-[600px] flex flex-col">
           <CardHeader>
-            <CardTitle className="text-2xl">{slide.title}</CardTitle>
-            <CardDescription>{slide.description}</CardDescription>
+            <CardTitle className="text-2xl">{t(slide.titleKey)}</CardTitle>
+            <CardDescription>{t(slide.descriptionKey)}</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 flex items-center justify-center p-6 relative">
             <div className="w-full h-full">

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 export interface TenantInfoData {
   name: string;
   slug: string;
@@ -13,6 +15,7 @@ export default function TenantInfoStep({
   value: TenantInfoData;
   onChange: (data: TenantInfoData) => void;
 }) {
+  const t = useTranslations('onboarding');
   const slugify = (name: string) =>
     name
       .toLowerCase()
@@ -24,12 +27,12 @@ export default function TenantInfoStep({
     <div className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="tenant-name" className="block text-sm font-medium">
-          Organization Name
+          {t('org_name')}
         </label>
         <input
           id="tenant-name"
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors"
-          placeholder="Acme Corp"
+          placeholder={t('org_name_placeholder')}
           value={value.name}
           onChange={(e) =>
             onChange({ ...value, name: e.target.value, slug: value.slug || slugify(e.target.value) })
@@ -39,23 +42,23 @@ export default function TenantInfoStep({
       </div>
       <div className="space-y-2">
         <label htmlFor="tenant-slug" className="block text-sm font-medium">
-          Slug
+          {t('slug')}
         </label>
         <div className="flex items-center rounded-md border border-input bg-background px-3 text-sm">
-          <span className="text-slate-400">basemap.io/</span>
+          <span className="text-slate-400">{t('slug_prefix')}</span>
           <input
             id="tenant-slug"
             className="flex-1 h-9 bg-transparent outline-none"
             value={value.slug}
             onChange={(e) => onChange({ ...value, slug: slugify(e.target.value) })}
-            placeholder="acme-corp"
+            placeholder={t('slug_placeholder')}
             required
           />
         </div>
-        <p className="text-xs text-slate-500">Unique identifier for your workspace URL.</p>
+        <p className="text-xs text-slate-500">{t('slug_hint')}</p>
       </div>
       <div className="space-y-2">
-        <label className="block text-sm font-medium">Plan</label>
+        <label className="block text-sm font-medium">{t('plan')}</label>
         <div className="grid grid-cols-3 gap-3">
           {(['starter', 'professional', 'enterprise'] as const).map((plan) => (
             <button
@@ -70,9 +73,7 @@ export default function TenantInfoStep({
             >
               <p className="font-medium capitalize">{plan}</p>
               <p className="text-xs text-slate-500">
-                {plan === 'starter' && 'Up to 100 requests/min'}
-                {plan === 'professional' && 'Up to 500 requests/min'}
-                {plan === 'enterprise' && 'Up to 2000 requests/min'}
+                {t(`plan_${plan}_desc`)}
               </p>
             </button>
           ))}

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 export interface AdminSetupData {
   firstName: string;
   lastName: string;
@@ -14,12 +16,13 @@ export default function AdminSetupStep({
   value: AdminSetupData;
   onChange: (data: AdminSetupData) => void;
 }) {
+  const t = useTranslations('onboarding');
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label htmlFor="first-name" className="block text-sm font-medium">
-            First Name
+            {t('first_name')}
           </label>
           <input
             id="first-name"
@@ -31,7 +34,7 @@ export default function AdminSetupStep({
         </div>
         <div className="space-y-2">
           <label htmlFor="last-name" className="block text-sm font-medium">
-            Last Name
+            {t('last_name')}
           </label>
           <input
             id="last-name"
@@ -44,7 +47,7 @@ export default function AdminSetupStep({
       </div>
       <div className="space-y-2">
         <label htmlFor="admin-email" className="block text-sm font-medium">
-          Email
+          {t('email')}
         </label>
         <input
           id="admin-email"
@@ -59,7 +62,7 @@ export default function AdminSetupStep({
       </div>
       <div className="space-y-2">
         <label htmlFor="admin-password" className="block text-sm font-medium">
-          Password
+          {t('password')}
         </label>
         <input
           id="admin-password"
@@ -69,12 +72,12 @@ export default function AdminSetupStep({
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
           value={value.password}
           onChange={(e) => onChange({ ...value, password: e.target.value })}
-          placeholder="At least 8 characters"
+          placeholder={t('password_placeholder')}
           required
         />
       </div>
       <p className="text-xs text-slate-500">
-        This account will be the workspace administrator with full access to tenant settings.
+        {t('admin_hint')}
       </p>
     </div>
   );

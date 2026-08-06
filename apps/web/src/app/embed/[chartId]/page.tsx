@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { CustomTreemap, CustomGantt } from '@/components/charts/AdvancedCharts';
 
 const mockGanttData = [
@@ -11,6 +12,7 @@ const mockGanttData = [
 
 export default function EmbedChartPage() {
   const params = useParams();
+  const t = useTranslations('embed');
   const chartId = params.chartId as string;
 
   // In a real scenario, fetch chart configuration by ID.
@@ -20,9 +22,9 @@ export default function EmbedChartPage() {
     <div className="w-full h-screen p-4 bg-white dark:bg-slate-950 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-lg text-slate-800 dark:text-slate-200">
-          Embedded Chart: {chartId}
+          {t('chart_title', { id: chartId })}
         </h3>
-        <span className="text-xs text-slate-400">Powered by BaseMap</span>
+        <span className="text-xs text-slate-400">{t('powered_by')}</span>
       </div>
       
       <div className="flex-1 w-full border rounded shadow-inner p-4 bg-slate-50 dark:bg-slate-900 overflow-hidden">
@@ -32,7 +34,7 @@ export default function EmbedChartPage() {
           <CustomGantt data={mockGanttData} />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
-            Invalid or missing chart configuration.
+            {t('invalid_chart')}
           </div>
         )}
       </div>

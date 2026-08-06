@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,9 @@ import BrandingStep, { BrandingData } from './steps/branding';
 const STEPS = ['Organization', 'Admin Account', 'SSO', 'Branding'];
 
 export default function OnboardingPage() {
+  const t = useTranslations('onboarding');
   const router = useRouter();
+  const stepNames = [t('step_organization'), t('step_admin'), t('step_sso'), t('step_branding')];
   const [step, setStep] = useState(0);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -103,7 +106,7 @@ export default function OnboardingPage() {
 
       router.push(`/login?tenant=${tenantInfo.slug}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Onboarding failed. Please try again.');
+      setError(err.response?.data?.message || err.message || t('submit_error'));
     } finally {
       setLoading(false);
     }
@@ -113,16 +116,16 @@ export default function OnboardingPage() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Set up your workspace</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
           <CardDescription>
-            Configure your organization in a few steps to get started
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-slate-500">
-                Step {step + 1} of {STEPS.length}: {STEPS[step]}
+                {t('step_label', { current: step + 1, total: STEPS.length, name: stepNames[step] })}
               </p>
               <p className="text-sm text-slate-400">{Math.round(((step + 1) / STEPS.length) * 100)}%</p>
             </div>
@@ -130,7 +133,7 @@ export default function OnboardingPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {STEPS.map((label, i) => (
+            {stepNames.map((label, i) => (
               <div key={label} className="flex items-center gap-2">
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${
@@ -170,10 +173,10 @@ export default function OnboardingPage() {
               onClick={() => setStep((s) => Math.max(0, s - 1))}
               disabled={step === 0 || loading}
             >
-              <ChevronLeft className="mr-1 h-4 w-4" /> Back
+              <ChevronLeft className="mr-1 h-4 w-4" /> {t('back')}
             </Button>
             <Button onClick={handleNext} disabled={!canProceed() || loading}>
-              {step === STEPS.length - 1 ? 'Create Workspace' : 'Continue'}
+              {step === STEPS.length - 1 ? t('create_workspace') : t('continue')}
               {step < STEPS.length - 1 && <ChevronRight className="ml-1 h-4 w-4" />}
             </Button>
           </div>

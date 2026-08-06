@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import DependencyGraph from '@/components/graph/DependencyGraph';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 export default function GraphPage() {
+  const t = useTranslations('graph');
   const [viewType, setViewType] = useState<'export' | 'circular'>('export');
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -20,14 +22,14 @@ export default function GraphPage() {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         }
       });
-      toast.success('Graph synchronized successfully');
+      toast.success(t('sync_success'));
       // Force a reload of the graph by toggling state
       const current = viewType;
       setViewType('circular');
       setTimeout(() => setViewType(current), 10);
     } catch (error) {
       console.error(error);
-      toast.error('Failed to sync graph');
+      toast.error(t('sync_error'));
     } finally {
       setIsSyncing(false);
     }
@@ -50,7 +52,7 @@ export default function GraphPage() {
       downloadAnchorNode.remove();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to export graph data');
+      toast.error(t('export_error'));
     }
   };
 
@@ -58,28 +60,28 @@ export default function GraphPage() {
     <div className="flex-col md:flex">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Graph Visualization</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('title')}</h2>
           <div className="flex items-center space-x-2">
             <Button onClick={() => setViewType('export')} variant={viewType === 'export' ? 'default' : 'outline'}>
-              Full Graph
+              {t('full_graph')}
             </Button>
             <Button onClick={() => setViewType('circular')} variant={viewType === 'circular' ? 'default' : 'outline'}>
-              Circular Dependencies
+              {t('circular_dependencies')}
             </Button>
             <Button onClick={handleSync} disabled={isSyncing} variant="secondary">
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-              Sync Neo4j
+              {t('sync_neo4j')}
             </Button>
             <Button onClick={handleExportJson} variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Export JSON
+              {t('export_json')}
             </Button>
           </div>
         </div>
 
         <Card className="col-span-4 h-[700px]">
           <CardHeader>
-            <CardTitle>{viewType === 'export' ? 'Enterprise Architecture Graph' : 'Circular Dependencies'}</CardTitle>
+            <CardTitle>{viewType === 'export' ? t('card_export') : t('card_circular')}</CardTitle>
           </CardHeader>
           <CardContent className="h-[600px] w-full">
             <DependencyGraph graphType={viewType} />
