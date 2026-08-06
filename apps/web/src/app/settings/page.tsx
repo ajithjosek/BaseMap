@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Bell, User, Building2, Mail, Shield, Save, Plug, CreditCard, Flag, Trash2, Download } from 'lucide-react';
 
 export default function SettingsPage() {
+  const t = useTranslations('settings');
+  const tc = useTranslations('common');
   const queryClient = useQueryClient();
   const [notifPreferences, setNotifPreferences] = useState({
     email_notifications: true,
@@ -84,76 +87,76 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
 
       <Tabs defaultValue="profile">
         <TabsList>
           <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" /> Profile
+            <User className="h-4 w-4" /> {t('tab_profile')}
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" /> Notifications
+            <Bell className="h-4 w-4" /> {t('tab_notifications')}
           </TabsTrigger>
           <TabsTrigger value="tenant" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" /> Tenant
+            <Building2 className="h-4 w-4" /> {t('tab_tenant')}
           </TabsTrigger>
           <TabsTrigger value="integrations" className="flex items-center gap-2">
-            <Plug className="h-4 w-4" /> Integrations
+            <Plug className="h-4 w-4" /> {t('tab_integrations')}
           </TabsTrigger>
           <TabsTrigger value="billing" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" /> Billing
+            <CreditCard className="h-4 w-4" /> {t('tab_billing')}
           </TabsTrigger>
           <TabsTrigger value="feature-flags" className="flex items-center gap-2">
-            <Flag className="h-4 w-4" /> Features
+            <Flag className="h-4 w-4" /> {t('tab_features')}
           </TabsTrigger>
           <TabsTrigger value="sso" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" /> SSO
+            <Shield className="h-4 w-4" /> {t('tab_sso')}
           </TabsTrigger>
           <TabsTrigger value="data" className="flex items-center gap-2">
-            <Trash2 className="h-4 w-4" /> Data
+            <Trash2 className="h-4 w-4" /> {t('tab_data')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Profile Settings</CardTitle>
-              <CardDescription>Manage your personal information</CardDescription>
+              <CardTitle>{t('profile_title')}</CardTitle>
+              <CardDescription>{t('profile_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>First Name</Label>
-                    <Input placeholder="John" />
+                    <Label>{t('first_name')}</Label>
+                    <Input placeholder={t('first_name_ph')} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Last Name</Label>
-                    <Input placeholder="Doe" />
+                    <Label>{t('last_name')}</Label>
+                    <Input placeholder={t('last_name_ph')} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input type="email" placeholder="john@example.com" />
+                    <Label>{t('email')}</Label>
+                    <Input type="email" placeholder={t('email_ph')} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Job Title</Label>
-                    <Input placeholder="Enterprise Architect" />
+                    <Label>{t('job_title')}</Label>
+                    <Input placeholder={t('job_title_ph')} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Department</Label>
-                    <Input placeholder="IT" />
+                    <Label>{t('department')}</Label>
+                    <Input placeholder={t('department_ph')} />
                   </div>
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label>Change Password</Label>
+                  <Label>{t('change_password')}</Label>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input type="password" placeholder="Current password" />
-                    <Input type="password" placeholder="New password" />
+                    <Input type="password" placeholder={t('current_password')} />
+                    <Input type="password" placeholder={t('new_password')} />
                   </div>
                 </div>
                 <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" /> Save Changes
+                  <Save className="mr-2 h-4 w-4" /> {t('save_changes')}
                 </Button>
               </form>
             </CardContent>
@@ -163,18 +166,18 @@ export default function SettingsPage() {
         <TabsContent value="notifications" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Configure how and when you receive notifications</CardDescription>
+              <CardTitle>{t('notif_title')}</CardTitle>
+              <CardDescription>{t('notif_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="font-medium">Notification Channels</h3>
+                <h3 className="font-medium">{t('notif_channels')}</h3>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-slate-500" />
                     <div>
-                      <p className="font-medium">Email Notifications</p>
-                      <p className="text-sm text-slate-500">Receive notifications via email</p>
+                      <p className="font-medium">{t('email_notifications')}</p>
+                      <p className="text-sm text-slate-500">{t('email_notifications_desc')}</p>
                     </div>
                   </div>
                   <Switch
@@ -186,8 +189,8 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-3">
                     <Bell className="h-5 w-5 text-slate-500" />
                     <div>
-                      <p className="font-medium">In-App Notifications</p>
-                      <p className="text-sm text-slate-500">Show notifications in the notification center</p>
+                      <p className="font-medium">{t('in_app_notifications')}</p>
+                      <p className="text-sm text-slate-500">{t('in_app_notifications_desc')}</p>
                     </div>
                   </div>
                   <Switch
@@ -200,11 +203,11 @@ export default function SettingsPage() {
               <Separator />
 
               <div className="space-y-4">
-                <h3 className="font-medium">Notification Types</h3>
+                <h3 className="font-medium">{t('notif_types')}</h3>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Lifecycle Changes</p>
-                    <p className="text-sm text-slate-500">Get notified when application lifecycle states change</p>
+                    <p className="font-medium">{t('lifecycle_changes')}</p>
+                    <p className="text-sm text-slate-500">{t('lifecycle_changes_desc')}</p>
                   </div>
                   <Switch
                     checked={notifPreferences.lifecycle_changes}
@@ -213,8 +216,8 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">EOL Alerts</p>
-                    <p className="text-sm text-slate-500">Get alerts before applications reach end of life</p>
+                    <p className="font-medium">{t('eol_alerts')}</p>
+                    <p className="text-sm text-slate-500">{t('eol_alerts_desc')}</p>
                   </div>
                   <Switch
                     checked={notifPreferences.eol_alerts}
@@ -223,8 +226,8 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Import/Export Alerts</p>
-                    <p className="text-sm text-slate-500">Get notified when import/export jobs complete</p>
+                    <p className="font-medium">{t('import_export_alerts')}</p>
+                    <p className="text-sm text-slate-500">{t('import_export_alerts_desc')}</p>
                   </div>
                   <Switch
                     checked={notifPreferences.import_export_alerts}
@@ -236,17 +239,17 @@ export default function SettingsPage() {
               <Separator />
 
               <div className="space-y-2">
-                <Label>EOL Alert Days Before</Label>
-                <p className="text-sm text-slate-500 mb-2">Comma-separated list of days before EOL to send alerts</p>
+                <Label>{t('eol_alert_days')}</Label>
+                <p className="text-sm text-slate-500 mb-2">{t('eol_alert_days_desc')}</p>
                 <Input
                   value={notifPreferences.eol_alert_days}
                   onChange={(e) => setNotifPreferences({ ...notifPreferences, eol_alert_days: e.target.value })}
-                  placeholder="90,60,30"
+                  placeholder={t('eol_alert_days_ph')}
                 />
               </div>
 
               <Button onClick={handleSavePreferences} disabled={updatePrefsMutation.isPending}>
-                <Save className="mr-2 h-4 w-4" /> Save Preferences
+                <Save className="mr-2 h-4 w-4" /> {t('save_preferences')}
               </Button>
             </CardContent>
           </Card>
@@ -255,42 +258,42 @@ export default function SettingsPage() {
         <TabsContent value="tenant" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Tenant Settings</CardTitle>
-              <CardDescription>Manage your organization settings</CardDescription>
+              <CardTitle>{t('tenant_title')}</CardTitle>
+              <CardDescription>{t('tenant_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Organization Name</Label>
-                  <Input placeholder="Acme Corp" />
+                  <Label>{t('organization_name')}</Label>
+                  <Input placeholder={t('organization_name_ph')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Plan</Label>
+                  <Label>{t('plan')}</Label>
                   <Select defaultValue="enterprise">
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="starter">Starter</SelectItem>
-                      <SelectItem value="professional">Professional</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      <SelectItem value="starter">{t('plan_starter')}</SelectItem>
+                      <SelectItem value="professional">{t('plan_professional')}</SelectItem>
+                      <SelectItem value="enterprise">{t('plan_enterprise')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label>Default Data Classification</Label>
+                <Label>{t('default_data_classification')}</Label>
                 <Select defaultValue="internal">
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="internal">Internal</SelectItem>
-                    <SelectItem value="confidential">Confidential</SelectItem>
-                    <SelectItem value="restricted">Restricted</SelectItem>
+                    <SelectItem value="public">{t('classification_public')}</SelectItem>
+                    <SelectItem value="internal">{t('classification_internal')}</SelectItem>
+                    <SelectItem value="confidential">{t('classification_confidential')}</SelectItem>
+                    <SelectItem value="restricted">{t('classification_restricted')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button>
-                <Save className="mr-2 h-4 w-4" /> Save Tenant Settings
+                <Save className="mr-2 h-4 w-4" /> {t('save_tenant_settings')}
               </Button>
             </CardContent>
           </Card>
@@ -299,17 +302,17 @@ export default function SettingsPage() {
         <TabsContent value="integrations" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>ServiceNow Integration</CardTitle>
-              <CardDescription>Connect to ServiceNow to sync CMDB data</CardDescription>
+              <CardTitle>{t('servicenow_title')}</CardTitle>
+              <CardDescription>{t('servicenow_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <p className="font-medium">ServiceNow CMDB Sync</p>
-                  <p className="text-sm text-slate-500">Sync applications from ServiceNow</p>
+                  <p className="font-medium">{t('servicenow_cmdb_sync')}</p>
+                  <p className="text-sm text-slate-500">{t('servicenow_cmdb_sync_desc')}</p>
                 </div>
                 <Button variant="outline" onClick={() => window.location.href = '/settings/integrations'}>
-                  Configure
+                  {t('configure')}
                 </Button>
               </div>
             </CardContent>
@@ -319,18 +322,18 @@ export default function SettingsPage() {
         <TabsContent value="billing" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Plan and Billing</CardTitle>
-              <CardDescription>Manage your workspace plan and usage limits</CardDescription>
+              <CardTitle>{t('plan_billing_title')}</CardTitle>
+              <CardDescription>{t('plan_billing_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
-                  <p className="font-medium">Current Plan</p>
-                  <p className="text-sm text-slate-500">Manage how your team uses BaseMap</p>
+                  <p className="font-medium">{t('current_plan')}</p>
+                  <p className="text-sm text-slate-500">{t('current_plan_desc')}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold capitalize">{tenant?.plan || 'starter'}</p>
-                  <p className="text-xs text-slate-500">Up to {tenant?.settings?.quotas?.requests_per_minute || 100} requests/min</p>
+                  <p className="text-xs text-slate-500">{t('requests_per_min', { count: tenant?.settings?.quotas?.requests_per_minute || 100 })}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -347,9 +350,9 @@ export default function SettingsPage() {
                   >
                     <p className="font-medium capitalize">{plan}</p>
                     <p className="text-xs text-slate-500">
-                      {plan === 'starter' && '100 requests/min'}
-                      {plan === 'professional' && '500 requests/min'}
-                      {plan === 'enterprise' && '2000 requests/min'}
+                      {plan === 'starter' && t('requests_per_min', { count: 100 })}
+                      {plan === 'professional' && t('requests_per_min', { count: 500 })}
+                      {plan === 'enterprise' && t('requests_per_min', { count: 2000 })}
                     </p>
                   </button>
                 ))}
@@ -361,8 +364,8 @@ export default function SettingsPage() {
         <TabsContent value="feature-flags" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Feature Flags</CardTitle>
-              <CardDescription>Enable or disable features for your workspace</CardDescription>
+              <CardTitle>{t('feature_flags_title')}</CardTitle>
+              <CardDescription>{t('feature_flags_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {featureFlags &&
@@ -370,7 +373,7 @@ export default function SettingsPage() {
                   <div key={key} className="flex items-center justify-between">
                     <div>
                       <p className="font-medium capitalize">{key.replace(/_/g, ' ')}</p>
-                      <p className="text-sm text-slate-500">Enable the {key.replace(/_/g, ' ')} feature</p>
+                      <p className="text-sm text-slate-500">{t('enable_feature', { name: key.replace(/_/g, ' ') })}</p>
                     </div>
                     <Switch
                       checked={Boolean(value)}
@@ -386,34 +389,33 @@ export default function SettingsPage() {
         <TabsContent value="sso" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>SSO Settings</CardTitle>
-              <CardDescription>Configure single sign-on for your organization</CardDescription>
+              <CardTitle>{t('sso_title')}</CardTitle>
+              <CardDescription>{t('sso_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-slate-500">
-                SSO configuration is managed during onboarding. Re-configure IdP details here for your
-                organization&apos;s identity provider (Okta, Azure AD, etc.).
+                {t('sso_help')}
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Provider</Label>
+                  <Label>{t('provider')}</Label>
                   <Input defaultValue="oidc" readOnly disabled />
                 </div>
                 <div className="space-y-2">
-                  <Label>Issuer URL</Label>
-                  <Input placeholder="https://your-tenant.okta.com/oauth2/default" />
+                  <Label>{t('issuer_url')}</Label>
+                  <Input placeholder={t('issuer_url_ph')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Client ID</Label>
+                  <Label>{t('client_id')}</Label>
                   <Input />
                 </div>
                 <div className="space-y-2">
-                  <Label>Client Secret</Label>
+                  <Label>{t('client_secret')}</Label>
                   <Input type="password" />
                 </div>
               </div>
               <Button>
-                <Save className="mr-2 h-4 w-4" /> Save SSO Config
+                <Save className="mr-2 h-4 w-4" /> {t('save_sso_config')}
               </Button>
             </CardContent>
           </Card>
@@ -422,14 +424,14 @@ export default function SettingsPage() {
         <TabsContent value="data" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Data Management</CardTitle>
-              <CardDescription>Export or delete your organization data</CardDescription>
+              <CardTitle>{t('data_title')}</CardTitle>
+              <CardDescription>{t('data_desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
-                  <p className="font-medium">Export Tenant Data</p>
-                  <p className="text-sm text-slate-500">Download all your data in a GDPR-compliant format</p>
+                  <p className="font-medium">{t('export_tenant_data')}</p>
+                  <p className="text-sm text-slate-500">{t('export_tenant_data_desc')}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -445,18 +447,18 @@ export default function SettingsPage() {
                     URL.revokeObjectURL(url);
                   }}
                 >
-                  <Download className="mr-2 h-4 w-4" /> Export Data
+                  <Download className="mr-2 h-4 w-4" /> {t('export_data')}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-lg border border-red-200 p-4">
                 <div>
-                  <p className="font-medium text-red-600">Danger Zone</p>
-                  <p className="text-sm text-slate-500">Schedule deletion of this workspace and all data (30-day grace)</p>
+                  <p className="font-medium text-red-600">{t('danger_zone')}</p>
+                  <p className="text-sm text-slate-500">{t('danger_zone_desc')}</p>
                 </div>
                 <Button
                   variant="destructive"
                   onClick={async () => {
-                    if (confirm('Are you sure you want to schedule deletion of this workspace? This cannot be undone.')) {
+                    if (confirm(t('delete_confirm'))) {
                       const tenantId = localStorage.getItem('tenant_id');
                       await api.delete(`/tenants/${tenantId}`);
                       localStorage.clear();
@@ -464,7 +466,7 @@ export default function SettingsPage() {
                     }
                   }}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
+                  <Trash2 className="mr-2 h-4 w-4" /> {t('delete_workspace')}
                 </Button>
               </div>
             </CardContent>

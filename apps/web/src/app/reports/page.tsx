@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,6 +26,8 @@ import {
 const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
 
 export default function ReportsPage() {
+  const t = useTranslations('reports');
+  const tc = useTranslations('common');
   const [reportType, setReportType] = useState('overview');
   const [selectedTemplate, setSelectedTemplate] = useState('landscape');
   const queryClient = useQueryClient();
@@ -134,25 +137,25 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <Select value={reportType} onValueChange={setReportType}>
             <SelectTrigger className="w-48">
               <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Report type" />
+              <SelectValue placeholder={t('report_type_placeholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="overview">Overview</SelectItem>
-              <SelectItem value="financial">Financial</SelectItem>
-              <SelectItem value="risk">Risk</SelectItem>
-              <SelectItem value="templates">Standard Reports</SelectItem>
+              <SelectItem value="overview">{t('overview')}</SelectItem>
+              <SelectItem value="financial">{t('financial')}</SelectItem>
+              <SelectItem value="risk">{t('risk')}</SelectItem>
+              <SelectItem value="templates">{t('standard_reports')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => handleExport('applications')}>
-            <FileSpreadsheet className="mr-2 h-4 w-4" /> Export Apps
+            <FileSpreadsheet className="mr-2 h-4 w-4" /> {t('export_apps')}
           </Button>
           <Button variant="outline" onClick={() => handleExport('costs')}>
-            <FileText className="mr-2 h-4 w-4" /> Export Costs
+            <FileText className="mr-2 h-4 w-4" /> {t('export_costs')}
           </Button>
         </div>
       </div>
@@ -162,7 +165,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('total_applications')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{executive?.total_apps || 0}</div>
@@ -170,7 +173,7 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('active')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">{executive?.active_percentage || 0}%</div>
@@ -178,7 +181,7 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">At Risk</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('at_risk')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-red-600">{executive?.at_risk_count || 0}</div>
@@ -186,7 +189,7 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Cost of Ownership</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('total_cost_ownership')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">${(executive?.tco || 0).toLocaleString()}</div>
@@ -197,12 +200,12 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Lifecycle Distribution</CardTitle>
-                <CardDescription>Applications by lifecycle state</CardDescription>
+                <CardTitle>{t('lifecycle_distribution')}</CardTitle>
+                <CardDescription>{t('lifecycle_distribution_desc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingRisk ? (
-                  <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                  <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -229,12 +232,12 @@ export default function ReportsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Risk Distribution</CardTitle>
-                <CardDescription>Applications by risk level</CardDescription>
+                <CardTitle>{t('risk_distribution')}</CardTitle>
+                <CardDescription>{t('risk_distribution_desc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingRisk ? (
-                  <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                  <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -266,12 +269,12 @@ export default function ReportsPage() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Top 10 Most Expensive Applications</CardTitle>
-              <CardDescription>By total cost of ownership</CardDescription>
+              <CardTitle>{t('top_10_expensive')}</CardTitle>
+              <CardDescription>{t('top_10_expensive_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingFin ? (
-                <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
               ) : (
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={topApps} layout="vertical">
@@ -279,7 +282,7 @@ export default function ReportsPage() {
                     <XAxis type="number" />
                     <YAxis type="category" dataKey="name" width={120} />
                     <Tooltip formatter={(value) => `${Number(value).toLocaleString()}`} />
-                    <Bar dataKey="total_cost" fill="#3b82f6" name="Total Cost" />
+                    <Bar dataKey="total_cost" fill="#3b82f6" name={t('total_cost')} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -289,11 +292,11 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Cost by Business Unit</CardTitle>
+                <CardTitle>{t('cost_by_business_unit')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingFin ? (
-                  <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                  <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={costByBu}>
@@ -301,7 +304,7 @@ export default function ReportsPage() {
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip formatter={(value) => `${Number(value).toLocaleString()}`} />
-                      <Bar dataKey="value" fill="#8b5cf6" name="Cost" />
+                      <Bar dataKey="value" fill="#8b5cf6" name={t('cost')} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -310,11 +313,11 @@ export default function ReportsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Cost by Type</CardTitle>
+                <CardTitle>{t('cost_by_type')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingFin ? (
-                  <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                  <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -346,12 +349,12 @@ export default function ReportsPage() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Risk Overview</CardTitle>
-              <CardDescription>Application risk assessment summary</CardDescription>
+              <CardTitle>{t('risk_overview')}</CardTitle>
+              <CardDescription>{t('risk_overview_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingRisk ? (
-                <div className="h-64 flex items-center justify-center text-slate-500">Loading...</div>
+                <div className="h-64 flex items-center justify-center text-slate-500">{tc('loading')}</div>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={riskData}>
@@ -359,7 +362,7 @@ export default function ReportsPage() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="value" name="Applications">
+                    <Bar dataKey="value" name={t('applications')}>
                       {riskData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
@@ -373,7 +376,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Low Risk</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('low_risk')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
@@ -383,7 +386,7 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Medium Risk</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('medium_risk')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-yellow-600">
@@ -393,7 +396,7 @@ export default function ReportsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">High Risk</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('high_risk')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-red-600">
@@ -414,10 +417,10 @@ export default function ReportsPage() {
             >
               <CardHeader className="pb-2">
                 <FileBarChart className="h-8 w-8 mb-2" />
-                <CardTitle className="text-sm">Application Landscape</CardTitle>
+                <CardTitle className="text-sm">{t('template_application_landscape')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-500">Overview of all applications</p>
+                <p className="text-xs text-slate-500">{t('template_application_landscape_desc')}</p>
               </CardContent>
             </Card>
             <Card 
@@ -426,10 +429,10 @@ export default function ReportsPage() {
             >
               <CardHeader className="pb-2">
                 <PieChartIcon className="h-8 w-8 mb-2" />
-                <CardTitle className="text-sm">Capability Coverage</CardTitle>
+                <CardTitle className="text-sm">{t('template_capability_coverage')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-500">App-to-capability mapping</p>
+                <p className="text-xs text-slate-500">{t('template_capability_coverage_desc')}</p>
               </CardContent>
             </Card>
             <Card 
@@ -438,10 +441,10 @@ export default function ReportsPage() {
             >
               <CardHeader className="pb-2">
                 <DollarSign className="h-8 w-8 mb-2" />
-                <CardTitle className="text-sm">IT Cost (TCO)</CardTitle>
+                <CardTitle className="text-sm">{t('template_it_cost')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-500">Total cost breakdown</p>
+                <p className="text-xs text-slate-500">{t('template_it_cost_desc')}</p>
               </CardContent>
             </Card>
             <Card 
@@ -450,10 +453,10 @@ export default function ReportsPage() {
             >
               <CardHeader className="pb-2">
                 <AlertTriangle className="h-8 w-8 mb-2" />
-                <CardTitle className="text-sm">EOL Risk</CardTitle>
+                <CardTitle className="text-sm">{t('template_eol')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-500">End-of-life risk assessment</p>
+                <p className="text-xs text-slate-500">{t('template_eol_desc')}</p>
               </CardContent>
             </Card>
           </div>
@@ -463,11 +466,11 @@ export default function ReportsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Application Landscape Report</CardTitle>
-                    <CardDescription>Generated: {new Date(landscapeReport.generated_at).toLocaleString()}</CardDescription>
+                    <CardTitle>{t('landscape_report_title')}</CardTitle>
+                    <CardDescription>{t('generated', { date: new Date(landscapeReport.generated_at).toLocaleString() })}</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handlePdfExport('landscape')}>
-                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                    <FileSignature className="mr-2 h-4 w-4" /> {t('export_pdf')}
                   </Button>
                 </div>
               </CardHeader>
@@ -475,23 +478,23 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-4 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold">{landscapeReport.summary?.total || 0}</div>
-                    <div className="text-sm text-slate-500">Total Apps</div>
+                    <div className="text-sm text-slate-500">{t('total_apps')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       {landscapeReport.summary?.byLifecycle?.Active || 0}
                     </div>
-                    <div className="text-sm text-slate-500">Active</div>
+                    <div className="text-sm text-slate-500">{t('active')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{landscapeReport.summary?.byRiskLevel?.critical || 0}</div>
-                    <div className="text-sm text-slate-500">Critical Risk</div>
+                    <div className="text-sm text-slate-500">{t('critical_risk')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">
                       ${((landscapeReport.summary as any)?.total_cost || 0).toLocaleString()}
                     </div>
-                    <div className="text-sm text-slate-500">Total Cost</div>
+                    <div className="text-sm text-slate-500">{t('total_cost')}</div>
                   </div>
                 </div>
                 <div className="h-64">
@@ -514,11 +517,11 @@ export default function ReportsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Capability Coverage Report</CardTitle>
-                    <CardDescription>Generated: {new Date(coverageReport.generated_at).toLocaleString()}</CardDescription>
+                    <CardTitle>{t('coverage_report_title')}</CardTitle>
+                    <CardDescription>{t('generated', { date: new Date(coverageReport.generated_at).toLocaleString() })}</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handlePdfExport('capability-coverage')}>
-                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                    <FileSignature className="mr-2 h-4 w-4" /> {t('export_pdf')}
                   </Button>
                 </div>
               </CardHeader>
@@ -526,19 +529,19 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-4 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold">{coverageReport.summary?.total_capabilities || 0}</div>
-                    <div className="text-sm text-slate-500">Total Capabilities</div>
+                    <div className="text-sm text-slate-500">{t('total_capabilities')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{coverageReport.summary?.covered || 0}</div>
-                    <div className="text-sm text-slate-500">Covered</div>
+                    <div className="text-sm text-slate-500">{t('covered')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">{coverageReport.summary?.partial || 0}</div>
-                    <div className="text-sm text-slate-500">Partial</div>
+                    <div className="text-sm text-slate-500">{t('partial')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{coverageReport.summary?.gaps || 0}</div>
-                    <div className="text-sm text-slate-500">Gaps</div>
+                    <div className="text-sm text-slate-500">{t('gaps')}</div>
                   </div>
                 </div>
               </CardContent>
@@ -550,11 +553,11 @@ export default function ReportsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>IT Cost Report (TCO)</CardTitle>
-                    <CardDescription>Generated: {new Date(costReport.generated_at).toLocaleString()}</CardDescription>
+                    <CardTitle>{t('it_cost_report_title')}</CardTitle>
+                    <CardDescription>{t('generated', { date: new Date(costReport.generated_at).toLocaleString() })}</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handlePdfExport('it-cost')}>
-                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                    <FileSignature className="mr-2 h-4 w-4" /> {t('export_pdf')}
                   </Button>
                 </div>
               </CardHeader>
@@ -562,15 +565,15 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold">${(costReport.summary?.total_cost || 0).toLocaleString()}</div>
-                    <div className="text-sm text-slate-500">Total Cost</div>
+                    <div className="text-sm text-slate-500">{t('total_cost')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">{costReport.summary?.application_count || 0}</div>
-                    <div className="text-sm text-slate-500">Applications</div>
+                    <div className="text-sm text-slate-500">{t('applications_plural')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">${Math.round(costReport.summary?.average_cost_per_app || 0).toLocaleString()}</div>
-                    <div className="text-sm text-slate-500">Avg Cost/App</div>
+                    <div className="text-sm text-slate-500">{t('avg_cost_per_app')}</div>
                   </div>
                 </div>
                 <div className="h-64">
@@ -593,11 +596,11 @@ export default function ReportsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>EOL Risk Report</CardTitle>
-                    <CardDescription>Generated: {new Date(eolReport.generated_at).toLocaleString()}</CardDescription>
+                    <CardTitle>{t('eol_report_title')}</CardTitle>
+                    <CardDescription>{t('generated', { date: new Date(eolReport.generated_at).toLocaleString() })}</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handlePdfExport('eol-risk')}>
-                    <FileSignature className="mr-2 h-4 w-4" /> Export PDF
+                    <FileSignature className="mr-2 h-4 w-4" /> {t('export_pdf')}
                   </Button>
                 </div>
               </CardHeader>
@@ -605,23 +608,23 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-5 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{eolReport.summary?.critical || 0}</div>
-                    <div className="text-sm text-slate-500">Critical (&lt;30d)</div>
+                    <div className="text-sm text-slate-500">{t('critical_30d')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-500">{eolReport.summary?.high || 0}</div>
-                    <div className="text-sm text-slate-500">High (&lt;90d)</div>
+                    <div className="text-sm text-slate-500">{t('high_90d')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-500">{eolReport.summary?.medium || 0}</div>
-                    <div className="text-sm text-slate-500">Medium (&lt;180d)</div>
+                    <div className="text-sm text-slate-500">{t('medium_180d')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{eolReport.summary?.low || 0}</div>
-                    <div className="text-sm text-slate-500">Low (&gt;180d)</div>
+                    <div className="text-sm text-slate-500">{t('low_180d')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-slate-600">{eolReport.summary?.past_eol || 0}</div>
-                    <div className="text-sm text-slate-500">Past EOL</div>
+                    <div className="text-sm text-slate-500">{t('past_eol')}</div>
                   </div>
                 </div>
               </CardContent>

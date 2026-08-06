@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,8 @@ interface Filter {
 }
 
 export default function QueryBuilderPage() {
+  const t = useTranslations('query');
+  const tc = useTranslations('common');
   const [entity, setEntity] = useState('applications');
   const [columns, setColumns] = useState<string[]>([]);
   const [filters, setFilters] = useState<Filter[]>([]);
@@ -270,28 +273,28 @@ export default function QueryBuilderPage() {
       );
     }
 
-    return <div className="text-center py-8 text-slate-500">Chart type not implemented</div>;
+    return <div className="text-center py-8 text-slate-500">{t('chart_not_implemented')}</div>;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Query Builder</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setIsSaveDialogOpen(true)} disabled={!columns.length}>
-            <Save className="mr-2 h-4 w-4" /> Save Insight
+            <Save className="mr-2 h-4 w-4" /> {t('save_insight')}
           </Button>
           <Button onClick={() => runQuery()} disabled={!columns.length || isExecuting}>
-            {isExecuting ? 'Running...' : 'Run Query'}
+            {isExecuting ? t('running') : t('run_query')}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="build" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="build">Build Query</TabsTrigger>
-          <TabsTrigger value="insights">Saved Insights</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="build">{t('tab_build')}</TabsTrigger>
+          <TabsTrigger value="insights">{t('tab_insights')}</TabsTrigger>
+          <TabsTrigger value="history">{t('tab_history')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="build">
@@ -299,7 +302,7 @@ export default function QueryBuilderPage() {
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Entity</CardTitle>
+                  <CardTitle>{t('entity')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Select value={entity} onValueChange={(v) => { setEntity(v); setColumns([]); setFilters([]); }}>
@@ -315,7 +318,7 @@ export default function QueryBuilderPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Columns</CardTitle>
+                  <CardTitle>{t('columns')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {selectedEntity?.columns?.map((col: string) => (
@@ -335,7 +338,7 @@ export default function QueryBuilderPage() {
 
               <Card>
                 <CardHeader className="flex items-center justify-between">
-                  <CardTitle>Filters</CardTitle>
+                  <CardTitle>{t('filters')}</CardTitle>
                   <Button size="sm" variant="ghost" onClick={addFilter}><Plus className="h-4 w-4" /></Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -346,7 +349,7 @@ export default function QueryBuilderPage() {
                         updated[idx].field = v;
                         setFilters(updated);
                       }}>
-                        <SelectTrigger className="w-28"><SelectValue placeholder="Field" /></SelectTrigger>
+                        <SelectTrigger className="w-28"><SelectValue placeholder={t('field')} /></SelectTrigger>
                         <SelectContent>
                           {selectedEntity?.columns?.map((c: string) => (
                             <SelectItem key={c} value={c}>{c}</SelectItem>
@@ -360,12 +363,12 @@ export default function QueryBuilderPage() {
                       }}>
                         <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="contains">contains</SelectItem>
-                          <SelectItem value="eq">equals</SelectItem>
-                          <SelectItem value="gt">greater</SelectItem>
-                          <SelectItem value="lt">less</SelectItem>
-                          <SelectItem value="isNull">is empty</SelectItem>
-                          <SelectItem value="isNotNull">not empty</SelectItem>
+                          <SelectItem value="contains">{t('op_contains')}</SelectItem>
+                          <SelectItem value="eq">{t('op_equals')}</SelectItem>
+                          <SelectItem value="gt">{t('op_greater')}</SelectItem>
+                          <SelectItem value="lt">{t('op_less')}</SelectItem>
+                          <SelectItem value="isNull">{t('op_is_empty')}</SelectItem>
+                          <SelectItem value="isNotNull">{t('op_not_empty')}</SelectItem>
                         </SelectContent>
                       </Select>
                       {filter.operator !== 'isNull' && filter.operator !== 'isNotNull' && (
@@ -377,7 +380,7 @@ export default function QueryBuilderPage() {
                             updated[idx].value = e.target.value;
                             setFilters(updated);
                           }}
-                          placeholder="Value"
+                          placeholder={t('value')}
                         />
                       )}
                       <Button size="sm" variant="ghost" onClick={() => removeFilter(idx)}>×</Button>
@@ -388,7 +391,7 @@ export default function QueryBuilderPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Group By</CardTitle>
+                  <CardTitle>{t('group_by')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {selectedEntity?.columns?.slice(0, 5).map((col: string) => (
@@ -410,7 +413,7 @@ export default function QueryBuilderPage() {
             <div className="lg:col-span-2 space-y-4">
               <Card>
                 <CardHeader className="flex items-center justify-between">
-                  <CardTitle>Chart Type</CardTitle>
+                  <CardTitle>{t('chart_type')}</CardTitle>
                   <div className="flex gap-2">
                     {['table', 'bar', 'line', 'pie', 'scatter', 'heatmap'].map((type) => (
                       <Button
@@ -454,10 +457,10 @@ export default function QueryBuilderPage() {
                         </table>
                         <div className="flex items-center justify-between mt-4">
                           <p className="text-sm text-slate-500">
-                            Showing {results.data.length} of {results.total} results
+                            {t('showing_results', { shown: results.data.length, total: results.total })}
                           </p>
                           <Button size="sm" variant="outline" onClick={exportCSV} disabled={!results.data.length}>
-                            <Download className="mr-2 h-4 w-4" /> Export CSV
+                            <Download className="mr-2 h-4 w-4" /> {t('export_csv')}
                           </Button>
                         </div>
                       </div>
@@ -466,17 +469,17 @@ export default function QueryBuilderPage() {
                         {renderChart(results.data, chartType)}
                         <div className="flex items-center justify-between mt-4">
                           <p className="text-sm text-slate-500">
-                            Showing {results.data.length} of {results.total} results
+                            {t('showing_results', { shown: results.data.length, total: results.total })}
                           </p>
                           <Button size="sm" variant="outline" onClick={exportCSV} disabled={!results.data.length}>
-                            <Download className="mr-2 h-4 w-4" /> Export CSV
+                            <Download className="mr-2 h-4 w-4" /> {t('export_csv')}
                           </Button>
                         </div>
                       </div>
                     )
                   ) : (
                     <div className="text-center py-12 text-slate-500">
-                      {isExecuting ? 'Running query...' : 'Select columns and run query to see results'}
+                      {isExecuting ? t('running_query') : t('no_results_hint')}
                     </div>
                   )}
                 </CardContent>
@@ -488,11 +491,11 @@ export default function QueryBuilderPage() {
         <TabsContent value="insights">
           <Card>
             <CardHeader>
-              <CardTitle>Saved Insights</CardTitle>
+              <CardTitle>{t('tab_insights')}</CardTitle>
             </CardHeader>
             <CardContent>
               {!insights?.data?.length ? (
-                <p className="text-center py-8 text-slate-500">No saved insights yet</p>
+                <p className="text-center py-8 text-slate-500">{t('no_insights')}</p>
               ) : (
                 <div className="space-y-3">
                   {insights.data.map((insight: any) => (
@@ -522,18 +525,18 @@ export default function QueryBuilderPage() {
         <TabsContent value="history">
           <Card>
             <CardHeader>
-              <CardTitle>Query History</CardTitle>
+              <CardTitle>{t('history_title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {!history?.data?.length ? (
-                <p className="text-center py-8 text-slate-500">No query history</p>
+                <p className="text-center py-8 text-slate-500">{t('no_history')}</p>
               ) : (
                 <div className="space-y-3">
                   {history.data.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded cursor-pointer hover:bg-slate-50" onClick={() => loadFromHistory(item)}>
                       <div>
                         <p className="font-medium">{item.entity_type}</p>
-                        <p className="text-sm text-slate-500">{new Date(item.executed_at).toLocaleString()} • {item.result_count} results</p>
+                        <p className="text-sm text-slate-500">{t('history_results', { date: new Date(item.executed_at).toLocaleString(), count: item.result_count })}</p>
                       </div>
                       <Search className="h-4 w-4 text-slate-400" />
                     </div>
@@ -548,21 +551,21 @@ export default function QueryBuilderPage() {
       <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Insight</DialogTitle>
+            <DialogTitle>{t('save_title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Name</Label>
-              <Input value={insightName} onChange={(e) => setInsightName(e.target.value)} placeholder="My Insight" />
+              <Label>{t('name')}</Label>
+              <Input value={insightName} onChange={(e) => setInsightName(e.target.value)} placeholder={t('name_ph')} />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
-              <Input value={insightDescription} onChange={(e) => setInsightDescription(e.target.value)} placeholder="Optional description" />
+              <Label>{t('description')}</Label>
+              <Input value={insightDescription} onChange={(e) => setInsightDescription(e.target.value)} placeholder={t('description_ph')} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => saveMutation.mutate()} disabled={!insightName}>Save</Button>
+            <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>{tc('cancel')}</Button>
+            <Button onClick={() => saveMutation.mutate()} disabled={!insightName}>{t('save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
