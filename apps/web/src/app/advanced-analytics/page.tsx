@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ interface BudgetForecast {
 }
 
 export default function AdvancedAnalyticsPage() {
+  const t = useTranslations('advancedAnalytics');
   const [isWidgetDialogOpen, setIsWidgetDialogOpen] = useState(false);
   const [newWidget, setNewWidget] = useState({ name: '', widget_type: 'stat', width: 4, height: 3 });
   const queryClient = useQueryClient();
@@ -76,11 +78,11 @@ export default function AdvancedAnalyticsPage() {
   const maxCost = Math.max(...(costTrend?.map((c: any) => c.amount) || [1]));
 
   const widgetTypes = [
-    { value: 'stat', label: 'Stat Card', icon: BarChart3 },
-    { value: 'chart_line', label: 'Line Chart', icon: TrendingUp },
-    { value: 'chart_bar', label: 'Bar Chart', icon: BarChart3 },
-    { value: 'chart_pie', label: 'Pie Chart', icon: PieChart },
-    { value: 'table', label: 'Data Table', icon: Layout },
+    { value: 'stat', label: t('widget_type_stat'), icon: BarChart3 },
+    { value: 'chart_line', label: t('widget_type_line'), icon: TrendingUp },
+    { value: 'chart_bar', label: t('widget_type_bar'), icon: BarChart3 },
+    { value: 'chart_pie', label: t('widget_type_pie'), icon: PieChart },
+    { value: 'table', label: t('widget_type_table'), icon: Layout },
   ];
 
   return (
@@ -89,12 +91,12 @@ export default function AdvancedAnalyticsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <BarChart3 className="h-8 w-8 text-blue-500" />
-            Advanced Analytics
+            {t('title')}
           </h1>
-          <p className="text-slate-500 mt-1">Custom dashboards, cost trends, and budget forecasting</p>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button onClick={() => setIsWidgetDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Widget
+          <Plus className="mr-2 h-4 w-4" /> {t('add_widget')}
         </Button>
       </div>
 
@@ -103,7 +105,7 @@ export default function AdvancedAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-green-500" />
-              Total SaaS Spend
+              {t('stat_saas_spend')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -116,13 +118,13 @@ export default function AdvancedAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <AppWindow className="h-4 w-4 text-blue-500" />
-              Applications
+              {t('stat_applications')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary?.applications?.total || 0}</div>
             <p className="text-xs text-slate-500">
-              {summary?.applications?.by_state?.Active || 0} active
+              {summary?.applications?.by_state?.Active || 0} {t('active_count')}
             </p>
           </CardContent>
         </Card>
@@ -130,13 +132,13 @@ export default function AdvancedAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Server className="h-4 w-4 text-purple-500" />
-              Technology Components
+              {t('stat_tech')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary?.technology?.total || 0}</div>
             <p className="text-xs text-slate-500">
-              {summary?.technology?.by_status?.Active || 0} active
+              {summary?.technology?.by_status?.Active || 0} {t('active_count')}
             </p>
           </CardContent>
         </Card>
@@ -144,14 +146,14 @@ export default function AdvancedAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-orange-500" />
-              Monthly Trend
+              {t('stat_monthly_trend')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               ${((costTrend?.[costTrend?.length - 1]?.amount) || 0).toLocaleString()}
             </div>
-            <p className="text-xs text-slate-500">current month</p>
+            <p className="text-xs text-slate-500">{t('current_month')}</p>
           </CardContent>
         </Card>
       </div>
@@ -159,7 +161,7 @@ export default function AdvancedAnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Cost Trend (12 Months)</CardTitle>
+            <CardTitle>{t('cost_trend')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64 flex items-end gap-1">
@@ -179,7 +181,7 @@ export default function AdvancedAnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Spend by Category</CardTitle>
+            <CardTitle>{t('spend_by_category')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -206,16 +208,16 @@ export default function AdvancedAnalyticsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Budget Forecast FY {new Date().getFullYear()}</CardTitle>
+          <CardTitle>{t('budget_forecast', { year: new Date().getFullYear() })}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2">Category</th>
+                  <th className="text-left py-2">{t('col_category')}</th>
                   {months.map(m => <th key={m} className="text-center py-2 text-xs">{m}</th>)}
-                  <th className="text-right py-2">Total</th>
+                  <th className="text-right py-2">{t('col_total')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,7 +247,7 @@ export default function AdvancedAnalyticsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Technology Distribution</CardTitle>
+          <CardTitle>{t('tech_distribution')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -262,19 +264,19 @@ export default function AdvancedAnalyticsPage() {
       <Dialog open={isWidgetDialogOpen} onOpenChange={setIsWidgetDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Dashboard Widget</DialogTitle>
+            <DialogTitle>{t('dialog_title')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Widget Name</Label>
+              <Label>{t('widget_name')}</Label>
               <Input
                 value={newWidget.name}
                 onChange={(e) => setNewWidget({ ...newWidget, name: e.target.value })}
-                placeholder="My Widget"
+                placeholder={t('widget_name_ph')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Widget Type</Label>
+              <Label>{t('widget_type')}</Label>
               <Select
                 value={newWidget.widget_type}
                 onValueChange={(v) => setNewWidget({ ...newWidget, widget_type: v })}
@@ -289,7 +291,7 @@ export default function AdvancedAnalyticsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Width (1-6)</Label>
+                <Label>{t('width')}</Label>
                 <Input
                   type="number"
                   min={1}
@@ -299,7 +301,7 @@ export default function AdvancedAnalyticsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Height (1-6)</Label>
+                <Label>{t('height')}</Label>
                 <Input
                   type="number"
                   min={1}
@@ -311,9 +313,9 @@ export default function AdvancedAnalyticsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsWidgetDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsWidgetDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={() => createWidgetMutation.mutate(newWidget)} disabled={createWidgetMutation.isPending}>
-              {createWidgetMutation.isPending ? 'Creating...' : 'Create Widget'}
+              {createWidgetMutation.isPending ? t('creating') : t('create_widget')}
             </Button>
           </DialogFooter>
         </DialogContent>

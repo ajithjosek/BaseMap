@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Edit, Trash2, UserPlus, Shield, Building } from 'lucide-react';
 
 export default function UsersPage() {
+  const t = useTranslations('users');
   const [search, setSearch] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -128,48 +130,48 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
-              <UserPlus className="mr-2 h-4 w-4" /> Add User
+              <UserPlus className="mr-2 h-4 w-4" /> {t('add_user')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
-              <DialogDescription>{editingUser ? 'Update user information' : 'Create a new user account'}</DialogDescription>
+              <DialogTitle>{editingUser ? t('dialog_edit') : t('dialog_add')}</DialogTitle>
+              <DialogDescription>{editingUser ? t('dialog_edit_desc') : t('dialog_add_desc')}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4 py-4">
                 <div className="space-y-2">
-                  <Label>Email *</Label>
+                  <Label>{t('email')}</Label>
                   <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>{editingUser ? 'New Password (optional)' : 'Password *'}</Label>
+                  <Label>{editingUser ? t('new_password') : t('password')}</Label>
                   <Input type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required={!editingUser} />
                 </div>
                 <div className="space-y-2">
-                  <Label>First Name</Label>
+                  <Label>{t('first_name')}</Label>
                   <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Last Name</Label>
+                  <Label>{t('last_name')}</Label>
                   <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Job Title</Label>
+                  <Label>{t('job_title')}</Label>
                   <Input value={formData.job_title} onChange={(e) => setFormData({ ...formData, job_title: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Department</Label>
+                  <Label>{t('department')}</Label>
                   <Input value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>Cancel</Button>
-                <Button type="submit">{editingUser ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>{t('cancel')}</Button>
+                <Button type="submit">{editingUser ? t('update') : t('create')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -179,7 +181,7 @@ export default function UsersPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalCount}</div>
@@ -187,7 +189,7 @@ export default function UsersPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_active')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{activeCount}</div>
@@ -195,7 +197,7 @@ export default function UsersPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Inactive Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_inactive')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-500">{totalCount - activeCount}</div>
@@ -206,11 +208,11 @@ export default function UsersPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <CardTitle>Users</CardTitle>
+            <CardTitle>{t('users_title')}</CardTitle>
             <div className="relative ml-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
               <Input
-                placeholder="Search users..."
+                placeholder={t('search_placeholder')}
                 className="pl-8 w-64"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -220,9 +222,9 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-slate-500">Loading...</div>
+            <div className="text-center py-8 text-slate-500">{t('loading')}</div>
           ) : data?.data?.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">No users found. Add one to get started.</div>
+            <div className="text-center py-8 text-slate-500">{t('no_users')}</div>
           ) : (
             <div className="space-y-3">
               {data?.data?.map((user: any) => (
@@ -237,7 +239,7 @@ export default function UsersPage() {
                         <p className="text-sm text-slate-500">{user.email}</p>
                       </div>
                       <Badge variant={user.is_active ? 'default' : 'outline'}>
-                        {user.is_active ? 'Active' : 'Inactive'}
+                        {user.is_active ? t('active') : t('inactive')}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 mt-1 ml-14 text-sm text-slate-500">
@@ -257,7 +259,7 @@ export default function UsersPage() {
                       size="sm"
                       onClick={() => toggleStatusMutation.mutate({ id: user.id, is_active: !user.is_active })}
                     >
-                      {user.is_active ? 'Deactivate' : 'Activate'}
+                      {user.is_active ? t('deactivate') : t('activate')}
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
                       <Edit className="h-4 w-4" />
