@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, AlertTriangle, CheckCircle, XCircle, Activity, FileCheck, Lock } from 'lucide-react';
 
 export default function CompliancePage() {
+  const t = useTranslations('compliance');
   const queryClient = useQueryClient();
 
   const { data: dashboard, isLoading: dashLoading } = useQuery({
@@ -73,16 +75,16 @@ export default function CompliancePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Shield className="h-8 w-8 text-purple-500" />
-            Compliance & Security
+            {t('title')}
           </h1>
-          <p className="text-slate-500 mt-1">Track compliance frameworks and security posture</p>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Compliance Score</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_compliance')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`text-3xl font-bold ${getScoreColor(dashboard?.compliance_percentage || 0)}`}>
@@ -92,7 +94,7 @@ export default function CompliancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Frameworks</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_frameworks')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{dashboard?.total_frameworks || 0}</div>
@@ -102,7 +104,7 @@ export default function CompliancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              Compliant
+              {t('stat_compliant')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -113,7 +115,7 @@ export default function CompliancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              Non-Compliant
+              {t('stat_non_compliant')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -127,7 +129,7 @@ export default function CompliancePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <Lock className="h-4 w-4 text-purple-500" />
-              Security Score
+              {t('stat_security')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -138,7 +140,7 @@ export default function CompliancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Assessed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_assessed')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{securityScore?.assessed_entities || 0}</div>
@@ -146,7 +148,7 @@ export default function CompliancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-600">High Risk</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-600">{t('stat_high_risk')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{dashboard?.high_risk || 0}</div>
@@ -154,7 +156,7 @@ export default function CompliancePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-600">Medium Risk</CardTitle>
+            <CardTitle className="text-sm font-medium text-yellow-600">{t('stat_medium_risk')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{dashboard?.medium_risk || 0}</div>
@@ -164,18 +166,18 @@ export default function CompliancePage() {
 
       <Tabs defaultValue="frameworks">
         <TabsList>
-          <TabsTrigger value="frameworks">Compliance Frameworks</TabsTrigger>
-          <TabsTrigger value="security">Security Assessments</TabsTrigger>
+          <TabsTrigger value="frameworks">{t('tab_frameworks')}</TabsTrigger>
+          <TabsTrigger value="security">{t('tab_security')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="frameworks">
           <Card>
             <CardHeader>
-              <CardTitle>Frameworks</CardTitle>
+              <CardTitle>{t('frameworks_title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {!frameworks?.length ? (
-                <div className="text-center py-8 text-slate-500">No frameworks configured</div>
+                <div className="text-center py-8 text-slate-500">{t('no_frameworks')}</div>
               ) : (
                 <div className="space-y-4">
                   {frameworks.map((fw: any) => (
@@ -193,10 +195,10 @@ export default function CompliancePage() {
                       </div>
                       <Progress value={fw.compliance_pct} className="h-2" />
                       <div className="mt-3 flex gap-2">
-                        <Badge variant="outline">{fw.controls?.length || 0} controls</Badge>
+                        <Badge variant="outline">{t('controls_count', { count: fw.controls?.length || 0 })}</Badge>
                         {fw.last_audit && (
                           <span className="text-xs text-slate-500">
-                            Last audit: {new Date(fw.last_audit).toLocaleDateString()}
+                            {t('last_audit', { date: new Date(fw.last_audit).toLocaleDateString() })}
                           </span>
                         )}
                       </div>
@@ -211,21 +213,21 @@ export default function CompliancePage() {
         <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle>Security Assessments</CardTitle>
+              <CardTitle>{t('security_title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {!assessments?.length ? (
-                <div className="text-center py-8 text-slate-500">No security assessments</div>
+                <div className="text-center py-8 text-slate-500">{t('no_assessments')}</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2">Entity</th>
-                        <th className="text-left py-2">Type</th>
-                        <th className="text-left py-2">Score</th>
-                        <th className="text-left py-2">Findings</th>
-                        <th className="text-left py-2">Date</th>
+                        <th className="text-left py-2">{t('col_entity')}</th>
+                        <th className="text-left py-2">{t('col_type')}</th>
+                        <th className="text-left py-2">{t('col_score')}</th>
+                        <th className="text-left py-2">{t('col_findings')}</th>
+                        <th className="text-left py-2">{t('col_date')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -245,7 +247,7 @@ export default function CompliancePage() {
                           </td>
                           <td className="py-3">
                             <Badge variant={a.vulnerabilities?.length > 0 ? 'destructive' : 'secondary'}>
-                              {a.vulnerabilities?.length || 0} issues
+                              {t('issues_count', { count: a.vulnerabilities?.length || 0 })}
                             </Badge>
                           </td>
                           <td className="py-3 text-sm text-slate-500">

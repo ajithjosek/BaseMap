@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Database, Layout, Cloud, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function DataQualityDashboard() {
+  const t = useTranslations('dataQuality');
   const { data, isLoading } = useQuery({
     queryKey: ['data-quality'],
     queryFn: async () => {
@@ -69,19 +71,19 @@ export default function DataQualityDashboard() {
     return 'destructive';
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (isLoading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   const entities = [
-    { key: 'applications', label: 'Applications', icon: Layout, fields: ['Name', 'Description', 'Vendor', 'Owner', 'BU', 'EOL', 'Deployment'] },
-    { key: 'saas', label: 'SaaS Applications', icon: Cloud, fields: ['Vendor', 'Use Case', 'Cost', 'Contract', 'Seats'] },
-    { key: 'components', label: 'Technology Components', icon: Database, fields: ['Name', 'Type', 'Environment', 'Host', 'Region'] },
-    { key: 'interfaces', label: 'API Interfaces', icon: AlertCircle, fields: ['Name', 'Source', 'Target', 'Protocol'] },
+    { key: 'applications', label: t('entity_applications'), icon: Layout, fields: [t('field_name'), t('field_description'), t('field_vendor'), t('field_owner'), t('field_bu'), t('field_eol'), t('field_deployment')] },
+    { key: 'saas', label: t('entity_saas'), icon: Cloud, fields: [t('field_vendor'), t('field_use_case'), t('field_cost'), t('field_contract'), t('field_seats')] },
+    { key: 'components', label: t('entity_components'), icon: Database, fields: [t('field_name'), t('field_type'), t('field_environment'), t('field_host'), t('field_region')] },
+    { key: 'interfaces', label: t('entity_interfaces'), icon: AlertCircle, fields: [t('field_name'), t('field_source'), t('field_target'), t('field_protocol')] },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Data Quality Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -110,7 +112,7 @@ export default function DataQualityDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Quality by Entity</CardTitle>
+          <CardTitle>{t('entity_quality')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -121,7 +123,7 @@ export default function DataQualityDashboard() {
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{entity.label}</span>
                     <Badge variant={getScoreVariant(entityData?.completeness || 0)}>
-                      {entityData?.completeness || 0}% Complete
+                      {t('complete_pct', { pct: entityData?.completeness || 0 })}
                     </Badge>
                   </div>
                   <div className="grid grid-cols-7 gap-2 text-xs text-slate-500">
