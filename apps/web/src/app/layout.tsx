@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
-import { defaultLocale, isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { defaultLocale, isLocale, LOCALE_COOKIE, textDirection } from "@/i18n/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +27,7 @@ export default async function RootLayout({
   const messages = (await import(`../../messages/${locale}.json`)).default;
 
   return (
-    <html lang={locale}>
+    <html lang={locale} dir={textDirection(locale)}>
       <body className={`${inter.className} bg-slate-50`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>

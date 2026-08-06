@@ -2,7 +2,10 @@
   "locale": {
     "switcher_label": "Language",
     "en": "English",
-    "pt-BR": "Português"
+    "pt-BR": "Português",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español"
   },
   "nav": {
     "dashboard": "Dashboard",

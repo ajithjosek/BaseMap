@@ -39,6 +39,7 @@ import { ResourceAllocationModule } from './resource-allocation/resource-allocat
 import { ComplianceModule } from './compliance/compliance.module';
 import { Neo4jModule } from './neo4j/neo4j.module';
 import { GraphModule } from './graph/graph.module';
+import { ReportingModule } from './reporting/reporting.module';
 import { AppGraphQLModule } from './graphql/graphql.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
@@ -94,6 +95,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     ComplianceModule,
     Neo4jModule,
     GraphModule,
+    ReportingModule,
     AppGraphQLModule,
   ],
   controllers: [AppController],
