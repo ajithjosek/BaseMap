@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import {
   Table,
@@ -35,6 +36,7 @@ import {
 import Link from 'next/link';
 
 export default function ApplicationsPage() {
+  const t = useTranslations('applications');
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -118,7 +120,7 @@ export default function ApplicationsPage() {
   });
 
   const handleBulkDelete = () => {
-    if (confirm(`Are you sure you want to delete ${selectedIds.length} applications?`)) {
+    if (confirm(t('confirm_delete', { count: selectedIds.length }))) {
       deleteMutation.mutate(selectedIds);
     }
   };
@@ -149,14 +151,14 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={exportToCsv}>
-            <Download className="mr-2 h-4 w-4" /> Export
+            <Download className="mr-2 h-4 w-4" /> {t('export')}
           </Button>
           <Button asChild>
             <Link href="/applications/new">
-              <Plus className="mr-2 h-4 w-4" /> Add Application
+              <Plus className="mr-2 h-4 w-4" /> {t('add_application')}
             </Link>
           </Button>
         </div>
@@ -167,7 +169,7 @@ export default function ApplicationsPage() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Search applications..."
+              placeholder={t('search_placeholder')}
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -177,7 +179,7 @@ export default function ApplicationsPage() {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="h-10">
-                <Filter className="mr-2 h-4 w-4" /> Filters
+                <Filter className="mr-2 h-4 w-4" /> {t('filters')}
                 {filters.lifecycle.length > 0 && (
                   <Badge variant="secondary" className="ml-2 rounded-sm px-1 font-normal">
                     {filters.lifecycle.length}
@@ -187,7 +189,7 @@ export default function ApplicationsPage() {
             </PopoverTrigger>
             <PopoverContent className="w-56 p-4">
               <div className="space-y-4">
-                <h4 className="font-medium leading-none">Lifecycle State</h4>
+                <h4 className="font-medium leading-none">{t('lifecycle_state')}</h4>
                 <div className="space-y-2">
                   {['Planning', 'Active', 'Maintenance', 'Retirement', 'Retired'].map((state) => (
                     <div key={state} className="flex items-center space-x-2">
@@ -216,18 +218,18 @@ export default function ApplicationsPage() {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="h-10">
-                <Columns className="mr-2 h-4 w-4" /> Columns
+                <Columns className="mr-2 h-4 w-4" /> {t('columns')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-56 p-4">
               <div className="space-y-2">
-                <h4 className="font-medium leading-none mb-4">Visible Columns</h4>
+                <h4 className="font-medium leading-none mb-4">{t('visible_columns')}</h4>
                 {[
-                  { id: 'name', label: 'Name' },
-                  { id: 'lifecycle', label: 'Lifecycle' },
-                  { id: 'businessUnit', label: 'Business Unit' },
-                  { id: 'vendor', label: 'Vendor' },
-                  { id: 'techType', label: 'Tech Type' },
+                  { id: 'name', label: t('col_name') },
+                  { id: 'lifecycle', label: t('col_lifecycle') },
+                  { id: 'businessUnit', label: t('col_business_unit') },
+                  { id: 'vendor', label: t('col_vendor') },
+                  { id: 'techType', label: t('col_tech_type') },
                 ].map((col) => (
                   <div key={col.id} className="flex items-center space-x-2">
                     <Checkbox 
@@ -247,9 +249,9 @@ export default function ApplicationsPage() {
 
         {selectedIds.length > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500">{selectedIds.length} selected</span>
+            <span className="text-sm text-slate-500">{t('selected_count', { count: selectedIds.length })}</span>
             <Button variant="destructive" size="sm" onClick={handleBulkDelete} disabled={deleteMutation.isPending}>
-              <Trash2 className="mr-2 h-4 w-4" /> {deleteMutation.isPending ? 'Deleting...' : 'Bulk Delete'}
+              <Trash2 className="mr-2 h-4 w-4" /> {deleteMutation.isPending ? t('deleting') : t('bulk_delete')}
             </Button>
           </div>
         )}
@@ -270,28 +272,28 @@ export default function ApplicationsPage() {
               {visibleColumns.includes('name') && (
                 <TableHead onClick={() => handleSort('name')} className="cursor-pointer hover:bg-slate-50">
                   <div className="flex items-center">
-                    Name <ArrowUpDown className="ml-2 h-4 w-4" />
+                    {t('col_name')} <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
               )}
               {visibleColumns.includes('lifecycle') && (
                 <TableHead onClick={() => handleSort('lifecycle_state')} className="cursor-pointer hover:bg-slate-50">
                   <div className="flex items-center">
-                    Lifecycle <ArrowUpDown className="ml-2 h-4 w-4" />
+                    {t('col_lifecycle')} <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
               )}
               {visibleColumns.includes('businessUnit') && (
-                <TableHead>Business Unit</TableHead>
+                <TableHead>{t('col_business_unit')}</TableHead>
               )}
               {visibleColumns.includes('vendor') && (
-                <TableHead>Vendor</TableHead>
+                <TableHead>{t('col_vendor')}</TableHead>
               )}
               {visibleColumns.includes('techType') && (
-                <TableHead>Technology Type</TableHead>
+                <TableHead>{t('col_tech_type')}</TableHead>
               )}
               {visibleColumns.includes('actions') && (
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-right">{t('col_actions')}</TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -299,13 +301,13 @@ export default function ApplicationsPage() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={visibleColumns.length} className="h-24 text-center">
-                  Loading...
+                  {t('loading')}
                 </TableCell>
               </TableRow>
             ) : data?.data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={visibleColumns.length} className="h-24 text-center">
-                  No applications found.
+                  {t('no_applications')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -365,10 +367,10 @@ export default function ApplicationsPage() {
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
-          <ChevronLeft className="h-4 w-4" /> Previous
+          <ChevronLeft className="h-4 w-4" /> {t('previous')}
         </Button>
         <div className="text-sm font-medium">
-          Page {page} of {data?.meta.totalPages || 1}
+          {t('page_of', { current: page, total: data?.meta.totalPages || 1 })}
         </div>
         <Button
           variant="outline"
@@ -376,7 +378,7 @@ export default function ApplicationsPage() {
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= (data?.meta.totalPages || 1)}
         >
-          Next <ChevronRight className="h-4 w-4" />
+          {t('next')} <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

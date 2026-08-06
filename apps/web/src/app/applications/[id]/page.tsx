@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { CapabilityMapping } from '@/components/applications/capability-mapping'
 import { InterfacesPanel } from '@/components/applications/interfaces-panel';
 
 export default function ApplicationDetailPage() {
+  const t = useTranslations('applicationDetail');
   const { id } = useParams();
   const router = useRouter();
   const [isTransitionDialogOpen, setIsTransitionDialogOpen] = useState(false);
@@ -55,8 +57,8 @@ export default function ApplicationDetailPage() {
     },
   });
 
-  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
-  if (!app) return <div className="p-8 text-center">Application not found.</div>;
+  if (isLoading) return <div className="p-8 text-center">{t('loading')}</div>;
+  if (!app) return <div className="p-8 text-center">{t('not_found')}</div>;
 
   const getLifecycleVariant = (state: string) => {
     switch (state) {
@@ -84,11 +86,11 @@ export default function ApplicationDetailPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
             <Link href={`/applications/${id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" /> Edit
+              <Edit className="mr-2 h-4 w-4" /> {t('edit')}
             </Link>
           </Button>
           <Button variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
+            <Trash2 className="mr-2 h-4 w-4" /> {t('delete')}
           </Button>
         </div>
       </div>
@@ -97,21 +99,21 @@ export default function ApplicationDetailPage() {
         <div className="col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Description</CardTitle>
+              <CardTitle>{t('description')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-slate-600">
-                {app.description || 'No description provided.'}
+                {app.description || t('no_description')}
               </p>
             </CardContent>
           </Card>
 
           <Tabs defaultValue="overview">
             <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
-              <TabsTrigger value="interfaces">Interfaces</TabsTrigger>
-              <TabsTrigger value="costs">Costs</TabsTrigger>
+              <TabsTrigger value="overview">{t('tab_overview')}</TabsTrigger>
+              <TabsTrigger value="capabilities">{t('tab_capabilities')}</TabsTrigger>
+              <TabsTrigger value="interfaces">{t('tab_interfaces')}</TabsTrigger>
+              <TabsTrigger value="costs">{t('tab_costs')}</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
                <Card>
@@ -121,14 +123,14 @@ export default function ApplicationDetailPage() {
                       <div className="flex items-center gap-3 text-slate-600">
                         <Building className="h-5 w-5" />
                         <div>
-                          <p className="text-xs font-semibold uppercase text-slate-400">Business Unit</p>
+                          <p className="text-xs font-semibold uppercase text-slate-400">{t('business_unit')}</p>
                           <p className="font-medium text-slate-900">{app.business_unit?.name || '-'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-slate-600">
                         <User className="h-5 w-5" />
                         <div>
-                          <p className="text-xs font-semibold uppercase text-slate-400">Owner</p>
+                          <p className="text-xs font-semibold uppercase text-slate-400">{t('owner')}</p>
                           <p className="font-medium text-slate-900">{app.owner?.first_name} {app.owner?.last_name || '-'}</p>
                         </div>
                       </div>
@@ -137,14 +139,14 @@ export default function ApplicationDetailPage() {
                       <div className="flex items-center gap-3 text-slate-600">
                         <Globe className="h-5 w-5" />
                         <div>
-                          <p className="text-xs font-semibold uppercase text-slate-400">Deployment Model</p>
+<p className="text-xs font-semibold uppercase text-slate-400">{t('deployment_model')}</p>
                           <p className="font-medium text-slate-900">{app.deployment_model || '-'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-slate-600">
                         <Shield className="h-5 w-5" />
                         <div>
-                          <p className="text-xs font-semibold uppercase text-slate-400">Risk Score</p>
+                          <p className="text-xs font-semibold uppercase text-slate-400">{t('risk_score')}</p>
                           <p className="font-medium text-slate-900">{app.risk_score} / 100</p>
                         </div>
                       </div>
@@ -168,23 +170,23 @@ export default function ApplicationDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Technical Info</CardTitle>
+              <CardTitle>{t('technical_info')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Vendor</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('vendor')}</p>
                 <p className="font-medium">{app.vendor || '-'}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Version</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('version')}</p>
                 <p className="font-medium">{app.version || '-'}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Technology Type</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('technology_type')}</p>
                 <p className="font-medium">{app.technology_type || '-'}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Cloud Readiness</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('cloud_readiness')}</p>
                 <div className="flex items-center gap-2">
                   {app.cloud_readiness_score ? (
                     <>
@@ -199,19 +201,19 @@ export default function ApplicationDetailPage() {
                           app.migration_complexity === 'Low' ? 'success' :
                           app.migration_complexity === 'Medium' ? 'warning' : 'destructive'
                         }>
-                          {app.migration_complexity} Complexity
+                          {t('complexity', { level: app.migration_complexity })}
                         </Badge>
                       )}
                     </>
                   ) : (
-                    <p className="text-slate-400">Not assessed</p>
+                    <p className="text-slate-400">{t('not_assessed')}</p>
                   )}
                 </div>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Deployment Model</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('deployment_model')}</p>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">{app.deployment_model || 'Not set'}</p>
+                  <p className="font-medium">{app.deployment_model || t('not_set')}</p>
                   <Button size="sm" variant="ghost" onClick={() => { setDeployModel(app.deployment_model || ''); setIsDeployDialogOpen(true); }}>
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -229,7 +231,7 @@ export default function ApplicationDetailPage() {
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-1" />
                   )}
-                  Assess Cloud Readiness
+                  {t('assess_cloud_readiness')}
                 </Button>
               </div>
             </CardContent>
@@ -239,26 +241,26 @@ export default function ApplicationDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" /> Lifecycle
+                  <Calendar className="h-5 w-5" /> {t('lifecycle')}
                 </div>
                 <Button size="sm" variant="outline" onClick={() => setIsTransitionDialogOpen(true)}>
-                   Transition State
+                   {t('transition_state')}
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Created At</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('created_at')}</p>
                 <p className="font-medium">{new Date(app.created_at).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-slate-400">Last Updated</p>
+                <p className="text-xs font-semibold uppercase text-slate-400">{t('last_updated')}</p>
                 <p className="font-medium">{new Date(app.updated_at).toLocaleDateString()}</p>
               </div>
               {app.lifecycle_reason && (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-slate-400">Last Reason</p>
-                  <p className="text-sm italic text-slate-600">"{app.lifecycle_reason}"</p>
+                  <p className="text-xs font-semibold uppercase text-slate-400">{t('last_reason')}</p>
+                  <p className="text-sm italic text-slate-600">{app.lifecycle_reason}</p>
                 </div>
               )}
             </CardContent>
@@ -267,12 +269,12 @@ export default function ApplicationDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" /> History
+                <History className="h-5 w-5" /> {t('history')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
                <div className="text-sm text-slate-500 py-4 italic">
-                  Timeline visualization coming soon.
+                  {t('timeline_soon')}
                </div>
             </CardContent>
           </Card>
@@ -288,28 +290,28 @@ export default function ApplicationDetailPage() {
       <Dialog open={isDeployDialogOpen} onOpenChange={setIsDeployDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Deployment Model</DialogTitle>
+            <DialogTitle>{t('update_deployment_model')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <Label>Deployment Model</Label>
+            <Label>{t('deployment_model')}</Label>
             <Select value={deployModel} onValueChange={setDeployModel}>
               <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select deployment model" />
+                <SelectValue placeholder={t('select_deployment_model')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="On-Premise">On-Premise</SelectItem>
-                <SelectItem value="IaaS">IaaS (Infrastructure as a Service)</SelectItem>
-                <SelectItem value="PaaS">PaaS (Platform as a Service)</SelectItem>
-                <SelectItem value="SaaS">SaaS (Software as a Service)</SelectItem>
-                <SelectItem value="Hybrid">Hybrid</SelectItem>
-                <SelectItem value="Multi-Cloud">Multi-Cloud</SelectItem>
+                <SelectItem value="On-Premise">{t('deploy_on_premise')}</SelectItem>
+                <SelectItem value="IaaS">{t('deploy_iaas')}</SelectItem>
+                <SelectItem value="PaaS">{t('deploy_paas')}</SelectItem>
+                <SelectItem value="SaaS">{t('deploy_saas')}</SelectItem>
+                <SelectItem value="Hybrid">{t('deploy_hybrid')}</SelectItem>
+                <SelectItem value="Multi-Cloud">{t('deploy_multi_cloud')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeployDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDeployDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={() => updateMutation.mutate({ deployment_model: deployModel })} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? 'Saving...' : 'Save'}
+              {updateMutation.isPending ? t('saving') : t('save')}
             </Button>
           </DialogFooter>
         </DialogContent>
