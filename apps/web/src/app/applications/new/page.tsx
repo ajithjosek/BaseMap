@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ const applicationSchema = z.object({
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
 export default function NewApplicationPage() {
+  const t = useTranslations('newApplication');
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -71,77 +73,77 @@ export default function NewApplicationPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Add New Application</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Application Details</CardTitle>
+          <CardTitle>{t('details_title')}</CardTitle>
           <CardDescription>
-            Enter the basic information for the new application.
+            {t('details_desc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Application Name *</Label>
-              <Input id="name" {...register('name')} placeholder="e.g. SAP ERP" />
+              <Label htmlFor="name">{t('application_name')}</Label>
+              <Input id="name" {...register('name')} placeholder={t('name_ph')} />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('description')}</Label>
               <Textarea
                 id="description"
                 {...register('description')}
-                placeholder="Brief description of the application's purpose"
+                placeholder={t('description_ph')}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="vendor">Vendor</Label>
-                <Input id="vendor" {...register('vendor')} placeholder="e.g. SAP SE" />
+                <Label htmlFor="vendor">{t('vendor')}</Label>
+                <Input id="vendor" {...register('vendor')} placeholder={t('vendor_ph')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="version">Version</Label>
-                <Input id="version" {...register('version')} placeholder="e.g. 2.0.1" />
+                <Label htmlFor="version">{t('version')}</Label>
+                <Input id="version" {...register('version')} placeholder={t('version_ph')} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="technology_type">Technology Type</Label>
-                <Input id="technology_type" {...register('technology_type')} placeholder="e.g. ERP" />
+                <Label htmlFor="technology_type">{t('technology_type')}</Label>
+                <Input id="technology_type" {...register('technology_type')} placeholder={t('technology_ph')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lifecycle_state">Lifecycle State</Label>
+                <Label htmlFor="lifecycle_state">{t('lifecycle_state')}</Label>
                 <Select
                   onValueChange={(value) => setValue('lifecycle_state', value as any)}
                   defaultValue="Planning"
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
+                    <SelectValue placeholder={t('select_state')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Planning">Planning</SelectItem>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Maintenance">Maintenance</SelectItem>
-                    <SelectItem value="Retirement">Retirement</SelectItem>
-                    <SelectItem value="Retired">Retired</SelectItem>
+                    <SelectItem value="Planning">{t('state_planning')}</SelectItem>
+                    <SelectItem value="Active">{t('state_active')}</SelectItem>
+                    <SelectItem value="Maintenance">{t('state_maintenance')}</SelectItem>
+                    <SelectItem value="Retirement">{t('state_retirement')}</SelectItem>
+                    <SelectItem value="Retired">{t('state_retired')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deployment_model">Deployment Model</Label>
+              <Label htmlFor="deployment_model">{t('deployment_model')}</Label>
               <Input
                 id="deployment_model"
                 {...register('deployment_model')}
-                placeholder="e.g. SaaS, On-Premise"
+                placeholder={t('deployment_ph')}
               />
             </div>
 
@@ -152,10 +154,10 @@ export default function NewApplicationPage() {
                 onClick={() => router.back()}
                 disabled={mutation.isPending}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Creating...' : 'Create Application'}
+                {mutation.isPending ? t('creating') : t('create_application')}
               </Button>
             </div>
           </form>

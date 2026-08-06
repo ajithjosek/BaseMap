@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { CapabilityTree } from '@/components/capabilities/capability-tree';
 import { CapabilityDetailPanel } from '@/components/capabilities/capability-detail-panel';
@@ -13,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 
 export default function CapabilitiesPage() {
+  const t = useTranslations('capabilities');
   const [selectedCapability, setSelectedCapability] = useState<any>(null);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [csvContent, setCsvContent] = useState('');
@@ -35,11 +37,11 @@ export default function CapabilitiesPage() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['capabilities-tree'] });
       setSelectedCapability(res.data);
-      toast.success('Capability updated successfully');
+      toast.success(t('updated_success'));
     },
     onError: (error: any) => {
-      toast.error('Error updating capability', { 
-        description: error.response?.data?.message || 'Unknown error',
+      toast.error(t('update_error'), { 
+        description: error.response?.data?.message || t('unknown_error'),
       });
     }
   });
@@ -52,11 +54,11 @@ export default function CapabilitiesPage() {
       queryClient.invalidateQueries({ queryKey: ['capabilities-tree'] });
       setSelectedCapability(null);
       setIsDeleting(false);
-      toast.success('Capability deleted successfully');
+      toast.success(t('deleted_success'));
     },
     onError: (error: any) => {
-      toast.error('Error deleting capability', { 
-        description: error.response?.data?.message || 'Unknown error',
+      toast.error(t('delete_error'), { 
+        description: error.response?.data?.message || t('unknown_error'),
       });
       setIsDeleting(false);
     }
@@ -69,11 +71,11 @@ export default function CapabilitiesPage() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['capabilities-tree'] });
       setIsImportOpen(false);
-      toast.success(`Import successful. Created ${res.data.imported} new capabilities.`);
+      toast.success(t('import_success', { count: res.data.imported }));
     },
     onError: (error: any) => {
-      toast.error('Import failed', { 
-        description: error.response?.data?.message || 'Unknown error',
+      toast.error(t('import_error'), { 
+        description: error.response?.data?.message || t('unknown_error'),
       });
     }
   });
@@ -94,16 +96,16 @@ export default function CapabilitiesPage() {
   return (
     <div className="space-y-6 h-[calc(100vh-100px)] flex flex-col">
       <div className="flex items-center justify-between flex-shrink-0">
-        <h1 className="text-3xl font-bold tracking-tight">Business Capabilities</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setIsImportOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" /> Import CSV
+            <Upload className="mr-2 h-4 w-4" /> {t('import_csv')}
           </Button>
           <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" /> Export
+            <Download className="mr-2 h-4 w-4" /> {t('export')}
           </Button>
           <Button>
-            <Plus className="mr-2 h-4 w-4" /> Add Capability
+            <Plus className="mr-2 h-4 w-4" /> {t('add_capability')}
           </Button>
         </div>
       </div>
@@ -112,19 +114,19 @@ export default function CapabilitiesPage() {
         <div className="col-span-2 overflow-y-auto">
           <Card className="h-full border-0 shadow-sm">
             <CardHeader className="bg-slate-50 sticky top-0 z-10 border-b">
-              <CardTitle>Capability Map</CardTitle>
+              <CardTitle>{t('map_title')}</CardTitle>
               <CardDescription>
-                Hierarchical view of your organization's business capabilities. Drag to reorder.
+                {t('map_desc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
-                <div className="py-8 text-center text-slate-500">Loading capability map...</div>
+                <div className="py-8 text-center text-slate-500">{t('loading_map')}</div>
               ) : tree?.length === 0 ? (
                 <div className="py-12 text-center">
-                  <h3 className="text-lg font-medium text-slate-900">No capabilities defined</h3>
+                  <h3 className="text-lg font-medium text-slate-900">{t('no_capabilities')}</h3>
                   <Button className="mt-4" onClick={() => setIsImportOpen(true)}>
-                    Import Sample Data
+                    {t('import_sample')}
                   </Button>
                 </div>
               ) : (
@@ -153,9 +155,9 @@ export default function CapabilitiesPage() {
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Capabilities from CSV</DialogTitle>
+            <DialogTitle>{t('import_dialog_title')}</DialogTitle>
             <DialogDescription>
-              Provide a CSV with columns: Level 1, Level 2, Level 3, Level 4, Description.
+              {t('import_dialog_desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -167,9 +169,9 @@ export default function CapabilitiesPage() {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsImportOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsImportOpen(false)}>{t('cancel')}</Button>
             <Button onClick={handleImport} disabled={importMutation.isPending || !csvContent}>
-              {importMutation.isPending ? 'Importing...' : 'Import'}
+              {importMutation.isPending ? t('importing') : t('import')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -180,21 +182,20 @@ export default function CapabilitiesPage() {
           <DialogHeader>
             <DialogTitle className="text-destructive flex items-center">
               <AlertTriangle className="mr-2" />
-              Confirm Bulk Delete
+              {t('confirm_delete_title')}
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Are you sure you want to delete <strong>{selectedCapability?.name}</strong>?
-              This action will cascade and <strong>delete all of its child capabilities</strong> as well. This cannot be undone.
+              {t('confirm_delete_desc', { name: selectedCapability?.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setIsDeleting(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDeleting(false)}>{t('cancel')}</Button>
             <Button 
               variant="destructive" 
               onClick={() => deleteMutation.mutate(selectedCapability?.id)} 
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? 'Deleting...' : 'Yes, Delete All'}
+              {deleteMutation.isPending ? t('deleting') : t('yes_delete_all')}
             </Button>
           </DialogFooter>
         </DialogContent>
