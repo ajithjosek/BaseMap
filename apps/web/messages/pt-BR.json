@@ -1,0 +1,38 @@
+{
+  "locale": {
+    "switcher_label": "Idioma",
+    "en": "English",
+    "pt-BR": "Português"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "dashboard_stories": "Histórias do Painel",
+    "applications": "Aplicações",
+    "capabilities": "Capacidades",
+    "heatmap": "Mapa de Calor C2A",
+    "saas": "SaaS & Cloud",
+    "saas_requests": "Solicitações SaaS",
+    "api_catalog": "Catálogo de APIs",
+    "components": "Componentes",
+    "graphql_api": "API GraphQL",
+    "eol_risk": "Risco EOL",
+    "data_quality": "Qualidade de Dados",
+    "query_builder": "Construtor de Consultas",
+    "ai_insights": "Insights de IA",
+    "advanced_analytics": "Análises Avançadas",
+    "exports": "Exportações",
+    "resource_allocation": "Alocação de Recursos",
+    "compliance": "Conformidade",
+    "audit_logs": "Logs de Auditoria",
+    "transformation": "Transformação",
+    "graph_visualization": "Visualização de Grafos",
+    "reports": "Relatórios",
+    "report_builder": "Construtor de Relatórios",
+    "users": "Usuários",
+    "settings": "Configurações"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "user": "Usuário"
+  }
+}

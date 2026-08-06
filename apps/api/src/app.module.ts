@@ -7,6 +7,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { StorageModule } from './storage/storage.module';
+import { BillingModule } from './billing/billing.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 import { AuthModule } from './auth/auth.module';
@@ -62,6 +64,8 @@ import { redisStore } from 'cache-manager-redis-yet';
     AuthModule,
     TenantsModule,
     FeatureFlagsModule,
+    StorageModule,
+    BillingModule,
     HttpModule,
     ApplicationsModule,
     CostsModule,

@@ -1,0 +1,14 @@
+{{- if and .Values.postgres.enabled (not .Values.postgres.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "basemap.fullname" . }}-postgres
+  labels:
+    {{- include "basemap.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgres.storageSize }}
+{{- end }}

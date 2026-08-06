@@ -1,0 +1,84 @@
+# BaseMap Helm chart values
+
+replicaCount: 1
+imagePullSecrets: []
+
+image:
+  repository: registry.example.com/basemap
+  pullPolicy: IfNotPresent
+  tag: latest
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+podSecurityContext:
+  fsGroup: 1000
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+
+api:
+  service:
+    port: 4000
+  replicas: 2
+  resources:
+    limits: {cpu: "1000m", memory: 1Gi}
+    requests: {cpu: "250m", memory: 512Mi}
+  env:
+    DATABASE_URL: ""
+    REDIS_HOST: ""
+    ELASTICSEARCH_NODE: ""
+    NEO4J_URI: ""
+    NEO4J_USER: neo4j
+    NEO4J_PASSWORD: ""
+    STORAGE_PROVIDER: s3
+    S3_ENDPOINT: ""
+    S3_BUCKET: basemap-assets
+    APP_URL: ""
+  secrets: [] # list of secret key refs, e.g. [{name: basemap-secrets, key: JWT_SECRET}]
+
+web:
+  service:
+    port: 3000
+  replicas: 2
+  resources:
+    limits: {memory: 1Gi}
+    requests: {memory: 512Mi}
+  env:
+    NEXT_PUBLIC_API_URL: http://api:4000
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  existingClaim: ""
+  storageSize: 20Gi
+  user: postgres
+  password: ""
+secretName: basemap-secrets
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: basemap.example.com
+      paths: ["/"]
+  tls: []
+
+serviceAccount: {}
+
+autoscaling:
+  apiEnabled: false
+  webEnabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80

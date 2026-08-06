@@ -1,0 +1,32 @@
+# Offline / air-gapped deployment. Uses locally-bundled images produced by
+# scripts/offline-bundle.sh and disables image pulls.
+#
+# Usage:
+#   1. On a connected host run: ./scripts/offline-bundle.sh
+#   2. Copy the ./bundle directory to the offline host
+#   3. docker compose -f docker-compose.yml -f docker-compose.offline.yml --profile offline up -d
+version: '3.8'
+
+services:
+  postgres:
+    image: basemap-bundle/postgres:16-alpine
+
+  redis:
+    image: basemap-bundle/redis:7-alpine
+
+  elasticsearch:
+    image: basemap-bundle/elasticsearch:8.12.0
+
+  neo4j:
+    image: basemap-bundle/neo4j:5
+
+  minio:
+    image: basemap-bundle/minio:latest
+
+  api:
+    image: basemap-bundle/basemap-api:${BASEMAP_VERSION:-latest}
+    pull_policy: never
+
+  web:
+    image: basemap-bundle/basemap-web:${BASEMAP_VERSION:-latest}
+    pull_policy: never
