@@ -994,5 +994,41 @@
     "field_source": "Origem",
     "field_target": "Destino",
     "field_protocol": "Protocolo"
+  },
+  "eolRisk": {
+    "loading": "Carregando...",
+    "title": "Painel de Risco de EOL",
+    "refresh": "Atualizar",
+    "stat_critical": "Crítico",
+    "stat_high": "Alto",
+    "stat_medium": "Médio",
+    "stat_low": "Baixo",
+    "days_lt30": "<30 dias",
+    "days_30_90": "30-90 dias",
+    "days_90_180": "90-180 dias",
+    "days_gt180": ">180 dias",
+    "apps_at_risk": "Aplicações em Risco",
+    "components_at_risk": "Componentes em Risco",
+    "no_apps_eol": "Nenhuma aplicação com datas de EOL",
+    "no_comps_eol": "Nenhum componente com datas de EOL",
+    "eol_days": "EOL: {date} ({days} dias)",
+    "badge_expired": "Expirado",
+    "badge_critical": "Crítico",
+    "badge_high": "Alto",
+    "badge_medium": "Médio",
+    "badge_low": "Baixo"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Digite suas credenciais para acessar o BaseMap",
+    "tenant_slug": "Slug do Tenant",
+    "email": "Email",
+    "password": "Senha",
+    "logging_in": "Entrando...",
+    "login": "Entrar",
+    "or": "ou",
+    "sign_in_sso": "Entrar com SSO",
+    "sso_not_configured": "SSO não configurado para este tenant",
+    "login_failed": "Falha no login. Verifique suas credenciais."
   }
 }

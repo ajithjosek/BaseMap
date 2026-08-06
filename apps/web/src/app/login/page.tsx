@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const t = useTranslations('login');
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('admin@basemap.com');
   const [password, setPassword] = useState('admin123');
@@ -36,7 +38,7 @@ function LoginForm() {
       const res = await api.post('/auth/sso/oidc/authorize', { tenantId: tenantSlug });
       window.location.href = res.data.authorizationUrl;
     } catch (err: any) {
-      setError(err.response?.data?.message || 'SSO is not configured for this tenant');
+      setError(err.response?.data?.message || t('sso_not_configured'));
       setSsoLoading(false);
     }
   };
@@ -70,7 +72,7 @@ function LoginForm() {
       console.error('Login error full:', err);
       console.error('Login error response:', err.response);
       console.error('Login error message:', err.message);
-      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || err.message || t('login_failed'));
     } finally {
       setLoading(false);
     }
@@ -80,9 +82,9 @@ function LoginForm() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <Card className="w-[400px]">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
           <CardDescription>
-            Enter your credentials to access BaseMap
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
@@ -93,7 +95,7 @@ function LoginForm() {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="tenant">Tenant Slug</Label>
+              <Label htmlFor="tenant">{t('tenant_slug')}</Label>
               <Input 
                 id="tenant" 
                 value={tenantSlug} 
@@ -103,7 +105,7 @@ function LoginForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input 
                 id="email" 
                 type="email" 
@@ -114,7 +116,7 @@ function LoginForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input 
                 id="password" 
                 type="password" 
@@ -126,19 +128,19 @@ function LoginForm() {
           </CardContent>
           <CardFooter className="flex-col gap-3">
             <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? t('logging_in') : t('login')}
             </Button>
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-400">or</span>
+                <span className="bg-white px-2 text-slate-400">{t('or')}</span>
               </div>
             </div>
             <Button variant="outline" className="w-full" type="button" onClick={handleSso} disabled={ssoLoading}>
               {ssoLoading ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Sign in with SSO
+              {t('sign_in_sso')}
             </Button>
           </CardFooter>
         </form>
