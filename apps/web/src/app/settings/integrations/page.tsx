@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertCircle, CheckCircle, Plus, Trash2, TestTube, MessageSquare, Globe } from 'lucide-react';
 
 export default function IntegrationsPage() {
+  const t = useTranslations('integrations');
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('servicenow');
 
@@ -92,35 +94,35 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-        <p className="text-slate-500 mt-1">Connect BaseMap with external systems</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-slate-500 mt-1">{t('subtitle')}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="servicenow">ServiceNow</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
+          <TabsTrigger value="servicenow">{t('tab_servicenow')}</TabsTrigger>
+          <TabsTrigger value="webhooks">{t('tab_webhooks')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="servicenow">
           <Card>
             <CardHeader>
-              <CardTitle>ServiceNow Configuration</CardTitle>
-              <CardDescription>Connect to your ServiceNow instance to sync applications</CardDescription>
+              <CardTitle>{t('sn_title')}</CardTitle>
+              <CardDescription>{t('sn_desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label>Instance URL</Label>
+                    <Label>{t('instance_url')}</Label>
                     <Input 
-                      placeholder="https://instance.service-now.com"
+                      placeholder={t('instance_url_ph')}
                       value={snForm.instance_url}
                       onChange={(e) => setSnForm({ ...snForm, instance_url: e.target.value })}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label>Username</Label>
+                    <Label>{t('username')}</Label>
                     <Input 
                       value={snForm.username}
                       onChange={(e) => setSnForm({ ...snForm, username: e.target.value })}
@@ -129,14 +131,14 @@ export default function IntegrationsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label>Client ID</Label>
+                    <Label>{t('client_id')}</Label>
                     <Input 
                       value={snForm.client_id}
                       onChange={(e) => setSnForm({ ...snForm, client_id: e.target.value })}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label>Client Secret</Label>
+                    <Label>{t('client_secret')}</Label>
                     <Input 
                       type="password"
                       value={snForm.client_secret}
@@ -145,8 +147,8 @@ export default function IntegrationsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline">Test Connection</Button>
-                  <Button>Save Configuration</Button>
+                  <Button variant="outline">{t('test_connection')}</Button>
+                  <Button>{t('save_configuration')}</Button>
                 </div>
               </div>
             </CardContent>
@@ -156,11 +158,11 @@ export default function IntegrationsPage() {
         <TabsContent value="webhooks">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Webhook Notifications</h2>
-              <p className="text-sm text-slate-500">Configure webhooks to send alerts to Slack, Teams, or other platforms</p>
+              <h2 className="text-lg font-semibold">{t('webhook_title')}</h2>
+              <p className="text-sm text-slate-500">{t('webhook_desc')}</p>
             </div>
             <Button onClick={() => setIsWebhookDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Webhook
+              <Plus className="mr-2 h-4 w-4" /> {t('add_webhook')}
             </Button>
           </div>
 
@@ -168,7 +170,7 @@ export default function IntegrationsPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <AlertCircle className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                <p className="text-slate-500">No webhooks configured yet</p>
+                <p className="text-slate-500">{t('no_webhooks')}</p>
               </CardContent>
             </Card>
           ) : (
@@ -193,7 +195,7 @@ export default function IntegrationsPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={wh.is_active ? 'default' : 'secondary'}>
-                          {wh.is_active ? 'Active' : 'Inactive'}
+                          {wh.is_active ? t('active') : t('inactive')}
                         </Badge>
                         <Button 
                           size="sm" 
@@ -222,42 +224,42 @@ export default function IntegrationsPage() {
       <Dialog open={isWebhookDialogOpen} onOpenChange={setIsWebhookDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Webhook</DialogTitle>
+            <DialogTitle>{t('add_webhook')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Webhook Name</Label>
+              <Label>{t('webhook_name')}</Label>
               <Input
                 value={webhookForm.name}
                 onChange={(e) => setWebhookForm({ ...webhookForm, name: e.target.value })}
-                placeholder="Production Alerts"
+                placeholder={t('webhook_name_ph')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Provider</Label>
+              <Label>{t('provider')}</Label>
               <Select
                 value={webhookForm.provider}
                 onValueChange={(v) => setWebhookForm({ ...webhookForm, provider: v })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="slack">Slack</SelectItem>
-                  <SelectItem value="teams">Microsoft Teams</SelectItem>
-                  <SelectItem value="discord">Discord</SelectItem>
-                  <SelectItem value="webhook">Generic Webhook</SelectItem>
+                  <SelectItem value="slack">{t('provider_slack')}</SelectItem>
+                  <SelectItem value="teams">{t('provider_teams')}</SelectItem>
+                  <SelectItem value="discord">{t('provider_discord')}</SelectItem>
+                  <SelectItem value="webhook">{t('provider_generic')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>Webhook URL</Label>
+              <Label>{t('webhook_url')}</Label>
               <Input
                 value={webhookForm.webhook_url}
                 onChange={(e) => setWebhookForm({ ...webhookForm, webhook_url: e.target.value })}
-                placeholder="https://hooks.slack.com/services/..."
+                placeholder={t('webhook_url_ph')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Events to Trigger</Label>
+              <Label>{t('events_to_trigger')}</Label>
               <div className="flex flex-wrap gap-2">
                 {['saas_renewal', 'eol_warning', 'security_alert', 'budget_threshold', 'request_approved'].map(event => (
                   <Button
@@ -272,16 +274,16 @@ export default function IntegrationsPage() {
                       setWebhookForm({ ...webhookForm, events });
                     }}
                   >
-                    {event.replace('_', ' ')}
+                    {t(`event_${event}`)}
                   </Button>
                 ))}
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsWebhookDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsWebhookDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={() => createWebhookMutation.mutate(webhookForm)} disabled={createWebhookMutation.isPending}>
-              {createWebhookMutation.isPending ? 'Creating...' : 'Create Webhook'}
+              {createWebhookMutation.isPending ? t('creating') : t('create_webhook')}
             </Button>
           </DialogFooter>
         </DialogContent>

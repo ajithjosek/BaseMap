@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ const aggregationTypes = [
 ];
 
 export default function ReportBuilderPage() {
+  const t = useTranslations('builder');
   const [selectedReport, setSelectedReport] = useState<CustomReport | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -154,18 +156,18 @@ export default function ReportBuilderPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading...</div>;
+    return <div className="p-6">{t('loading')}</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Custom Report Builder</h1>
-          <p className="text-slate-500 mt-1">Create and manage custom reports with filters, grouping, and aggregations</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create Report
+          <Plus className="mr-2 h-4 w-4" /> {t('create_report')}
         </Button>
       </div>
 
@@ -173,11 +175,11 @@ export default function ReportBuilderPage() {
         <div className="md:col-span-1 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">My Reports</CardTitle>
+              <CardTitle className="text-lg">{t('my_reports')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {reports?.length === 0 ? (
-                <p className="text-slate-500 text-sm">No custom reports yet. Create one to get started.</p>
+                <p className="text-slate-500 text-sm">{t('no_reports')}</p>
               ) : (
                 reports?.map(report => (
                   <div
@@ -192,8 +194,8 @@ export default function ReportBuilderPage() {
                       {report.entity_type} • {report.user?.first_name} {report.user?.last_name}
                     </div>
                     <div className="flex gap-1 mt-2">
-                      {report.is_shared && <Badge variant="outline" className="text-xs">Shared</Badge>}
-                      {report.last_run_at && <Badge variant="secondary" className="text-xs">Run</Badge>}
+                      {report.is_shared && <Badge variant="outline" className="text-xs">{t('shared')}</Badge>}
+                      {report.last_run_at && <Badge variant="secondary" className="text-xs">{t('run')}</Badge>}
                     </div>
                   </div>
                 ))
@@ -209,7 +211,7 @@ export default function ReportBuilderPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{selectedReport.name}</CardTitle>
-                    <CardDescription>{selectedReport.description || 'No description'}</CardDescription>
+                    <CardDescription>{selectedReport.description || t('no_description')}</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button 
@@ -219,10 +221,10 @@ export default function ReportBuilderPage() {
                       disabled={executeMutation.isPending}
                     >
                       <Play className="mr-1 h-4 w-4" /> 
-                      {executeMutation.isPending ? 'Running...' : 'Run'}
+                      {executeMutation.isPending ? t('running') : t('run_action')}
                     </Button>
                     <Button variant="outline" size="sm">
-                      <Download className="mr-1 h-4 w-4" /> Export
+                      <Download className="mr-1 h-4 w-4" /> {t('export')}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -239,22 +241,22 @@ export default function ReportBuilderPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-slate-500">Entity:</span> <span className="font-medium">{selectedReport.entity_type}</span>
+                      <span className="text-slate-500">{t('entity')}</span> <span className="font-medium">{selectedReport.entity_type}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Columns:</span> <span className="font-medium">{(selectedReport.columns as any[])?.length || 0}</span>
+                      <span className="text-slate-500">{t('columns')}</span> <span className="font-medium">{(selectedReport.columns as any[])?.length || 0}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Filters:</span> <span className="font-medium">{(selectedReport.filters as any[])?.length || 0}</span>
+                      <span className="text-slate-500">{t('filters')}:</span> <span className="font-medium">{(selectedReport.filters as any[])?.length || 0}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Group By:</span> <span className="font-medium">{(selectedReport.group_by as any[])?.length || 0}</span>
+                      <span className="text-slate-500">{t('group_by')}:</span> <span className="font-medium">{(selectedReport.group_by as any[])?.length || 0}</span>
                     </div>
                   </div>
 
                   {(selectedReport.filters as any[])?.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-sm mb-2">Applied Filters</h4>
+                      <h4 className="font-medium text-sm mb-2">{t('applied_filters')}</h4>
                       <div className="flex flex-wrap gap-2">
                         {(selectedReport.filters as any[]).map((f, i) => (
                           <Badge key={i} variant="secondary">
@@ -267,7 +269,7 @@ export default function ReportBuilderPage() {
 
                   {(selectedReport.aggregations as any[])?.length > 0 && (
                     <div>
-                      <h4 className="font-medium text-sm mb-2">Aggregations</h4>
+                      <h4 className="font-medium text-sm mb-2">{t('aggregations')}</h4>
                       <div className="flex flex-wrap gap-2">
                         {(selectedReport.aggregations as any[]).map((a, i) => (
                           <Badge key={i} variant="outline">
@@ -284,7 +286,7 @@ export default function ReportBuilderPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
                 <Table className="h-12 w-12 mb-4 opacity-50" />
-                <p>Select a report from the list or create a new one</p>
+                <p>{t('select_report_hint')}</p>
               </CardContent>
             </Card>
           )}
@@ -294,21 +296,21 @@ export default function ReportBuilderPage() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create Custom Report</DialogTitle>
+            <DialogTitle>{t('dialog_title')}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Report Name</Label>
+                <Label>{t('report_name')}</Label>
                 <Input 
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="My Custom Report"
+                  placeholder={t('report_name_ph')}
                 />
               </div>
               <div>
-                <Label>Entity Type</Label>
+                <Label>{t('entity_type')}</Label>
                 <Select 
                   value={formData.entity_type}
                   onValueChange={(v) => setFormData({ ...formData, entity_type: v, columns: [], group_by: [] })}
@@ -317,26 +319,26 @@ export default function ReportBuilderPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="application">Application</SelectItem>
-                    <SelectItem value="capability">Capability</SelectItem>
-                    <SelectItem value="cost">Cost</SelectItem>
+                    <SelectItem value="application">{t('application')}</SelectItem>
+                    <SelectItem value="capability">{t('capability')}</SelectItem>
+                    <SelectItem value="cost">{t('cost')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div>
-              <Label>Description (Optional)</Label>
+              <Label>{t('description_optional')}</Label>
               <Textarea 
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="What does this report show?"
+                placeholder={t('description_ph')}
               />
             </div>
 
             <div>
               <Label className="flex items-center gap-2">
-                <Table className="h-4 w-4" /> Columns
+                <Table className="h-4 w-4" /> {t('columns_label')}
               </Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {entityFields[formData.entity_type]?.map(field => (
@@ -373,7 +375,7 @@ export default function ReportBuilderPage() {
                       }}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Field" />
+                        <SelectValue placeholder={t('field')} />
                       </SelectTrigger>
                       <SelectContent>
                         {entityFields[formData.entity_type]?.map(f => (
@@ -390,14 +392,14 @@ export default function ReportBuilderPage() {
                       }}
                     >
                       <SelectTrigger className="w-24">
-                        <SelectValue placeholder="Op" />
+                        <SelectValue placeholder={t('op')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="eq">=</SelectItem>
                         <SelectItem value="ne">!=</SelectItem>
                         <SelectItem value="gt">&gt;</SelectItem>
                         <SelectItem value="lt">&lt;</SelectItem>
-                        <SelectItem value="contains">Contains</SelectItem>
+                        <SelectItem value="contains">{t('contains')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Input 
@@ -408,7 +410,7 @@ export default function ReportBuilderPage() {
                         newFilters[i].value = e.target.value;
                         setFormData({ ...formData, filters: newFilters });
                       }}
-                      placeholder="Value"
+                      placeholder={t('value')}
                     />
                     <Button variant="ghost" size="icon" onClick={() => handleRemoveFilter(i)}>
                       <Trash2 className="h-4 w-4" />
@@ -421,7 +423,7 @@ export default function ReportBuilderPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label className="flex items-center gap-2">
-                  <ArrowDownUp className="h-4 w-4" /> Group By
+                  <ArrowDownUp className="h-4 w-4" /> {t('group_by')}
                 </Label>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -441,7 +443,7 @@ export default function ReportBuilderPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" /> Aggregations
+                  <BarChart3 className="h-4 w-4" /> {t('aggregations')}
                 </Label>
                 <Button variant="outline" size="sm" onClick={handleAddAggregation}>
                   <Plus className="h-4 w-4" />
@@ -459,7 +461,7 @@ export default function ReportBuilderPage() {
                       }}
                     >
                       <SelectTrigger className="w-28">
-                        <SelectValue placeholder="Type" />
+                        <SelectValue placeholder={t('type')} />
                       </SelectTrigger>
                       <SelectContent>
                         {aggregationTypes.map(t => (
@@ -494,7 +496,7 @@ export default function ReportBuilderPage() {
                         newAggs[i].alias = e.target.value;
                         setFormData({ ...formData, aggregations: newAggs });
                       }}
-                      placeholder="Alias"
+                      placeholder={t('alias')}
                     />
                     <Button variant="ghost" size="icon" onClick={() => handleRemoveAggregation(i)}>
                       <Trash2 className="h-4 w-4" />
@@ -506,9 +508,9 @@ export default function ReportBuilderPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={handleCreateReport} disabled={!formData.name}>
-              <Save className="mr-2 h-4 w-4" /> Create Report
+              <Save className="mr-2 h-4 w-4" /> {t('create_report')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const statusColors: Record<string, string> = {
 const typeOptions = ['REST', 'SOAP', 'GraphQL', 'gRPC', 'Database', 'File Transfer', 'Message Queue', 'Other'];
 
 export default function ApiCatalogPage() {
+  const t = useTranslations('interfaces');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -125,25 +127,25 @@ export default function ApiCatalogPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading...</div>;
+    return <div className="p-6">{t('common.loading')}</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">API Catalog</h1>
-          <p className="text-slate-500 mt-1">Manage and monitor your application interfaces</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Interface
+          <Plus className="mr-2 h-4 w-4" /> {t('add_interface')}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Interfaces</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.total || 0}</div>
@@ -151,7 +153,7 @@ export default function ApiCatalogPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Operational</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_operational')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats?.operational || 0}</div>
@@ -159,7 +161,7 @@ export default function ApiCatalogPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Degraded</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_degraded')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats?.degraded || 0}</div>
@@ -167,7 +169,7 @@ export default function ApiCatalogPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Down</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_down')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats?.down || 0}</div>
@@ -179,7 +181,7 @@ export default function ApiCatalogPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input 
-            placeholder="Search interfaces..." 
+            placeholder={t('search_placeholder')}
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -187,10 +189,10 @@ export default function ApiCatalogPage() {
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Type" />
+            <SelectValue placeholder={t('type')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">{t('all_types')}</SelectItem>
             {typeOptions.map(t => (
               <SelectItem key={t} value={t}>{t}</SelectItem>
             ))}
@@ -198,14 +200,14 @@ export default function ApiCatalogPage() {
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t('status')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="Operational">Operational</SelectItem>
-            <SelectItem value="Degraded">Degraded</SelectItem>
-            <SelectItem value="Down">Down</SelectItem>
-            <SelectItem value="Deprecated">Deprecated</SelectItem>
+            <SelectItem value="all">{t('all_status')}</SelectItem>
+            <SelectItem value="Operational">{t('operational')}</SelectItem>
+            <SelectItem value="Degraded">{t('degraded')}</SelectItem>
+            <SelectItem value="Down">{t('down')}</SelectItem>
+            <SelectItem value="Deprecated">{t('deprecated')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -224,14 +226,14 @@ export default function ApiCatalogPage() {
                   <div>
                     <div className="font-medium">{iface.name}</div>
                     <div className="text-sm text-slate-500">
-                      {iface.interface_type} • {iface.protocol || 'No protocol'} • {iface.data_format || 'No format'}
+                      {iface.interface_type} • {iface.protocol || t('no_protocol')} • {iface.data_format || t('no_format')}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   {iface.source_application && (
                     <div className="text-sm">
-                      <span className="text-slate-500">From:</span> {iface.source_application.name}
+                      <span className="text-slate-500">{t('from')}</span> {iface.source_application.name}
                     </div>
                   )}
                   {iface.source_application && iface.target_application && (
@@ -239,13 +241,13 @@ export default function ApiCatalogPage() {
                   )}
                   {iface.target_application && (
                     <div className="text-sm">
-                      <span className="text-slate-500">To:</span> {iface.target_application.name}
+                      <span className="text-slate-500">{t('to')}</span> {iface.target_application.name}
                     </div>
                   )}
                   {iface._count?.incidents ? (
-                    <Badge variant="destructive">{iface._count.incidents} incidents</Badge>
+                    <Badge variant="destructive">{t('incidents', { count: iface._count.incidents })}</Badge>
                   ) : (
-                    <Badge variant="outline">No incidents</Badge>
+                    <Badge variant="outline">{t('no_incidents')}</Badge>
                   )}
                 </div>
               </div>
@@ -256,7 +258,7 @@ export default function ApiCatalogPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
               <Link2 className="h-12 w-12 mb-4 opacity-50" />
-              <p>No interfaces found. Add one to get started.</p>
+              <p>{t('no_interfaces')}</p>
             </CardContent>
           </Card>
         )}
@@ -265,21 +267,21 @@ export default function ApiCatalogPage() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add Interface</DialogTitle>
+            <DialogTitle>{t('add_interface')}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Interface Name</Label>
+                <Label>{t('interface_name')}</Label>
                 <Input 
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="User API"
+                  placeholder={t('name_ph')}
                 />
               </div>
               <div>
-                <Label>Type</Label>
+                <Label>{t('type')}</Label>
                 <Select 
                   value={formData.interface_type}
                   onValueChange={(v) => setFormData({ ...formData, interface_type: v })}
@@ -297,36 +299,36 @@ export default function ApiCatalogPage() {
             </div>
 
             <div>
-              <Label>Description</Label>
+              <Label>{t('description')}</Label>
               <Input 
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="What does this interface do?"
+                placeholder={t('description_ph')}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Source Application</Label>
+                <Label>{t('source_application')}</Label>
                 <Input 
                   value={formData.source_application_id}
                   onChange={(e) => setFormData({ ...formData, source_application_id: e.target.value })}
-                  placeholder="Application ID (optional)"
+                  placeholder={t('app_id_optional')}
                 />
               </div>
               <div>
-                <Label>Target Application</Label>
+                <Label>{t('target_application')}</Label>
                 <Input 
                   value={formData.target_application_id}
                   onChange={(e) => setFormData({ ...formData, target_application_id: e.target.value })}
-                  placeholder="Application ID (optional)"
+                  placeholder={t('app_id_optional')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Direction</Label>
+                <Label>{t('direction')}</Label>
                 <Select 
                   value={formData.direction}
                   onValueChange={(v) => setFormData({ ...formData, direction: v })}
@@ -335,13 +337,13 @@ export default function ApiCatalogPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="One-way">One-way</SelectItem>
-                    <SelectItem value="Bidirectional">Bidirectional</SelectItem>
+                    <SelectItem value="One-way">{t('direction_one_way')}</SelectItem>
+                    <SelectItem value="Bidirectional">{t('direction_bidirectional')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Frequency</Label>
+                <Label>{t('frequency')}</Label>
                 <Select 
                   value={formData.frequency}
                   onValueChange={(v) => setFormData({ ...formData, frequency: v })}
@@ -350,10 +352,10 @@ export default function ApiCatalogPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Real-time">Real-time</SelectItem>
-                    <SelectItem value="Batch">Batch</SelectItem>
-                    <SelectItem value="Scheduled">Scheduled</SelectItem>
-                    <SelectItem value="On-demand">On-demand</SelectItem>
+                    <SelectItem value="Real-time">{t('freq_real_time')}</SelectItem>
+                    <SelectItem value="Batch">{t('freq_batch')}</SelectItem>
+                    <SelectItem value="Scheduled">{t('freq_scheduled')}</SelectItem>
+                    <SelectItem value="On-demand">{t('freq_on_demand')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -361,27 +363,27 @@ export default function ApiCatalogPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Protocol</Label>
+                <Label>{t('protocol')}</Label>
                 <Input 
                   value={formData.protocol}
                   onChange={(e) => setFormData({ ...formData, protocol: e.target.value })}
-                  placeholder="HTTPS, TCP, etc."
+                  placeholder={t('protocol_ph')}
                 />
               </div>
               <div>
-                <Label>Data Format</Label>
+                <Label>{t('data_format')}</Label>
                 <Input 
                   value={formData.data_format}
                   onChange={(e) => setFormData({ ...formData, data_format: e.target.value })}
-                  placeholder="JSON, XML, etc."
+                  placeholder={t('data_format_ph')}
                 />
               </div>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={!formData.name}>Add Interface</Button>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>{t('cancel')}</Button>
+            <Button onClick={handleCreate} disabled={!formData.name}>{t('add_interface')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
