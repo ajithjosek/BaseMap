@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface Allocation {
 }
 
 export default function ResourceAllocationPage() {
+  const t = useTranslations('resourceAllocation');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAllocation, setNewAllocation] = useState({
     user_id: '',
@@ -83,19 +85,19 @@ export default function ResourceAllocationPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="h-8 w-8 text-blue-500" />
-            Resource Allocation
+            {t('title')}
           </h1>
-          <p className="text-slate-500 mt-1">Track team capacity and resource utilization</p>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Allocation
+          <Plus className="mr-2 h-4 w-4" /> {t('add_allocation')}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Resources</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{capacity?.total_users || 0}</div>
@@ -105,7 +107,7 @@ export default function ResourceAllocationPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              Over Capacity
+              {t('stat_over')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -116,7 +118,7 @@ export default function ResourceAllocationPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              At Capacity
+              {t('stat_at')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -127,7 +129,7 @@ export default function ResourceAllocationPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-1">
               <Clock className="h-4 w-4 text-yellow-500" />
-              Under Capacity
+              {t('stat_under')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -138,7 +140,7 @@ export default function ResourceAllocationPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Utilization by Department</CardTitle>
+          <CardTitle>{t('util_title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -159,23 +161,23 @@ export default function ResourceAllocationPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Active Allocations</CardTitle>
+          <CardTitle>{t('active_allocations')}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="text-center py-8">{t('loading')}</div>
           ) : !allocations?.length ? (
-            <div className="text-center py-8 text-slate-500">No allocations yet</div>
+            <div className="text-center py-8 text-slate-500">{t('no_allocations')}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2">Resource</th>
-                    <th className="text-left py-2">Type</th>
-                    <th className="text-left py-2">Allocation</th>
-                    <th className="text-left py-2">Period</th>
-                    <th className="text-left py-2">Status</th>
+                    <th className="text-left py-2">{t('col_resource')}</th>
+                    <th className="text-left py-2">{t('col_type')}</th>
+                    <th className="text-left py-2">{t('col_allocation')}</th>
+                    <th className="text-left py-2">{t('col_period')}</th>
+                    <th className="text-left py-2">{t('col_status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -199,7 +201,7 @@ export default function ResourceAllocationPage() {
                       </td>
                       <td className="py-3">
                         <Badge variant={alloc.is_active ? 'default' : 'secondary'}>
-                          {alloc.is_active ? 'Active' : 'Inactive'}
+                          {alloc.is_active ? t('active') : t('inactive')}
                         </Badge>
                       </td>
                     </tr>
@@ -214,35 +216,35 @@ export default function ResourceAllocationPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Resource Allocation</DialogTitle>
+            <DialogTitle>{t('dialog_title')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>User ID</Label>
+              <Label>{t('user_id')}</Label>
               <Input
                 value={newAllocation.user_id}
                 onChange={(e) => setNewAllocation({ ...newAllocation, user_id: e.target.value })}
-                placeholder="Enter user ID"
+                placeholder={t('user_id_ph')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Resource Type</Label>
+              <Label>{t('resource_type')}</Label>
               <Select
                 value={newAllocation.resource_type}
                 onValueChange={(v) => setNewAllocation({ ...newAllocation, resource_type: v })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="product">Product</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="operations">Operations</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="engineering">{t('type_engineering')}</SelectItem>
+                  <SelectItem value="product">{t('type_product')}</SelectItem>
+                  <SelectItem value="design">{t('type_design')}</SelectItem>
+                  <SelectItem value="operations">{t('type_operations')}</SelectItem>
+                  <SelectItem value="finance">{t('type_finance')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>Allocation %</Label>
+              <Label>{t('allocation_pct')}</Label>
               <Input
                 type="number"
                 min={0}
@@ -253,7 +255,7 @@ export default function ResourceAllocationPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Start Date</Label>
+                <Label>{t('start_date')}</Label>
                 <Input
                   type="date"
                   value={newAllocation.start_date}
@@ -261,7 +263,7 @@ export default function ResourceAllocationPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>End Date</Label>
+                <Label>{t('end_date')}</Label>
                 <Input
                   type="date"
                   value={newAllocation.end_date}
@@ -271,9 +273,9 @@ export default function ResourceAllocationPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={() => createMutation.mutate(newAllocation)} disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create'}
+              {createMutation.isPending ? t('creating') : t('create')}
             </Button>
           </DialogFooter>
         </DialogContent>

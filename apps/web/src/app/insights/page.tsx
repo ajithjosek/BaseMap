@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ interface Recommendation {
 }
 
 export default function AIInsightsPage() {
+  const t = useTranslations('insights');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const queryClient = useQueryClient();
@@ -97,7 +99,7 @@ export default function AIInsightsPage() {
 
   const resolvedPct = dashboard ? Math.round((dashboard.resolved / (dashboard.open + dashboard.resolved || 1)) * 100) : 0;
 
-  if (dashLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (dashLoading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
     <div className="space-y-6">
@@ -105,23 +107,23 @@ export default function AIInsightsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Sparkles className="h-8 w-8 text-purple-500" />
-            AI Insights
+            {t('title')}
           </h1>
-          <p className="text-slate-500 mt-1">AI-powered recommendations based on your EAM data</p>
+          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
         </div>
         <Button 
           onClick={() => generateMutation.mutate()} 
           disabled={generateMutation.isPending}
         >
           <Zap className="mr-2 h-4 w-4" />
-          {generateMutation.isPending ? 'Generating...' : 'Generate Insights'}
+          {generateMutation.isPending ? t('generating') : t('generate')}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Insights</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{dashboard?.total || 0}</div>
@@ -129,7 +131,7 @@ export default function AIInsightsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Open</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_open')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-orange-600">{dashboard?.open || 0}</div>
@@ -137,7 +139,7 @@ export default function AIInsightsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_resolved')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">{dashboard?.resolved || 0}</div>
@@ -145,11 +147,11 @@ export default function AIInsightsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Impact</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_total_impact')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">${(dashboard?.total_impact || 0).toLocaleString()}</div>
-            <p className="text-xs text-slate-500">potential savings</p>
+            <p className="text-xs text-slate-500">{t('potential_savings')}</p>
           </CardContent>
         </Card>
       </div>
@@ -157,8 +159,8 @@ export default function AIInsightsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Resolution Progress</span>
-            <span className="text-sm font-normal text-slate-500">{resolvedPct}% resolved</span>
+            <span>{t('resolution_progress')}</span>
+            <span className="text-sm font-normal text-slate-500">{t('resolved_pct', { pct: resolvedPct })}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -169,24 +171,24 @@ export default function AIInsightsPage() {
       <div className="flex gap-4">
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={t('category')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="eol_risk">EOL Risk</SelectItem>
-            <SelectItem value="underutilization">Underutilization</SelectItem>
-            <SelectItem value="renewal">Renewals</SelectItem>
+            <SelectItem value="all">{t('all_categories')}</SelectItem>
+            <SelectItem value="eol_risk">{t('cat_eol_risk')}</SelectItem>
+            <SelectItem value="underutilization">{t('cat_underutilization')}</SelectItem>
+            <SelectItem value="renewal">{t('cat_renewal')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="Priority" />
+            <SelectValue placeholder={t('priority')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="all">{t('all_priorities')}</SelectItem>
+            <SelectItem value="critical">{t('prio_critical')}</SelectItem>
+            <SelectItem value="high">{t('prio_high')}</SelectItem>
+            <SelectItem value="medium">{t('prio_medium')}</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="icon" onClick={() => refetch()}>
@@ -196,12 +198,12 @@ export default function AIInsightsPage() {
 
       <div className="grid gap-4">
         {isLoading ? (
-          <div className="text-center py-12">Loading recommendations...</div>
+          <div className="text-center py-12">{t('loading_recs')}</div>
         ) : !recommendations?.length ? (
           <Card className="p-12 text-center">
             <Sparkles className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-            <h3 className="text-lg font-medium">No insights yet</h3>
-            <p className="text-slate-500 mb-4">Click "Generate Insights" to analyze your data</p>
+            <h3 className="text-lg font-medium">{t('no_insights')}</h3>
+            <p className="text-slate-500 mb-4">{t('no_insights_desc')}</p>
           </Card>
         ) : (
           recommendations.map((rec) => (
@@ -217,18 +219,18 @@ export default function AIInsightsPage() {
                         <h3 className="font-semibold">{rec.title}</h3>
                         <Badge variant={getPriorityVariant(rec.priority)}>{rec.priority}</Badge>
                         {rec.is_resolved && (
-                          <Badge variant="outline" className="bg-green-50">Resolved</Badge>
+                          <Badge variant="outline" className="bg-green-50">{t('resolved_badge')}</Badge>
                         )}
                       </div>
                       <p className="text-slate-600 text-sm">{rec.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
                         <span className="flex items-center gap-1">
                           <Target className="h-3 w-3" />
-                          Confidence: {(rec.confidence * 100).toFixed(0)}%
+                          Confidence: {t('confidence', { value: (rec.confidence * 100).toFixed(0) })}
                         </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
-                          Impact: ${rec.impact_score.toLocaleString()}
+                          {t('impact_value', { value: rec.impact_score.toLocaleString() })}
                         </span>
                         <span>{new Date(rec.created_at).toLocaleDateString()}</span>
                       </div>
@@ -242,7 +244,7 @@ export default function AIInsightsPage() {
                       disabled={resolveMutation.isPending}
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
-                      Resolve
+                      {t('resolve')}
                     </Button>
                   )}
                 </div>

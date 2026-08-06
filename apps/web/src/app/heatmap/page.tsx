@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ const supportLevelColors: Record<string, string> = {
 };
 
 export default function HeatmapPage() {
+  const t = useTranslations('heatmap');
   const [matrixData, setMatrixData] = useState<MatrixData | null>(null);
   const [coverage, setCoverage] = useState<Coverage>({});
   const [gapStats, setGapStats] = useState<GapStats | null>(null);
@@ -130,19 +132,19 @@ export default function HeatmapPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Capability to Application Heatmap</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-slate-500 mt-1">
-            Map applications to capabilities and identify gaps in coverage
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleDetectGaps}>
             <AlertTriangle className="mr-2 h-4 w-4" />
-            Detect Gaps
+            {t('detect_gaps')}
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            {t('export')}
           </Button>
         </div>
       </div>
@@ -150,7 +152,7 @@ export default function HeatmapPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Gaps</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_total_gaps')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{gapStats?.total || 0}</div>
@@ -158,7 +160,7 @@ export default function HeatmapPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Open Gaps</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_open_gaps')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{gapStats?.open || 0}</div>
@@ -166,7 +168,7 @@ export default function HeatmapPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Closed Gaps</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_closed_gaps')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{gapStats?.closed || 0}</div>
@@ -174,7 +176,7 @@ export default function HeatmapPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Critical</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">{t('stat_critical')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{gapStats?.bySeverity?.Critical || 0}</div>
@@ -185,21 +187,21 @@ export default function HeatmapPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Filters</CardTitle>
+            <CardTitle>{t('filters')}</CardTitle>
             <div className="flex gap-2">
               <Select
                 value={filters.lifecycleState}
                 onValueChange={(value) => setFilters({ ...filters, lifecycleState: value })}
               >
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Lifecycle" />
+                  <SelectValue placeholder={t('lifecycle')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Lifecycles</SelectItem>
-                  <SelectItem value="Planning">Planning</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Maintenance">Maintenance</SelectItem>
-                  <SelectItem value="Retirement">Retirement</SelectItem>
+                  <SelectItem value="all">{t('all_lifecycles')}</SelectItem>
+                  <SelectItem value="Planning">{t('planning')}</SelectItem>
+                  <SelectItem value="Active">{t('active')}</SelectItem>
+                  <SelectItem value="Maintenance">{t('maintenance')}</SelectItem>
+                  <SelectItem value="Retirement">{t('retirement')}</SelectItem>
                 </SelectContent>
               </Select>
               <Select
@@ -207,13 +209,13 @@ export default function HeatmapPage() {
                 onValueChange={(value) => setFilters({ ...filters, riskScore: value })}
               >
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Risk Level" />
+                  <SelectValue placeholder={t('risk_level')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Risks</SelectItem>
-                  <SelectItem value="0-30">Low (0-30)</SelectItem>
-                  <SelectItem value="31-60">Medium (31-60)</SelectItem>
-                  <SelectItem value="61-100">High (61-100)</SelectItem>
+                  <SelectItem value="all">{t('all_risks')}</SelectItem>
+                  <SelectItem value="0-30">{t('risk_low')}</SelectItem>
+                  <SelectItem value="31-60">{t('risk_medium')}</SelectItem>
+                  <SelectItem value="61-100">{t('risk_high')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -223,7 +225,7 @@ export default function HeatmapPage() {
 
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>Capability Coverage Matrix</CardTitle>
+          <CardTitle>{t('matrix_title')}</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {matrixData && matrixData.capabilities.length > 0 ? (
@@ -231,26 +233,26 @@ export default function HeatmapPage() {
               <div className="flex mb-4 gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-blue-600 rounded"></div>
-                  <span className="text-sm">Primary</span>
+                  <span className="text-sm">{t('legend_primary')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span className="text-sm">Supporting</span>
+                  <span className="text-sm">{t('legend_supporting')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                  <span className="text-sm">Enabling</span>
+                  <span className="text-sm">{t('legend_enabling')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-slate-200 rounded"></div>
-                  <span className="text-sm">No Mapping</span>
+                  <span className="text-sm">{t('legend_no_mapping')}</span>
                 </div>
               </div>
 
               <div className="grid gap-1" style={{ 
                 gridTemplateColumns: `200px repeat(${Math.min(matrixData.applications.length, 10)}, 80px)`
               }}>
-                <div className="font-medium p-2 bg-slate-50">Capability</div>
+                <div className="font-medium p-2 bg-slate-50">{t('capability')}</div>
                 {matrixData.applications.slice(0, 10).map((app) => (
                   <div key={app.id} className="font-medium p-2 bg-slate-50 text-xs truncate text-center">
                     {app.name.substring(0, 10)}
@@ -288,14 +290,14 @@ export default function HeatmapPage() {
 
               {matrixData.applications.length > 10 && (
                 <p className="text-sm text-slate-500 mt-4 text-center">
-                  Showing first 10 of {matrixData.applications.length} applications
+                  {t('showing_first', { count: matrixData.applications.length })}
                 </p>
               )}
             </div>
           ) : (
             <div className="text-center py-12 text-slate-500">
               <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No capabilities found. Create capabilities first in the Capabilities page.</p>
+              <p>{t('no_capabilities')}</p>
             </div>
           )}
         </CardContent>
@@ -303,7 +305,7 @@ export default function HeatmapPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Gap List</CardTitle>
+          <CardTitle>{t('gap_list')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -315,14 +317,14 @@ export default function HeatmapPage() {
                   const res = await api.get('/capabilities/gaps');
                   const gaps = res.data;
                   if (gaps.length === 0) {
-                    alert('No gaps found. Click "Detect Gaps" to scan for gaps.');
+                    alert(t('no_gaps_alert'));
                   }
                 } catch (error) {
                   console.error('Failed to fetch gaps:', error);
                 }
               }}
             >
-              View All Gaps
+              {t('view_all_gaps')}
             </Button>
           </div>
         </CardContent>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,7 @@ interface Project {
 }
 
 export default function TransformationRoadmap() {
+  const t = useTranslations('transformation');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState({
     name: '',
@@ -112,21 +114,21 @@ export default function TransformationRoadmap() {
     return Math.max(0, Math.min(100, (elapsed / total) * 100));
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (isLoading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Transformation Roadmap</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Project
+          <Plus className="mr-2 h-4 w-4" /> {t('add_project')}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats?.total || 0}</div>
@@ -134,7 +136,7 @@ export default function TransformationRoadmap() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Planning</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_planning')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-slate-600">{stats?.by_status?.planning || 0}</div>
@@ -142,7 +144,7 @@ export default function TransformationRoadmap() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_in_progress')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">{stats?.by_status?.in_progress || 0}</div>
@@ -150,7 +152,7 @@ export default function TransformationRoadmap() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_completed')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">{stats?.by_status?.completed || 0}</div>
@@ -158,7 +160,7 @@ export default function TransformationRoadmap() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stat_avg_progress')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats?.avg_progress || 0}%</div>
@@ -170,14 +172,14 @@ export default function TransformationRoadmap() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Project Timeline (Gantt View)
+            {t('timeline_title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {!projects?.length ? (
             <div className="text-center py-12 text-slate-500">
               <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No transformation projects yet. Click "Add Project" to get started.</p>
+              <p>{t('no_projects')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -207,9 +209,9 @@ export default function TransformationRoadmap() {
                     </div>
                     <div className="flex items-center justify-between mt-2 text-sm">
                       <span className="text-slate-500">
-                        {project.owner && `Owner: ${project.owner}`}
+                        {project.owner && t('owner', { name: project.owner })}
                       </span>
-                      <span className="font-medium">{project.progress}% complete</span>
+                      <span className="font-medium">{t('complete_pct', { pct: project.progress })}</span>
                     </div>
                   </div>
                 );
@@ -222,60 +224,60 @@ export default function TransformationRoadmap() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>New Transformation Project</DialogTitle>
+            <DialogTitle>{t('dialog_title')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Project Name</Label>
+              <Label>{t('project_name')}</Label>
               <Input
                 value={newProject.name}
                 onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                placeholder="Cloud Migration Phase 1"
+                placeholder={t('project_name_ph')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Description</Label>
+              <Label>{t('description')}</Label>
               <Textarea
                 value={newProject.description}
                 onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                placeholder="Brief description..."
+                placeholder={t('description_ph')}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Status</Label>
+                <Label>{t('status')}</Label>
                 <Select
                   value={newProject.status}
                   onValueChange={(v) => setNewProject({ ...newProject, status: v })}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="planning">Planning</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="on_hold">On Hold</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="planning">{t('status_planning')}</SelectItem>
+                    <SelectItem value="in_progress">{t('status_in_progress')}</SelectItem>
+                    <SelectItem value="on_hold">{t('status_on_hold')}</SelectItem>
+                    <SelectItem value="completed">{t('status_completed')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Priority</Label>
+                <Label>{t('priority')}</Label>
                 <Select
                   value={newProject.priority}
                   onValueChange={(v) => setNewProject({ ...newProject, priority: v })}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="low">{t('prio_low')}</SelectItem>
+                    <SelectItem value="medium">{t('prio_medium')}</SelectItem>
+                    <SelectItem value="high">{t('prio_high')}</SelectItem>
+                    <SelectItem value="critical">{t('prio_critical')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Start Date</Label>
+                <Label>{t('start_date')}</Label>
                 <Input
                   type="date"
                   value={newProject.start_date}
@@ -283,7 +285,7 @@ export default function TransformationRoadmap() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>End Date</Label>
+                <Label>{t('end_date')}</Label>
                 <Input
                   type="date"
                   value={newProject.end_date}
@@ -292,18 +294,18 @@ export default function TransformationRoadmap() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label>Owner</Label>
+              <Label>{t('owner_label')}</Label>
               <Input
                 value={newProject.owner}
                 onChange={(e) => setNewProject({ ...newProject, owner: e.target.value })}
-                placeholder="Project lead name"
+                placeholder={t('owner_ph')}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t('cancel')}</Button>
             <Button onClick={() => createMutation.mutate(newProject)} disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating...' : 'Create Project'}
+              {createMutation.isPending ? t('creating') : t('create_project')}
             </Button>
           </DialogFooter>
         </DialogContent>
