@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bell, User, Building2, Mail, Shield, Save, Plug } from 'lucide-react';
+import { Bell, User, Building2, Mail, Shield, Save, Plug, CreditCard, Flag, Trash2, Download } from 'lucide-react';
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
@@ -24,7 +24,37 @@ export default function SettingsPage() {
     eol_alert_days: '90,60,30',
   });
 
-  const { data: preferences, isLoading } = useQuery({
+  const { data: tenant, refetch: refetchTenant } = useQuery({
+    queryKey: ['current-tenant'],
+    queryFn: async () => {
+      const tenantId = localStorage.getItem('tenant_id');
+      const response = await api.get(`/tenants/${tenantId}`);
+      return response.data;
+    },
+  });
+
+  const { data: featureFlags, refetch: refetchFlags } = useQuery({
+    queryKey: ['feature-flags'],
+    queryFn: async () => {
+      const response = await api.get('/feature-flags');
+      return response.data;
+    },
+  });
+
+  const updateFlagsMutation = useMutation({
+    mutationFn: async (flags: any) => api.put('/feature-flags', { flags }),
+    onSuccess: () => refetchFlags(),
+  });
+
+  const updateTenantMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const tenantId = localStorage.getItem('tenant_id');
+      return api.patch(`/tenants/${tenantId}`, data);
+    },
+    onSuccess: () => refetchTenant(),
+  });
+
+  const { data: preferences, isLoading: prefsLoading } = useQuery({
     queryKey: ['user-preferences'],
     queryFn: async () => {
       const response = await api.get('/users/me/preferences');
@@ -69,6 +99,18 @@ export default function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="integrations" className="flex items-center gap-2">
             <Plug className="h-4 w-4" /> Integrations
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" /> Billing
+          </TabsTrigger>
+          <TabsTrigger value="feature-flags" className="flex items-center gap-2">
+            <Flag className="h-4 w-4" /> Features
+          </TabsTrigger>
+          <TabsTrigger value="sso" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" /> SSO
+          </TabsTrigger>
+          <TabsTrigger value="data" className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4" /> Data
           </TabsTrigger>
         </TabsList>
 
@@ -268,6 +310,161 @@ export default function SettingsPage() {
                 </div>
                 <Button variant="outline" onClick={() => window.location.href = '/settings/integrations'}>
                   Configure
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="billing" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Plan and Billing</CardTitle>
+              <CardDescription>Manage your workspace plan and usage limits</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <p className="font-medium">Current Plan</p>
+                  <p className="text-sm text-slate-500">Manage how your team uses BaseMap</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold capitalize">{tenant?.plan || 'starter'}</p>
+                  <p className="text-xs text-slate-500">Up to {tenant?.settings?.quotas?.requests_per_minute || 100} requests/min</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {(['starter', 'professional', 'enterprise'] as const).map((plan) => (
+                  <button
+                    key={plan}
+                    disabled={!tenant || tenant?.plan === plan || updateTenantMutation.isPending}
+                    onClick={() => updateTenantMutation.mutate({ plan })}
+                    className={`rounded-lg border p-3 text-left transition-colors ${
+                      tenant?.plan === plan
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                        : 'border-border hover:border-slate-300 disabled:opacity-50'
+                    }`}
+                  >
+                    <p className="font-medium capitalize">{plan}</p>
+                    <p className="text-xs text-slate-500">
+                      {plan === 'starter' && '100 requests/min'}
+                      {plan === 'professional' && '500 requests/min'}
+                      {plan === 'enterprise' && '2000 requests/min'}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="feature-flags" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Flags</CardTitle>
+              <CardDescription>Enable or disable features for your workspace</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {featureFlags &&
+                Object.entries(featureFlags).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium capitalize">{key.replace(/_/g, ' ')}</p>
+                      <p className="text-sm text-slate-500">Enable the {key.replace(/_/g, ' ')} feature</p>
+                    </div>
+                    <Switch
+                      checked={Boolean(value)}
+                      onCheckedChange={(checked) => updateFlagsMutation.mutate({ [key]: checked })}
+                      aria-label={`Toggle ${key}`}
+                    />
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sso" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>SSO Settings</CardTitle>
+              <CardDescription>Configure single sign-on for your organization</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-500">
+                SSO configuration is managed during onboarding. Re-configure IdP details here for your
+                organization&apos;s identity provider (Okta, Azure AD, etc.).
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Provider</Label>
+                  <Input defaultValue="oidc" readOnly disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Issuer URL</Label>
+                  <Input placeholder="https://your-tenant.okta.com/oauth2/default" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Client ID</Label>
+                  <Input />
+                </div>
+                <div className="space-y-2">
+                  <Label>Client Secret</Label>
+                  <Input type="password" />
+                </div>
+              </div>
+              <Button>
+                <Save className="mr-2 h-4 w-4" /> Save SSO Config
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="data" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Management</CardTitle>
+              <CardDescription>Export or delete your organization data</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <p className="font-medium">Export Tenant Data</p>
+                  <p className="text-sm text-slate-500">Download all your data in a GDPR-compliant format</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const tenantId = localStorage.getItem('tenant_id');
+                    const res = await api.get(`/tenants/${tenantId}/export`);
+                    const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tenant-export-${tenantId}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  <Download className="mr-2 h-4 w-4" /> Export Data
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-red-200 p-4">
+                <div>
+                  <p className="font-medium text-red-600">Danger Zone</p>
+                  <p className="text-sm text-slate-500">Schedule deletion of this workspace and all data (30-day grace)</p>
+                </div>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    if (confirm('Are you sure you want to schedule deletion of this workspace? This cannot be undone.')) {
+                      const tenantId = localStorage.getItem('tenant_id');
+                      await api.delete(`/tenants/${tenantId}`);
+                      localStorage.clear();
+                      window.location.href = '/login';
+                    }
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
                 </Button>
               </div>
             </CardContent>

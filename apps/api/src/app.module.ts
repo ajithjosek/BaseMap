@@ -5,7 +5,10 @@ import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { TenantsModule } from './tenants/tenants.module';
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { CostsModule } from './costs/costs.module';
@@ -57,6 +60,8 @@ import { redisStore } from 'cache-manager-redis-yet';
     }),
     PrismaModule,
     AuthModule,
+    TenantsModule,
+    FeatureFlagsModule,
     HttpModule,
     ApplicationsModule,
     CostsModule,
@@ -93,5 +98,6 @@ import { redisStore } from 'cache-manager-redis-yet';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(TenantMiddleware).forRoutes('*');
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
   }
 }

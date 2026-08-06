@@ -50,10 +50,12 @@
     "graphql-subscriptions": "^3.0.0",
     "neo4j-driver": "^6.0.1",
     "nodemailer": "^8.0.7",
+    "openid-client": "^6.8.4",
     "papaparse": "^5.5.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "passport-saml": "^3.2.4",
     "pdfkit": "^0.18.0",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
@@ -74,6 +76,7 @@
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/passport-saml": "^1.1.7",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.0.0",
     "@types/ws": "^8.18.1",
@@ -112,6 +115,7 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "node --env-file=.env ../../node_modules/tsx/dist/cli.mjs prisma/seed.ts"
+    "seed": "node --env-file=.env ../../node_modules/tsx/dist/cli.mjs prisma/seed.ts",
+    "seed:soc2": "node --env-file=.env ../../node_modules/tsx/dist/cli.mjs prisma/seed-soc2.ts"
   }
 }
