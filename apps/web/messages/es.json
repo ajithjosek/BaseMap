@@ -29,6 +29,8 @@
     "audit_logs": "Registros de Auditoría",
     "transformation": "Transformación",
     "graph_visualization": "Visualización de Grafos",
+    "workflows": "Flujos de Trabajo",
+    "c4_diagrams": "Diagramas C4",
     "reports": "Informes",
     "report_builder": "Constructor de Informes",
     "users": "Usuarios",

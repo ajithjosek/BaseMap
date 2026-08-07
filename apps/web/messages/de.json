@@ -29,6 +29,8 @@
     "audit_logs": "Prüfprotokolle",
     "transformation": "Transformation",
     "graph_visualization": "Grafikvisualisierung",
+    "workflows": "Workflows",
+    "c4_diagrams": "C4-Diagramme",
     "reports": "Berichte",
     "report_builder": "Berichts-Builder",
     "users": "Benutzer",

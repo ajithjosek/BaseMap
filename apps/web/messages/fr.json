@@ -29,6 +29,8 @@
     "audit_logs": "Journaux d'audit",
     "transformation": "Transformation",
     "graph_visualization": "Visualisation de graphe",
+    "workflows": "Workflows",
+    "c4_diagrams": "Diagrammes C4",
     "reports": "Rapports",
     "report_builder": "Créateur de rapports",
     "users": "Utilisateurs",

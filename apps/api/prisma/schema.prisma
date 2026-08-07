@@ -1102,3 +1102,79 @@ model RetentionPolicy {
 
   @@map("retention_policies")
 }
+
+// Sprint 37 — Workflow engine
+model Workflow {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  entity_type String   @db.VarChar(50)
+  is_active   Boolean  @default(true)
+  created_by  String?  @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  @@index([tenant_id, entity_type])
+  @@index([tenant_id, is_active])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id          String   @id @default(uuid()) @db.Uuid
+  workflow_id String   @db.Uuid
+  step_type   String   @db.VarChar(50)
+  name        String?  @db.VarChar(255)
+  config      Json?    @default("{}")
+  position_x  Decimal  @default(0) @db.Decimal(12, 4)
+  position_y  Decimal  @default(0) @db.Decimal(12, 4)
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  @@index([workflow_id])
+  @@map("workflow_steps")
+}
+
+model WorkflowInstance {
+  id           String    @id @default(uuid()) @db.Uuid
+  workflow_id  String    @db.Uuid
+  entity_type  String    @db.VarChar(50)
+  entity_id    String    @db.Uuid
+  status       String    @default("running") @db.VarChar(20)
+  context      Json?     @default("{}")
+  trace        Json?     @default("[]")
+  created_by   String?   @db.Uuid
+  started_at   DateTime  @default(now()) @db.Timestamptz
+  completed_at DateTime? @db.Timestamptz
+
+  @@index([workflow_id, status])
+  @@map("workflow_instances")
+}
+
+// Sprint 37 — C4 diagrams with versioning
+model C4Diagram {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(255)
+  level       String   @default("level1") @db.VarChar(20)
+  canvas_data Json?    @default("{}")
+  created_by  String?  @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  @@index([tenant_id])
+  @@map("c4_diagrams")
+}
+
+model C4DiagramVersion {
+  id          String    @id @default(uuid()) @db.Uuid
+  diagram_id  String    @db.Uuid
+  snapshot    Json      @default("{}")
+  comment     String?   @db.Text
+  created_by  String?   @db.Uuid
+  created_at  DateTime  @default(now()) @db.Timestamptz
+
+  @@index([diagram_id, created_at])
+  @@map("c4_diagram_versions")
+}

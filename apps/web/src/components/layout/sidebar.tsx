@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock, Shield, UsersRound, Share2, Presentation, Webhook } from 'lucide-react';
+import { Home, Layout, Database, Cloud, BarChart, Settings, Users, Grid3X3, PenTool, Network, Send, Server, Activity, FileCheck, Search, Map, Sparkles, TrendingUp, FileDown, Clock, Shield, UsersRound, Share2, Presentation, Webhook, Workflow, GitBranch } from 'lucide-react';
 import { NotificationCenter } from './notification-center';
 import { LocaleSwitcher } from './locale-switcher';
 
@@ -30,6 +30,8 @@ const menuItems = [
   { icon: Clock, key: 'audit_logs', href: '/audit-logs' },
   { icon: Map, key: 'transformation', href: '/transformation-roadmap' },
   { icon: Share2, key: 'graph_visualization', href: '/graph' },
+  { icon: Workflow, key: 'workflows', href: '/workflows' },
+  { icon: GitBranch, key: 'c4_diagrams', href: '/c4-diagrams' },
   { icon: BarChart, key: 'reports', href: '/reports' },
   { icon: PenTool, key: 'report_builder', href: '/reports/builder' },
   { icon: Users, key: 'users', href: '/users' },
