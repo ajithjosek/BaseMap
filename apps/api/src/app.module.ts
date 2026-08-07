@@ -44,6 +44,8 @@ import { CertReviewsModule } from './cert-reviews/cert-reviews.module';
 import { RetentionModule } from './retention/retention.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { C4DiagramsModule } from './c4-diagrams/c4-diagrams.module';
+import { TechStandardsModule } from './tech-standards/tech-standards.module';
+import { CapabilityKpisModule } from './capability-kpis/capability-kpis.module';
 import { AppGraphQLModule } from './graphql/graphql.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
@@ -104,6 +106,8 @@ import { redisStore } from 'cache-manager-redis-yet';
     RetentionModule,
     WorkflowsModule,
     C4DiagramsModule,
+    TechStandardsModule,
+    CapabilityKpisModule,
     AppGraphQLModule,
   ],
   controllers: [AppController],

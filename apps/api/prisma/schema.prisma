@@ -1178,3 +1178,63 @@ model C4DiagramVersion {
   @@index([diagram_id, created_at])
   @@map("c4_diagram_versions")
 }
+
+// Sprint 38 — Technology standards governance
+model TechStandard {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenant_id     String    @db.Uuid
+  name          String    @db.VarChar(255)
+  category      String    @db.VarChar(50)
+  status        String    @default("proposed") @db.VarChar(20)
+  version_range String?   @db.VarChar(100)
+  sunset_date   DateTime? @db.Date
+  notes         String?   @db.Text
+  created_by    String?   @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
+
+  @@index([tenant_id])
+  @@index([tenant_id, category])
+  @@index([tenant_id, status])
+  @@map("tech_standards")
+}
+
+model TechStandardCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenant_id   String   @db.Uuid
+  name        String   @db.VarChar(50)
+  description String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  @@unique([tenant_id, name])
+  @@index([tenant_id])
+  @@map("tech_standard_categories")
+}
+
+// Sprint 38 — Capability KPI tracking
+model CapabilityKpi {
+  id           String    @id @default(uuid()) @db.Uuid
+  tenant_id    String    @db.Uuid
+  capability_id String   @db.Uuid
+  name         String    @db.VarChar(255)
+  unit         String?   @db.VarChar(50)
+  description  String?   @db.Text
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+
+  @@index([tenant_id])
+  @@index([capability_id])
+  @@map("capability_kpis")
+}
+
+model CapabilityKpiValue {
+  id          String    @id @default(uuid()) @db.Uuid
+  kpi_id      String    @db.Uuid
+  value       Decimal   @db.Decimal(14, 4)
+  recorded_at DateTime  @default(now()) @db.Timestamptz
+  created_at  DateTime  @default(now()) @db.Timestamptz
+
+  @@index([kpi_id, recorded_at])
+  @@index([kpi_id])
+  @@map("capability_kpi_values")
+}
