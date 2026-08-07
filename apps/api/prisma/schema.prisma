@@ -1055,3 +1055,50 @@ model SecurityAssessment {
   @@index([tenant_id, entity_type, entity_id])
   @@map("security_assessments")
 }
+
+// Sprint 36 — Quarterly access certification cycles
+model AccessCertification {
+  id         String    @id @default(uuid()) @db.Uuid
+  tenant_id  String    @db.Uuid
+  name       String    @db.VarChar(255)
+  period     String?   @db.VarChar(50)
+  status     String    @default("active") @db.VarChar(20)
+  created_by String?   @db.Uuid
+  due_at     DateTime? @db.Timestamptz
+  created_at DateTime  @default(now()) @db.Timestamptz
+  updated_at DateTime  @updatedAt @db.Timestamptz
+
+  @@index([tenant_id, status])
+  @@map("access_certifications")
+}
+
+model AccessCertificationItem {
+  id               String    @id @default(uuid()) @db.Uuid
+  certification_id String    @db.Uuid
+  user_id          String    @db.Uuid
+  resource_type    String    @db.VarChar(50)
+  resource_id      String    @db.Uuid
+  resource_name    String?   @db.VarChar(255)
+  access_level     String    @db.VarChar(50)
+  review_status    String    @default("pending") @db.VarChar(20)
+  reviewer_id      String?   @db.Uuid
+  reviewed_at      DateTime? @db.Timestamptz
+  comment          String?   @db.Text
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+
+  @@index([certification_id, review_status])
+  @@index([user_id])
+  @@map("access_certification_items")
+}
+
+model RetentionPolicy {
+  id            String   @id @default(uuid()) @db.Uuid
+  entity_type   String   @unique @db.VarChar(50)
+  retention_days Int       @db.Integer
+  enabled       Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @updatedAt @db.Timestamptz
+
+  @@map("retention_policies")
+}
