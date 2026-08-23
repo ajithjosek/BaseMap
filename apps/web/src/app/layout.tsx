@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/shared/command-palette";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
@@ -37,10 +38,11 @@ export default async function RootLayout({
                 <Sidebar />
               </div>
               <MobileNav />
-              <main className="flex-1 min-h-screen overflow-auto p-4 md:p-8 pt-16 md:pt-8">
+              <main className="flex-1 min-h-screen overflow-auto p-4 md:p-8 pt-16 md:pt-8 pb-20 md:pb-8">
                 {children}
               </main>
             </div>
+            <BottomNav />
             <Toaster />
             <CommandPalette />
           </Providers>

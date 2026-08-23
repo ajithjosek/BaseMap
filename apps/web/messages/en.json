@@ -47,6 +47,7 @@
   },
   "common": {
     "navigation": "Navigation",
+    "more": "More",
     "loading": "Loading...",
     "user": "User",
     "cancel": "Cancel",

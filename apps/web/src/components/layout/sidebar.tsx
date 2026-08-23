@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ChevronDown } from 'lucide-react';
-import { navSections, isActivePathname, findActiveSectionKey } from '@/lib/navigation';
+import { navSections, isActivePathname, findActiveSectionKey, getStoredUserRoles, isAdminUser, filterSectionsForRoles } from '@/lib/navigation';
 import { NotificationCenter } from './notification-center';
 import { LocaleSwitcher } from './locale-switcher';
 
@@ -46,7 +46,11 @@ export function Sidebar() {
     }
   }, [pathname]);
 
-  const activeSectionKey = findActiveSectionKey(pathname);
+  const sections = filterSectionsForRoles(
+    navSections,
+    isAdminUser(getStoredUserRoles())
+  );
+  const activeSectionKey = findActiveSectionKey(sections, pathname);
 
   function toggleSection(sectionKey: string) {
     setCollapsed((prev) => {
@@ -72,7 +76,7 @@ export function Sidebar() {
         BaseMap
       </div>
       <nav className="flex-1 p-3 overflow-y-auto" aria-label={tc('navigation')}>
-        {navSections.map((section) => {
+        {sections.map((section) => {
           const hasActive = section.key === activeSectionKey;
           const isOpen = !collapsed.includes(section.key) || hasActive;
           return (

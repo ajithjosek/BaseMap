@@ -33,6 +33,7 @@ export interface NavItem {
   icon: LucideIcon;
   key: string;
   href: string;
+  adminOnly?: boolean;
 }
 
 export interface NavSection {
@@ -104,8 +105,8 @@ export const navSections: NavSection[] = [
   {
     key: 'section_admin',
     items: [
-      { icon: Users, key: 'users', href: '/users' },
-      { icon: Settings, key: 'settings', href: '/settings' },
+      { icon: Users, key: 'users', href: '/users', adminOnly: true },
+      { icon: Settings, key: 'settings', href: '/settings', adminOnly: true },
     ],
   },
 ];
@@ -115,11 +116,45 @@ export function isActivePathname(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function findActiveSectionKey(pathname: string): string | null {
-  for (const section of navSections) {
+export function findActiveSectionKey(
+  sections: NavSection[],
+  pathname: string
+): string | null {
+  for (const section of sections) {
     if (section.items.some((item) => isActivePathname(pathname, item.href))) {
       return section.key;
     }
   }
   return null;
+}
+
+export function getStoredUserRoles(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem('user');
+    if (!raw) return [];
+    const user = JSON.parse(raw);
+    return Array.isArray(user?.roles) ? user.roles : [];
+  } catch {
+    return [];
+  }
+}
+
+export function isAdminUser(roleNames: string[]): boolean {
+  // Tenants without RBAC data see everything by default.
+  if (roleNames.length === 0) return true;
+  return roleNames.some((name) => /admin/i.test(name));
+}
+
+export function filterSectionsForRoles(
+  sections: NavSection[],
+  isAdmin: boolean
+): NavSection[] {
+  if (isAdmin) return sections;
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.adminOnly),
+    }))
+    .filter((section) => section.items.length > 0);
 }

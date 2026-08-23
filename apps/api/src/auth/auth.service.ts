@@ -92,9 +92,18 @@ export class AuthService {
     return regex.test(id);
   }
 
+  private async getRoleNames(userId: string): Promise<string[]> {
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { user_id: userId },
+      include: { role: { select: { name: true } } },
+    });
+    return userRoles.map((ur) => ur.role.name);
+  }
+
   async login(user: any) {
     const payload: JwtPayload = { email: user.email, sub: user.id, tenantId: user.tenant_id };
-    
+    const roles = await this.getRoleNames(user.id);
+
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, {
@@ -107,6 +116,7 @@ export class AuthService {
         firstName: user.first_name,
         lastName: user.last_name,
         tenantId: user.tenant_id,
+        roles,
       },
     };
   }

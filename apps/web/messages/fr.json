@@ -46,6 +46,7 @@
   },
   "common": {
     "navigation": "Navigation",
+    "more": "Plus",
     "loading": "Chargement...",
     "user": "Utilisateur",
     "cancel": "Annuler",

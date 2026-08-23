@@ -46,6 +46,7 @@
   },
   "common": {
     "navigation": "Navigation",
+    "more": "Mehr",
     "loading": "Lädt...",
     "user": "Benutzer",
     "cancel": "Abbrechen",
