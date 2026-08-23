@@ -8,6 +8,14 @@
     "es": "Español"
   },
   "nav": {
+    "section_home": "Home",
+    "section_portfolio": "Portfolio",
+    "section_architecture": "Architektur",
+    "section_risk_governance": "Risiko & Governance",
+    "section_plan_deliver": "Planung & Umsetzung",
+    "section_insights": "Insights",
+    "section_reporting": "Berichte",
+    "section_admin": "Verwaltung",
     "dashboard": "Dashboard",
     "dashboard_stories": "Dashboard-Stories",
     "applications": "Anwendungen",
@@ -17,7 +25,6 @@
     "saas_requests": "SaaS-Anfragen",
     "api_catalog": "API-Katalog",
     "components": "Komponenten",
-    "graphql_api": "GraphQL-API",
     "eol_risk": "EOL-Risiko",
     "data_quality": "Datenqualität",
     "query_builder": "Abfrage-Builder",
@@ -38,6 +45,7 @@
     "settings": "Einstellungen"
   },
   "common": {
+    "navigation": "Navigation",
     "loading": "Lädt...",
     "user": "Benutzer",
     "cancel": "Abbrechen",

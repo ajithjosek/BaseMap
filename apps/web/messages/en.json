@@ -8,6 +8,14 @@
     "es": "Español"
   },
   "nav": {
+    "section_home": "Home",
+    "section_portfolio": "Portfolio",
+    "section_architecture": "Architecture",
+    "section_risk_governance": "Risk & Governance",
+    "section_plan_deliver": "Plan & Deliver",
+    "section_insights": "Insights",
+    "section_reporting": "Reporting",
+    "section_admin": "Administration",
     "dashboard": "Dashboard",
     "dashboard_stories": "Dashboard Stories",
     "applications": "Applications",
@@ -38,6 +46,7 @@
     "settings": "Settings"
   },
   "common": {
+    "navigation": "Navigation",
     "loading": "Loading...",
     "user": "User",
     "cancel": "Cancel",
