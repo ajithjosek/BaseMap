@@ -60,6 +60,25 @@
     "n_a": "N/A",
     "never": "Never"
   },
+  "status": {
+    "operational": "Operational",
+    "degraded": "Degraded",
+    "down": "Down",
+    "active": "Active",
+    "inactive": "Inactive",
+    "deprecated": "Deprecated",
+    "retired": "Retired",
+    "draft": "Draft",
+    "pending": "Pending",
+    "pending_approval": "Pending approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "open": "Open",
+    "closed": "Closed",
+    "planned": "Planned",
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
   "saas": {
     "title": "SaaS & Cloud",
     "add_application": "Add SaaS Application",

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { PageHeader } from '@/components/shared/page-header';
 
 export default function CapabilitiesPage() {
   const t = useTranslations('capabilities');
@@ -95,20 +96,17 @@ export default function CapabilitiesPage() {
 
   return (
     <div className="space-y-6 h-[calc(100vh-100px)] flex flex-col">
-      <div className="flex items-center justify-between flex-shrink-0">
-        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setIsImportOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" /> {t('import_csv')}
-          </Button>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" /> {t('export')}
-          </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> {t('add_capability')}
-          </Button>
-        </div>
-      </div>
+      <PageHeader title={t('title')} className="flex-shrink-0">
+        <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+          <Upload className="mr-2 h-4 w-4" /> {t('import_csv')}
+        </Button>
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" /> {t('export')}
+        </Button>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" /> {t('add_capability')}
+        </Button>
+      </PageHeader>
 
       <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">
         <div className="col-span-2 overflow-y-auto">

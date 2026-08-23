@@ -12,10 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, Plus, Activity, Link2, Server, ArrowRight, 
+import {
+  Search, Plus, Activity, Link2, Server, ArrowRight,
   CheckCircle, AlertTriangle, XCircle, Clock
 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/page-header';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { EmptyState } from '@/components/shared/empty-state';
+import { CardGridSkeleton, TableRowsSkeleton } from '@/components/shared/skeletons';
 
 interface Interface {
   id: string;
@@ -31,14 +35,6 @@ interface Interface {
   frequency?: string;
   _count?: { incidents: number };
 }
-
-const statusColors: Record<string, string> = {
-  'Operational': 'bg-green-500',
-  'Degraded': 'bg-yellow-500',
-  'Down': 'bg-red-500',
-  'Active': 'bg-green-500',
-  'Deprecated': 'bg-slate-500',
-};
 
 const typeOptions = ['REST', 'SOAP', 'GraphQL', 'gRPC', 'Database', 'File Transfer', 'Message Queue', 'Other'];
 
@@ -127,20 +123,22 @@ export default function ApiCatalogPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6">{t('loading')}</div>;
+    return (
+      <div className="p-6 space-y-6">
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
+        <CardGridSkeleton />
+        <TableRowsSkeleton rows={5} />
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{t('title')}</h1>
-          <p className="text-slate-500 mt-1">{t('subtitle')}</p>
-        </div>
+      <PageHeader title={t('title')} subtitle={t('subtitle')}>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> {t('add_interface')}
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -221,11 +219,11 @@ export default function ApiCatalogPage() {
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full ${statusColors[iface.status] || 'bg-slate-400'}`} />
-                  <div>
-                    <div className="font-medium">{iface.name}</div>
-                    <div className="text-sm text-slate-500">
+                <div className="flex items-center gap-3 min-w-0">
+                  <StatusBadge status={iface.status} />
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{iface.name}</div>
+                    <div className="text-sm text-slate-500 truncate">
                       {iface.interface_type} • {iface.protocol || t('no_protocol')} • {iface.data_format || t('no_format')}
                     </div>
                   </div>
@@ -256,9 +254,12 @@ export default function ApiCatalogPage() {
         ))}
         {interfaces?.length === 0 && (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
-              <Link2 className="h-12 w-12 mb-4 opacity-50" />
-              <p>{t('no_interfaces')}</p>
+            <CardContent>
+              <EmptyState icon={<Link2 className="h-12 w-12" />} message={t('no_interfaces')}>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> {t('add_interface')}
+                </Button>
+              </EmptyState>
             </CardContent>
           </Card>
         )}
