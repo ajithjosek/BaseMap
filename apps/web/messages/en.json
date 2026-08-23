@@ -60,6 +60,16 @@
     "n_a": "N/A",
     "never": "Never"
   },
+  "palette": {
+    "title": "Command palette",
+    "placeholder": "Search pages, applications, capabilities...",
+    "pages": "Pages",
+    "applications": "Applications",
+    "capabilities": "Capabilities",
+    "interfaces": "Interfaces",
+    "no_results": "No results found.",
+    "hint": "Type to search. Ctrl+K to open anytime."
+  },
   "status": {
     "operational": "Operational",
     "degraded": "Degraded",

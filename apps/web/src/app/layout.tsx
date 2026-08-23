@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { CommandPalette } from "@/components/shared/command-palette";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { defaultLocale, isLocale, LOCALE_COOKIE, textDirection } from "@/i18n/config";
@@ -41,6 +42,7 @@ export default async function RootLayout({
               </main>
             </div>
             <Toaster />
+            <CommandPalette />
           </Providers>
         </NextIntlClientProvider>
       </body>

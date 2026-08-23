@@ -59,6 +59,16 @@
     "n_a": "N/A",
     "never": "Nie"
   },
+  "palette": {
+    "title": "Befehlspalette",
+    "placeholder": "Seiten, Anwendungen, Fähigkeiten suchen...",
+    "pages": "Seiten",
+    "applications": "Anwendungen",
+    "capabilities": "Fähigkeiten",
+    "interfaces": "Schnittstellen",
+    "no_results": "Keine Ergebnisse gefunden.",
+    "hint": "Tippen zum Suchen. Strg+K zum Öffnen."
+  },
   "status": {
     "operational": "Betriebsbereit",
     "degraded": "Beeinträchtigt",

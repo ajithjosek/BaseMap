@@ -59,6 +59,16 @@
     "n_a": "N/A",
     "never": "Jamais"
   },
+  "palette": {
+    "title": "Palette de commandes",
+    "placeholder": "Rechercher des pages, applications, capacités...",
+    "pages": "Pages",
+    "applications": "Applications",
+    "capabilities": "Capacités",
+    "interfaces": "Interfaces",
+    "no_results": "Aucun résultat.",
+    "hint": "Tapez pour rechercher. Ctrl+K pour ouvrir."
+  },
   "status": {
     "operational": "Opérationnel",
     "degraded": "Dégradé",
