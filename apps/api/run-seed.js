@@ -8,5 +8,5 @@ console.log('Dotenv loaded:', result.parsed ? 'YES' : 'NO');
 console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
 
 // Now load and run the seed
-require('tsx/dist/register.cjs');
+require('tsx/cjs');
 require('./prisma/seed.ts');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -260,9 +260,8 @@ export default function HeatmapPage() {
                 ))}
 
                 {matrixData.capabilities.map((cap) => (
-                  <>
+                  <Fragment key={cap.id}>
                     <div 
-                      key={`cap-${cap.id}`} 
                       className="p-2 flex items-center gap-2"
                     >
                       <span className={`text-sm ${getCapabilityStatus(cap.id) === 'red' ? 'text-red-600 font-medium' : getCapabilityStatus(cap.id) === 'yellow' ? 'text-yellow-600' : 'text-green-600'}`}>
@@ -284,7 +283,7 @@ export default function HeatmapPage() {
                         />
                       );
                     })}
-                  </>
+                  </Fragment>
                 ))}
               </div>
 

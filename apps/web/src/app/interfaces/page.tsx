@@ -127,7 +127,7 @@ export default function ApiCatalogPage() {
   };
 
   if (isLoading) {
-    return <div className="p-6">{t('common.loading')}</div>;
+    return <div className="p-6">{t('loading')}</div>;
   }
 
   return (

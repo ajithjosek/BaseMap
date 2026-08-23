@@ -6,6 +6,6 @@ import { GapsController } from './gaps.controller';
 
 @Module({
   providers: [CapabilitiesService, GapsService],
-  controllers: [CapabilitiesController, GapsController]
+  controllers: [GapsController, CapabilitiesController],
 })
 export class CapabilitiesModule {}

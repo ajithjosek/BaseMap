@@ -185,7 +185,10 @@ export default function CapabilitiesPage() {
               {t('confirm_delete_title')}
             </DialogTitle>
             <DialogDescription className="pt-2">
-              {t('confirm_delete_desc', { name: selectedCapability?.name })}
+              {t.rich('confirm_delete_desc', {
+                name: selectedCapability?.name,
+                strong: (chunk) => <strong>{chunk}</strong>,
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
