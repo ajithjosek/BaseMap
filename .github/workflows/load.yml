@@ -1,0 +1,50 @@
+name: Load Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'API URL'
+        required: false
+        default: 'http://localhost:4001'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6am UTC
+
+jobs:
+  k6-load:
+    name: k6 Load Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D68
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run auth load test
+        run: |
+          k6 run tests/load/k6-auth-load.js \
+            --out json=tests/load/results-auth.json \
+            -e API_URL=${{ inputs.api_url || 'http://localhost:4001' }} \
+            -e TENANT_ID=default
+        continue-on-error: true
+
+      - name: Run CRUD load test
+        run: |
+          k6 run tests/load/k6-api-crud.js \
+            --out json=tests/load/results-crud.json \
+            -e API_URL=${{ inputs.api_url || 'http://localhost:4001' }} \
+            -e TENANT_ID=default
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-results
+          path: tests/load/results-*.json
+          retention-days: 30
