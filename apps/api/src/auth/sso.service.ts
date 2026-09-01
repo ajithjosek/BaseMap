@@ -87,7 +87,7 @@ export class SsoService {
 
     return this.db.user.create({
       data: {
-        tenant_id: tenantId,
+        tenant_id: resolvedTenantId,
         email,
         first_name: firstName,
         last_name: lastName,
