@@ -1,7 +1,8 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Responsive E2E - mobile viewport, bottom nav, mobile sheet.
+ * Uses desktop viewport; actual device emulation is configured per-project.
  */
 
 const WEB_URL = process.env.WEB_URL || 'http://localhost:3005';
@@ -16,8 +17,8 @@ async function loginMobile(page: any) {
   await page.waitForURL(/dashboard|^\/$/, { timeout: 15000 });
 }
 
-test.describe('mobile viewport (iPhone 14)', () => {
-  test.use({ ...devices['iPhone 14'] });
+test.describe('mobile viewport', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
 
   test('bottom navigation bar is visible', async ({ page }) => {
     await loginMobile(page);
@@ -27,7 +28,6 @@ test.describe('mobile viewport (iPhone 14)', () => {
 
   test('desktop sidebar is hidden on mobile', async ({ page }) => {
     await loginMobile(page);
-    // The sidebar should not be visible on mobile (md:hidden)
     const sidebar = page.locator('.w-64.bg-slate-900');
     await expect(sidebar).not.toBeVisible();
   });
@@ -39,7 +39,6 @@ test.describe('mobile viewport (iPhone 14)', () => {
 
   test('bottom nav tabs navigate to pages', async ({ page }) => {
     await loginMobile(page);
-    // Click on the Applications tab in bottom nav
     const appsTab = page.locator('nav a[href="/applications"]');
     if (await appsTab.isVisible()) {
       await appsTab.click();
@@ -49,7 +48,6 @@ test.describe('mobile viewport (iPhone 14)', () => {
 
   test('More sheet opens on bottom nav', async ({ page }) => {
     await loginMobile(page);
-    // Find and click the More button
     const moreBtn = page.locator('nav button').filter({ hasText: /more/i });
     if (await moreBtn.isVisible()) {
       await moreBtn.click();
@@ -58,8 +56,8 @@ test.describe('mobile viewport (iPhone 14)', () => {
   });
 });
 
-test.describe('tablet viewport (iPad)', () => {
-  test.use({ ...devices['iPad (gen 7)'] });
+test.describe('tablet viewport', () => {
+  test.use({ viewport: { width: 810, height: 1080 } });
 
   test('page renders correctly on tablet', async ({ page }) => {
     await loginMobile(page);
