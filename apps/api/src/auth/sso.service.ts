@@ -17,6 +17,8 @@ export interface SsoConfig {
   certificate?: string;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class SsoService {
   private db: any;
@@ -25,10 +27,15 @@ export class SsoService {
     this.db = this.prisma as any;
   }
 
+  private async findTenant(tenantId: string) {
+    if (UUID_RE.test(tenantId)) {
+      return this.db.tenant.findUnique({ where: { id: tenantId } });
+    }
+    return this.db.tenant.findUnique({ where: { slug: tenantId } });
+  }
+
   async resolveSso(tenantId: string): Promise<SsoConfig | null> {
-    const tenant = await this.db.tenant.findUnique({
-      where: { id: tenantId },
-    });
+    const tenant = await this.findTenant(tenantId);
     const config = tenant?.settings?.sso;
     if (!config || !config.enabled) {
       return null;
@@ -58,8 +65,11 @@ export class SsoService {
     firstName?: string,
     lastName?: string,
   ) {
+    const tenant = await this.findTenant(tenantId);
+    const resolvedTenantId = tenant?.id ?? tenantId;
+
     const existing = await this.db.user.findUnique({
-      where: { tenant_id_email: { tenant_id: tenantId, email } },
+      where: { tenant_id_email: { tenant_id: resolvedTenantId, email } },
     });
 
     if (existing) {
