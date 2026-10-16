@@ -1,4 +1,10 @@
-import { IsString, IsEnum, IsOptional, IsDateString, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+  IsUUID,
+} from 'class-validator';
 
 export class TransitionLifecycleDto {
   @IsEnum(['Planning', 'Active', 'Maintenance', 'Retirement', 'Retired'])

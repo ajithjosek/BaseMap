@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsObject, IsArray, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsObject,
+  IsArray,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 
 export enum ModelType {
   APPLICATION = 'application',

@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import * as Papa from 'papaparse';
@@ -29,7 +33,10 @@ export class ImportExportService {
     return jsonData as any[];
   }
 
-  async validateImportData(data: any[], modelType: string): Promise<{ valid: boolean; errors: any[]; preview: any[] }> {
+  async validateImportData(
+    data: any[],
+    modelType: string,
+  ): Promise<{ valid: boolean; errors: any[]; preview: any[] }> {
     const errors: any[] = [];
     const preview: any[] = [];
 
@@ -39,9 +46,22 @@ export class ImportExportService {
           const row = data[i];
           const rowErrors: any[] = [];
 
-          if (!row.name) rowErrors.push({ field: 'name', message: 'Name is required' });
-          if (!row.lifecycle_state || !['Planning', 'Active', 'Maintenance', 'Retirement', 'Retired'].includes(row.lifecycle_state)) {
-            rowErrors.push({ field: 'lifecycle_state', message: 'Invalid lifecycle state' });
+          if (!row.name)
+            rowErrors.push({ field: 'name', message: 'Name is required' });
+          if (
+            !row.lifecycle_state ||
+            ![
+              'Planning',
+              'Active',
+              'Maintenance',
+              'Retirement',
+              'Retired',
+            ].includes(row.lifecycle_state)
+          ) {
+            rowErrors.push({
+              field: 'lifecycle_state',
+              message: 'Invalid lifecycle state',
+            });
           }
 
           if (rowErrors.length > 0) {
@@ -62,11 +82,25 @@ export class ImportExportService {
           const rowErrors: any[] = [];
 
           if (!row.application_id && !row.application_name) {
-            rowErrors.push({ field: 'application', message: 'Application ID or name is required' });
+            rowErrors.push({
+              field: 'application',
+              message: 'Application ID or name is required',
+            });
           }
-          if (!row.cost_type) rowErrors.push({ field: 'cost_type', message: 'Cost type is required' });
-          if (!row.amount || isNaN(Number(row.amount)) || Number(row.amount) < 0) {
-            rowErrors.push({ field: 'amount', message: 'Valid amount is required' });
+          if (!row.cost_type)
+            rowErrors.push({
+              field: 'cost_type',
+              message: 'Cost type is required',
+            });
+          if (
+            !row.amount ||
+            isNaN(Number(row.amount)) ||
+            Number(row.amount) < 0
+          ) {
+            rowErrors.push({
+              field: 'amount',
+              message: 'Valid amount is required',
+            });
           }
 
           if (rowErrors.length > 0) {
@@ -121,7 +155,11 @@ export class ImportExportService {
     return importJob;
   }
 
-  async processImportJob(importJobId: string, tenantId: string, userId: string) {
+  async processImportJob(
+    importJobId: string,
+    tenantId: string,
+    userId: string,
+  ) {
     const importJob = await this.prisma.importJob.findUnique({
       where: { id: importJobId },
     });
@@ -167,7 +205,8 @@ export class ImportExportService {
               where: { id: existingApp.id },
               data: {
                 vendor: row.vendor || existingApp.vendor,
-                lifecycle_state: row.lifecycle_state || existingApp.lifecycle_state,
+                lifecycle_state:
+                  row.lifecycle_state || existingApp.lifecycle_state,
                 updated_at: new Date(),
                 updated_by: userId,
               },
@@ -195,7 +234,10 @@ export class ImportExportService {
         }
       }
 
-      const allErrors = [...(importJob.errors as any[] || []), ...processingErrors];
+      const allErrors = [
+        ...((importJob.errors as any[]) || []),
+        ...processingErrors,
+      ];
 
       await this.prisma.importJob.update({
         where: { id: importJobId },
@@ -228,7 +270,10 @@ export class ImportExportService {
         where: { id: importJobId },
         data: {
           status: 'failed',
-          errors: [...(importJob.errors as any[] || []), { error: error instanceof Error ? error.message : 'Unknown error' }],
+          errors: [
+            ...((importJob.errors as any[]) || []),
+            { error: error instanceof Error ? error.message : 'Unknown error' },
+          ],
           completed_at: new Date(),
         },
       });
@@ -291,7 +336,9 @@ export class ImportExportService {
           if (filters?.search) {
             whereClause.OR = [
               { name: { contains: filters.search, mode: 'insensitive' } },
-              { description: { contains: filters.search, mode: 'insensitive' } },
+              {
+                description: { contains: filters.search, mode: 'insensitive' },
+              },
             ];
           }
 
@@ -314,7 +361,9 @@ export class ImportExportService {
             risk_score: app.risk_score,
             eol_date: app.eol_date,
             business_unit: app.business_unit?.name || '',
-            owner: app.owner ? `${app.owner.first_name} ${app.owner.last_name}` : '',
+            owner: app.owner
+              ? `${app.owner.first_name} ${app.owner.last_name}`
+              : '',
             created_at: app.created_at,
             updated_at: app.updated_at,
           }));
@@ -342,7 +391,9 @@ export class ImportExportService {
           break;
 
         default:
-          throw new BadRequestException(`Unknown export type: ${exportJob.export_type}`);
+          throw new BadRequestException(
+            `Unknown export type: ${exportJob.export_type}`,
+          );
       }
 
       let fileBuffer: Buffer;
@@ -359,7 +410,9 @@ export class ImportExportService {
         fileBuffer = Buffer.from(JSON.stringify(data, null, 2));
         fileExtension = 'json';
       } else {
-        throw new BadRequestException(`Unsupported format: ${exportJob.format}`);
+        throw new BadRequestException(
+          `Unsupported format: ${exportJob.format}`,
+        );
       }
 
       const fileName = `export_${exportJob.export_type}_${Date.now()}.${fileExtension}`;

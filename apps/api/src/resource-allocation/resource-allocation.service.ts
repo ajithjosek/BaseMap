@@ -9,7 +9,10 @@ export class ResourceAllocationService {
 
   private db: any;
 
-  async findAll(tenantId: string, filters?: { user_id?: string; project_id?: string; active?: boolean }) {
+  async findAll(
+    tenantId: string,
+    filters?: { user_id?: string; project_id?: string; active?: boolean },
+  ) {
     const where: any = { tenant_id: tenantId };
     if (filters?.user_id) where.user_id = filters.user_id;
     if (filters?.project_id) where.project_id = filters.project_id;
@@ -18,7 +21,15 @@ export class ResourceAllocationService {
     return this.db.resourceAllocation.findMany({
       where,
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true, department: true } },
+        user: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            department: true,
+          },
+        },
       },
       orderBy: { start_date: 'desc' },
     });
@@ -28,21 +39,33 @@ export class ResourceAllocationService {
     const allocation = await this.db.resourceAllocation.findFirst({
       where: { id, tenant_id: tenantId },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true, department: true } },
+        user: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            department: true,
+          },
+        },
       },
     });
-    if (!allocation) throw new NotFoundException('Resource allocation not found');
+    if (!allocation)
+      throw new NotFoundException('Resource allocation not found');
     return allocation;
   }
 
-  async create(tenantId: string, data: {
-    user_id: string;
-    project_id?: string;
-    resource_type: string;
-    allocation_pct: number;
-    start_date: string;
-    end_date: string;
-  }) {
+  async create(
+    tenantId: string,
+    data: {
+      user_id: string;
+      project_id?: string;
+      resource_type: string;
+      allocation_pct: number;
+      start_date: string;
+      end_date: string;
+    },
+  ) {
     return this.db.resourceAllocation.create({
       data: {
         tenant_id: tenantId,
@@ -60,7 +83,8 @@ export class ResourceAllocationService {
   async update(id: string, tenantId: string, data: any) {
     await this.findOne(id, tenantId);
     const updateData: any = {};
-    if (data.allocation_pct !== undefined) updateData.allocation_pct = data.allocation_pct;
+    if (data.allocation_pct !== undefined)
+      updateData.allocation_pct = data.allocation_pct;
     if (data.start_date) updateData.start_date = new Date(data.start_date);
     if (data.end_date) updateData.end_date = new Date(data.end_date);
     if (data.is_active !== undefined) updateData.is_active = data.is_active;
@@ -80,7 +104,14 @@ export class ResourceAllocationService {
     const allocations = await this.db.resourceAllocation.findMany({
       where: { tenant_id: tenantId, is_active: true },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, department: true } },
+        user: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            department: true,
+          },
+        },
       },
     });
 
@@ -92,14 +123,14 @@ export class ResourceAllocationService {
       byUser[a.user_id].total += a.allocation_pct;
     }
 
-    const overCapacity = Object.values(byUser).filter(u => u.total > 100);
-    const available = Object.values(byUser).filter(u => u.total < 100);
+    const overCapacity = Object.values(byUser).filter((u) => u.total > 100);
+    const available = Object.values(byUser).filter((u) => u.total < 100);
 
     return {
       total_users: Object.keys(byUser).length,
       over_capacity: overCapacity.length,
-      at_capacity: available.filter(u => u.total === 100).length,
-      under_capacity: available.filter(u => u.total < 100).length,
+      at_capacity: available.filter((u) => u.total === 100).length,
+      under_capacity: available.filter((u) => u.total < 100).length,
       by_user: Object.values(byUser),
     };
   }

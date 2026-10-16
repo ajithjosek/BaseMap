@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as nodeStream from 'stream';
@@ -69,9 +65,7 @@ export class StorageService implements OnModuleInit {
     } catch (err: any) {
       if (err?.name === 'NotFound' || err?.$metadata?.httpStatusCode === 404) {
         try {
-          await this.s3.send(
-            new CreateBucketCommand({ Bucket: this.bucket }),
-          );
+          await this.s3.send(new CreateBucketCommand({ Bucket: this.bucket }));
           this.logger.log(`Created storage bucket '${this.bucket}'`);
         } catch (createErr: any) {
           if (createErr?.name !== 'BucketAlreadyOwnedByYou') {
@@ -81,7 +75,9 @@ export class StorageService implements OnModuleInit {
           }
         }
       } else {
-        this.logger.warn(`Storage endpoint connection warning: ${err?.message}`);
+        this.logger.warn(
+          `Storage endpoint connection warning: ${err?.message}`,
+        );
       }
     }
   }
@@ -90,7 +86,11 @@ export class StorageService implements OnModuleInit {
     return path.join(this.localRoot, key);
   }
 
-  async put(key: string, data: Buffer | nodeStream.Readable | string, options?: UploadOptions) {
+  async put(
+    key: string,
+    data: Buffer | nodeStream.Readable | string,
+    options?: UploadOptions,
+  ) {
     if (this.provider === 's3' && this.s3) {
       await this.s3.send(
         new PutObjectCommand({
@@ -106,10 +106,10 @@ export class StorageService implements OnModuleInit {
     const target = this.localPath(key);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     if (Buffer.isBuffer(data) || typeof data === 'string') {
-      fs.writeFileSync(target, data as any);
+      fs.writeFileSync(target, data);
     } else {
       const ws = fs.createWriteStream(target);
-      await pipeline(data as nodeStream.Readable, ws);
+      await pipeline(data, ws);
     }
     return { key, url: target };
   }
@@ -135,7 +135,9 @@ export class StorageService implements OnModuleInit {
 
   async delete(key: string): Promise<boolean> {
     if (this.provider === 's3' && this.s3) {
-      await this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
       return true;
     }
     try {
@@ -185,7 +187,11 @@ export class StorageService implements OnModuleInit {
       try {
         await this.s3.send(new HeadBucketCommand({ Bucket: this.bucket }));
         const res = await this.s3.send(
-          new ListObjectsV2Command({ Bucket: this.bucket, Prefix: key, MaxKeys: 1 }),
+          new ListObjectsV2Command({
+            Bucket: this.bucket,
+            Prefix: key,
+            MaxKeys: 1,
+          }),
         );
         return (res.Contents || []).some((c) => c.Key === key);
       } catch {

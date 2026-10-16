@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTransformationProjectDto, UpdateTransformationProjectDto } from './dto/create-transformation-project.dto';
+import {
+  CreateTransformationProjectDto,
+  UpdateTransformationProjectDto,
+} from './dto/create-transformation-project.dto';
 
 @Injectable()
 export class TransformationProjectsService {
@@ -10,7 +13,10 @@ export class TransformationProjectsService {
 
   private db: any;
 
-  async findAll(tenantId: string, filters?: { status?: string; category?: string; priority?: string }) {
+  async findAll(
+    tenantId: string,
+    filters?: { status?: string; category?: string; priority?: string },
+  ) {
     const where: any = { tenant_id: tenantId };
     if (filters?.status) where.status = filters.status;
     if (filters?.category) where.category = filters.category;
@@ -53,7 +59,11 @@ export class TransformationProjectsService {
     });
   }
 
-  async update(id: string, tenantId: string, dto: UpdateTransformationProjectDto) {
+  async update(
+    id: string,
+    tenantId: string,
+    dto: UpdateTransformationProjectDto,
+  ) {
     await this.findOne(id, tenantId);
 
     const updateData: any = {};
@@ -62,12 +72,15 @@ export class TransformationProjectsService {
     if (dto.status !== undefined) updateData.status = dto.status;
     if (dto.priority !== undefined) updateData.priority = dto.priority;
     if (dto.category !== undefined) updateData.category = dto.category;
-    if (dto.start_date !== undefined) updateData.start_date = new Date(dto.start_date);
-    if (dto.end_date !== undefined) updateData.end_date = new Date(dto.end_date);
+    if (dto.start_date !== undefined)
+      updateData.start_date = new Date(dto.start_date);
+    if (dto.end_date !== undefined)
+      updateData.end_date = new Date(dto.end_date);
     if (dto.progress !== undefined) updateData.progress = dto.progress;
     if (dto.budget !== undefined) updateData.budget = dto.budget;
     if (dto.owner !== undefined) updateData.owner = dto.owner;
-    if (dto.dependencies !== undefined) updateData.dependencies = dto.dependencies;
+    if (dto.dependencies !== undefined)
+      updateData.dependencies = dto.dependencies;
     if (dto.risks !== undefined) updateData.risks = dto.risks;
     if (dto.milestones !== undefined) updateData.milestones = dto.milestones;
 
@@ -98,7 +111,7 @@ export class TransformationProjectsService {
       },
     });
 
-    return projects.map(p => ({
+    return projects.map((p) => ({
       id: p.id,
       name: p.name,
       status: p.status,
@@ -129,7 +142,9 @@ export class TransformationProjectsService {
     return {
       total: projects.length,
       by_status: byStatus,
-      avg_progress: projects.length ? Math.round(totalProgress / projects.length) : 0,
+      avg_progress: projects.length
+        ? Math.round(totalProgress / projects.length)
+        : 0,
       total_budget: totalBudget,
     };
   }

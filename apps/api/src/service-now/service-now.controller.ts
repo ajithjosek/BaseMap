@@ -29,9 +29,7 @@ export class ServiceNowController {
   }
 
   @Get('logs')
-  getSyncLogs(
-    @CurrentUser() user: any,
-  ) {
+  getSyncLogs(@CurrentUser() user: any) {
     return this.serviceNowService.getSyncLogs(user.tenantId);
   }
 }

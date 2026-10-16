@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInterfaceDto, UpdateInterfaceDto, CreateIncidentDto } from './dto/interface.dto';
+import {
+  CreateInterfaceDto,
+  UpdateInterfaceDto,
+  CreateIncidentDto,
+} from './dto/interface.dto';
 
 @Injectable()
 export class InterfacesService {
@@ -20,20 +24,25 @@ export class InterfacesService {
       include: {
         source_application: { select: { id: true, name: true } },
         target_application: { select: { id: true, name: true } },
-        owner: { select: { id: true, first_name: true, last_name: true, email: true } },
+        owner: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
   }
 
-  async findAll(tenantId: string, filters?: { 
-    search?: string; 
-    type?: string; 
-    status?: string; 
-    sourceAppId?: string;
-    targetAppId?: string;
-  }) {
+  async findAll(
+    tenantId: string,
+    filters?: {
+      search?: string;
+      type?: string;
+      status?: string;
+      sourceAppId?: string;
+      targetAppId?: string;
+    },
+  ) {
     const where: any = { tenant_id: tenantId };
-    
+
     if (filters?.search) {
       where.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },
@@ -50,7 +59,9 @@ export class InterfacesService {
       include: {
         source_application: { select: { id: true, name: true } },
         target_application: { select: { id: true, name: true } },
-        owner: { select: { id: true, first_name: true, last_name: true, email: true } },
+        owner: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
         _count: { select: { incidents: true } },
       },
       orderBy: { name: 'asc' },
@@ -61,9 +72,15 @@ export class InterfacesService {
     const interface_ = await this.db.interface.findUnique({
       where: { id },
       include: {
-        source_application: { select: { id: true, name: true, lifecycle_state: true } },
-        target_application: { select: { id: true, name: true, lifecycle_state: true } },
-        owner: { select: { id: true, first_name: true, last_name: true, email: true } },
+        source_application: {
+          select: { id: true, name: true, lifecycle_state: true },
+        },
+        target_application: {
+          select: { id: true, name: true, lifecycle_state: true },
+        },
+        owner: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
         incidents: { orderBy: { created_at: 'desc' }, take: 10 },
       },
     });
@@ -83,7 +100,9 @@ export class InterfacesService {
       include: {
         source_application: { select: { id: true, name: true } },
         target_application: { select: { id: true, name: true } },
-        owner: { select: { id: true, first_name: true, last_name: true, email: true } },
+        owner: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
   }
@@ -99,12 +118,12 @@ export class InterfacesService {
   }
 
   async updateStatus(id: string, tenantId: string, status: string) {
-    return this.update(id, tenantId, { status: status as any });
+    return this.update(id, tenantId, { status: status });
   }
 
   async getLineage(interfaceId: string, tenantId: string) {
     const interface_ = await this.findOne(interfaceId);
-    
+
     const lineage = {
       interface: interface_,
       path: [] as any[],
@@ -135,7 +154,12 @@ export class InterfacesService {
     return lineage;
   }
 
-  async createIncident(tenantId: string, interfaceId: string, dto: CreateIncidentDto, userId?: string) {
+  async createIncident(
+    tenantId: string,
+    interfaceId: string,
+    dto: CreateIncidentDto,
+    userId?: string,
+  ) {
     return this.db.interfaceIncident.create({
       data: {
         tenant_id: tenantId,
@@ -179,14 +203,29 @@ export class InterfacesService {
   }
 
   async getStats(tenantId: string) {
-    const [total, operational, degraded, down, openIncidents] = await Promise.all([
-      this.db.interface.count({ where: { tenant_id: tenantId } }),
-      this.db.interface.count({ where: { tenant_id: tenantId, status: 'Operational' } }),
-      this.db.interface.count({ where: { tenant_id: tenantId, status: 'Degraded' } }),
-      this.db.interface.count({ where: { tenant_id: tenantId, status: 'Down' } }),
-      this.db.interfaceIncident.count({ where: { tenant_id: tenantId, status: 'Open' } }),
-    ]);
+    const [total, operational, degraded, down, openIncidents] =
+      await Promise.all([
+        this.db.interface.count({ where: { tenant_id: tenantId } }),
+        this.db.interface.count({
+          where: { tenant_id: tenantId, status: 'Operational' },
+        }),
+        this.db.interface.count({
+          where: { tenant_id: tenantId, status: 'Degraded' },
+        }),
+        this.db.interface.count({
+          where: { tenant_id: tenantId, status: 'Down' },
+        }),
+        this.db.interfaceIncident.count({
+          where: { tenant_id: tenantId, status: 'Open' },
+        }),
+      ]);
 
-    return { total, operational, degraded, down, open_incidents: openIncidents };
+    return {
+      total,
+      operational,
+      degraded,
+      down,
+      open_incidents: openIncidents,
+    };
   }
 }

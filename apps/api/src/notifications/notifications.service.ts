@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { NotificationsGateway } from './notifications.gateway';
@@ -63,7 +68,12 @@ export class NotificationsService {
     return notification;
   }
 
-  async getNotifications(tenantId: string, userId: string, page = 1, limit = 20) {
+  async getNotifications(
+    tenantId: string,
+    userId: string,
+    page = 1,
+    limit = 20,
+  ) {
     const skip = (page - 1) * limit;
 
     const [data, total] = await Promise.all([
@@ -73,7 +83,9 @@ export class NotificationsService {
         skip,
         take: limit,
       }),
-      this.prisma.notification.count({ where: { tenant_id: tenantId, user_id: userId } }),
+      this.prisma.notification.count({
+        where: { tenant_id: tenantId, user_id: userId },
+      }),
     ]);
 
     return {
@@ -96,7 +108,10 @@ export class NotificationsService {
       throw new NotFoundException('Notification not found');
     }
 
-    if (notification.user_id !== userId || notification.tenant_id !== tenantId) {
+    if (
+      notification.user_id !== userId ||
+      notification.tenant_id !== tenantId
+    ) {
       throw new NotFoundException('Notification not found');
     }
 
@@ -113,7 +128,11 @@ export class NotificationsService {
     });
   }
 
-  async deleteNotification(notificationId: string, userId: string, tenantId: string) {
+  async deleteNotification(
+    notificationId: string,
+    userId: string,
+    tenantId: string,
+  ) {
     const notification = await this.prisma.notification.findUnique({
       where: { id: notificationId },
     });
@@ -122,7 +141,10 @@ export class NotificationsService {
       throw new NotFoundException('Notification not found');
     }
 
-    if (notification.user_id !== userId || notification.tenant_id !== tenantId) {
+    if (
+      notification.user_id !== userId ||
+      notification.tenant_id !== tenantId
+    ) {
       throw new NotFoundException('Notification not found');
     }
 
@@ -153,8 +175,11 @@ export class NotificationsService {
       'application',
     );
 
-    await this.sendEmailNotification(userId, `Lifecycle Changed: ${applicationName}`, 
-      `Application "${applicationName}" changed from "${oldState}" to "${newState}"`);
+    await this.sendEmailNotification(
+      userId,
+      `Lifecycle Changed: ${applicationName}`,
+      `Application "${applicationName}" changed from "${oldState}" to "${newState}"`,
+    );
 
     return notification;
   }
@@ -175,8 +200,11 @@ export class NotificationsService {
       'application',
     );
 
-    await this.sendEmailNotification(userId, `EOL Alert: ${applicationName}`,
-      `Application "${applicationName}" will reach end of life in ${daysRemaining} days (${eolDate.toISOString().split('T')[0]})`);
+    await this.sendEmailNotification(
+      userId,
+      `EOL Alert: ${applicationName}`,
+      `Application "${applicationName}" will reach end of life in ${daysRemaining} days (${eolDate.toISOString().split('T')[0]})`,
+    );
 
     return notification;
   }
@@ -198,8 +226,11 @@ export class NotificationsService {
       'import_job',
     );
 
-    await this.sendEmailNotification(userId, `Import Completed: ${fileName}`,
-      `Imported ${successRows} of ${totalRows} rows successfully. ${failedRows} rows failed.`);
+    await this.sendEmailNotification(
+      userId,
+      `Import Completed: ${fileName}`,
+      `Imported ${successRows} of ${totalRows} rows successfully. ${failedRows} rows failed.`,
+    );
 
     return notification;
   }
@@ -220,8 +251,11 @@ export class NotificationsService {
       'export_job',
     );
 
-    await this.sendEmailNotification(userId, `Export Completed: ${exportType}`,
-      `Your ${exportType} export in ${format} format is ready for download.`);
+    await this.sendEmailNotification(
+      userId,
+      `Export Completed: ${exportType}`,
+      `Your ${exportType} export in ${format} format is ready for download.`,
+    );
 
     return notification;
   }
@@ -263,7 +297,11 @@ export class NotificationsService {
     return { scheduled: totalAlerts };
   }
 
-  private async sendEmailNotification(userId: string, subject: string, body: string) {
+  private async sendEmailNotification(
+    userId: string,
+    subject: string,
+    body: string,
+  ) {
     if (!this.transporter) {
       return { sent: false, reason: 'SMTP not configured' };
     }
@@ -310,11 +348,15 @@ export class NotificationsService {
           subject,
           template: 'notification',
           status: 'failed',
-          error_message: error instanceof Error ? error.message : 'Unknown error',
+          error_message:
+            error instanceof Error ? error.message : 'Unknown error',
         },
       });
 
-      return { sent: false, reason: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        sent: false,
+        reason: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 }

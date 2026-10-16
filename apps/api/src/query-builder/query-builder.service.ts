@@ -50,24 +50,34 @@ export class QueryBuilderService {
     }
   }
 
-  async executeQuery(tenantId: string, userId: string, config: {
-    entity: string;
-    columns: string[];
-    filters: Record<string, any>[];
-    joins?: string[];
-    groupBy?: string[];
-    limit?: number;
-    offset?: number;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-  }) {
+  async executeQuery(
+    tenantId: string,
+    userId: string,
+    config: {
+      entity: string;
+      columns: string[];
+      filters: Record<string, any>[];
+      joins?: string[];
+      groupBy?: string[];
+      limit?: number;
+      offset?: number;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+    },
+  ) {
     const startTime = Date.now();
     const cacheKey = this.getCacheKey(tenantId, config);
     const cachedResult = this.getCachedResult(cacheKey);
-    
+
     if (cachedResult) {
       this.logger.debug(`Cache hit for query (${Date.now() - startTime}ms)`);
-      await this.saveQueryHistory(tenantId, userId, config, cachedResult.total, true);
+      await this.saveQueryHistory(
+        tenantId,
+        userId,
+        config,
+        cachedResult.total,
+        true,
+      );
       return { ...cachedResult, fromCache: true };
     }
 
@@ -76,7 +86,9 @@ export class QueryBuilderService {
       throw new NotFoundException(`Entity ${config.entity} not found`);
     }
 
-    const allowedColumns = entityConfig.columns.filter(c => config.columns.includes(c));
+    const allowedColumns = entityConfig.columns.filter((c) =>
+      config.columns.includes(c),
+    );
     if (allowedColumns.length === 0) {
       throw new NotFoundException('No valid columns selected');
     }
@@ -86,7 +98,10 @@ export class QueryBuilderService {
       for (const filter of config.filters) {
         if (filter.field && filter.value !== undefined && filter.value !== '') {
           if (filter.operator === 'contains') {
-            where[filter.field] = { contains: filter.value, mode: 'insensitive' };
+            where[filter.field] = {
+              contains: filter.value,
+              mode: 'insensitive',
+            };
           } else if (filter.operator === 'eq') {
             where[filter.field] = filter.value;
           } else if (filter.operator === 'gt') {
@@ -105,23 +120,31 @@ export class QueryBuilderService {
     }
 
     const select: any = {};
-    allowedColumns.forEach(col => { select[col] = true; });
+    allowedColumns.forEach((col) => {
+      select[col] = true;
+    });
 
     let results: any[];
     let total = 0;
 
     if (config.groupBy?.length) {
       const groupBySelect: any = {};
-      config.groupBy.forEach(g => { groupBySelect[g] = true; });
-      const groupByArr = config.groupBy as string[];
-      allowedColumns.forEach(col => { if (!groupByArr.includes(col)) groupBySelect[col] = true; });
-      
+      config.groupBy.forEach((g) => {
+        groupBySelect[g] = true;
+      });
+      const groupByArr = config.groupBy;
+      allowedColumns.forEach((col) => {
+        if (!groupByArr.includes(col)) groupBySelect[col] = true;
+      });
+
       results = await this.db[entityConfig.model].groupBy({
         by: config.groupBy,
         where,
         ...groupBySelect,
         _count: true,
-        orderBy: config.sortBy ? { [config.sortBy]: config.sortOrder || 'asc' } : undefined,
+        orderBy: config.sortBy
+          ? { [config.sortBy]: config.sortOrder || 'asc' }
+          : undefined,
         take: config.limit || 50,
         skip: config.offset || 0,
       });
@@ -131,7 +154,9 @@ export class QueryBuilderService {
         this.db[entityConfig.model].findMany({
           where,
           select,
-          orderBy: config.sortBy ? { [config.sortBy]: config.sortOrder || 'asc' } : { created_at: 'desc' },
+          orderBy: config.sortBy
+            ? { [config.sortBy]: config.sortOrder || 'asc' }
+            : { created_at: 'desc' },
           take: config.limit || 50,
           skip: config.offset || 0,
         }),
@@ -141,7 +166,13 @@ export class QueryBuilderService {
       total = count;
     }
 
-    await this.saveQueryHistory(tenantId, userId, config, results.length, false);
+    await this.saveQueryHistory(
+      tenantId,
+      userId,
+      config,
+      results.length,
+      false,
+    );
 
     const response = {
       data: results,
@@ -152,21 +183,27 @@ export class QueryBuilderService {
 
     this.setCachedResult(cacheKey, response);
     const duration = Date.now() - startTime;
-    this.logger.log(`Query executed in ${duration}ms${config.filters?.length ? ` with ${config.filters.length} filters` : ''}`);
+    this.logger.log(
+      `Query executed in ${duration}ms${config.filters?.length ? ` with ${config.filters.length} filters` : ''}`,
+    );
 
     return response;
   }
 
-  async saveInsight(tenantId: string, userId: string, data: {
-    name: string;
-    description?: string;
-    entity_type: string;
-    query_config: any;
-    chart_type?: string;
-    is_shared?: boolean;
-  }) {
+  async saveInsight(
+    tenantId: string,
+    userId: string,
+    data: {
+      name: string;
+      description?: string;
+      entity_type: string;
+      query_config: any;
+      chart_type?: string;
+      is_shared?: boolean;
+    },
+  ) {
     const shareToken = data.is_shared ? this.generateShareToken() : null;
-    
+
     return this.db.insight.create({
       data: {
         tenant_id: tenantId,
@@ -233,35 +270,93 @@ export class QueryBuilderService {
   }
 
   getEntityConfig(entity: string) {
-    const entities: Record<string, { model: string; columns: string[]; label: string }> = {
+    const entities: Record<
+      string,
+      { model: string; columns: string[]; label: string }
+    > = {
       applications: {
         model: 'application',
-        columns: ['id', 'name', 'description', 'vendor', 'version', 'technology_type', 'lifecycle_state', 'risk_score', 'eol_date', 'deployment_model', 'cloud_readiness_score', 'created_at'],
+        columns: [
+          'id',
+          'name',
+          'description',
+          'vendor',
+          'version',
+          'technology_type',
+          'lifecycle_state',
+          'risk_score',
+          'eol_date',
+          'deployment_model',
+          'cloud_readiness_score',
+          'created_at',
+        ],
         label: 'Applications',
       },
       capabilities: {
         model: 'capabilityNode',
-        columns: ['id', 'name', 'description', 'category', 'maturity_level', 'criticality', 'created_at'],
+        columns: [
+          'id',
+          'name',
+          'description',
+          'category',
+          'maturity_level',
+          'criticality',
+          'created_at',
+        ],
         label: 'Capabilities',
       },
       costs: {
         model: 'applicationCost',
-        columns: ['id', 'application_id', 'cost_type', 'amount', 'frequency', 'start_date', 'end_date'],
+        columns: [
+          'id',
+          'application_id',
+          'cost_type',
+          'amount',
+          'frequency',
+          'start_date',
+          'end_date',
+        ],
         label: 'Costs',
       },
       interfaces: {
         model: 'interface',
-        columns: ['id', 'name', 'source', 'target', 'protocol', 'status', 'created_at'],
+        columns: [
+          'id',
+          'name',
+          'source',
+          'target',
+          'protocol',
+          'status',
+          'created_at',
+        ],
         label: 'API Interfaces',
       },
       components: {
         model: 'technologyComponent',
-        columns: ['id', 'name', 'component_type', 'environment', 'status', 'host', 'cloud_region', 'eol_date'],
+        columns: [
+          'id',
+          'name',
+          'component_type',
+          'environment',
+          'status',
+          'host',
+          'cloud_region',
+          'eol_date',
+        ],
         label: 'Components',
       },
       saas: {
         model: 'saaSApplication',
-        columns: ['id', 'vendor', 'use_case', 'annual_contract_value', 'pricing_model', 'contract_end_date', 'total_seats', 'is_shadow_it'],
+        columns: [
+          'id',
+          'vendor',
+          'use_case',
+          'annual_contract_value',
+          'pricing_model',
+          'contract_end_date',
+          'total_seats',
+          'is_shadow_it',
+        ],
         label: 'SaaS Applications',
       },
     };
@@ -269,14 +364,22 @@ export class QueryBuilderService {
   }
 
   getEntities() {
-    return Object.entries(this.getEntityConfig('')).map(([key, val]: [string, any]) => ({
-      value: key,
-      label: val.label,
-      columns: val.columns,
-    }));
+    return Object.entries(this.getEntityConfig('')).map(
+      ([key, val]: [string, any]) => ({
+        value: key,
+        label: val.label,
+        columns: val.columns,
+      }),
+    );
   }
 
-  private async saveQueryHistory(tenantId: string, userId: string, config: any, resultCount: number, fromCache: boolean = false) {
+  private async saveQueryHistory(
+    tenantId: string,
+    userId: string,
+    config: any,
+    resultCount: number,
+    fromCache: boolean = false,
+  ) {
     await this.db.queryHistory.create({
       data: {
         tenant_id: tenantId,
@@ -289,6 +392,9 @@ export class QueryBuilderService {
   }
 
   private generateShareToken(): string {
-    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    return (
+      Math.random().toString(36).substring(2) +
+      Math.random().toString(36).substring(2)
+    );
   }
 }

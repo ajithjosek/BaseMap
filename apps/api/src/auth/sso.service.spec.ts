@@ -13,10 +13,7 @@ describe('SsoService', () => {
     prisma = createPrismaMock();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SsoService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [SsoService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get(SsoService);
@@ -123,7 +120,9 @@ describe('SsoService', () => {
     it('should throw BadRequestException when SSO not configured', async () => {
       prisma.tenant.findUnique.mockResolvedValue(makeTenant({ settings: {} }));
 
-      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(BadRequestException);
+      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid OIDC config (missing issuer)', async () => {
@@ -140,7 +139,9 @@ describe('SsoService', () => {
         }),
       );
 
-      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(BadRequestException);
+      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for non-OIDC provider', async () => {
@@ -158,31 +159,57 @@ describe('SsoService', () => {
         }),
       );
 
-      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(BadRequestException);
+      await expect(service.buildOidcConfig(UUID.TENANT)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('provisionSsoUser', () => {
     it('should return existing user when found', async () => {
-      const existingUser = { id: UUID.USER, email: 'sso@example.com', sso_provider: null, sso_subject: null };
+      const existingUser = {
+        id: UUID.USER,
+        email: 'sso@example.com',
+        sso_provider: null,
+        sso_subject: null,
+      };
       const tenant = makeTenant();
       prisma.tenant.findUnique.mockResolvedValue(tenant);
       prisma.user.findUnique.mockResolvedValue(existingUser as any);
 
-      const result = await service.provisionSsoUser('sso@example.com', 'oidc', UUID.TENANT, 'SSO', 'User');
+      const result = await service.provisionSsoUser(
+        'sso@example.com',
+        'oidc',
+        UUID.TENANT,
+        'SSO',
+        'User',
+      );
 
       expect(result.id).toBe(UUID.USER);
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
     it('should update SSO fields on existing user', async () => {
-      const existingUser = { id: UUID.USER, email: 'sso@example.com', sso_provider: null, sso_subject: null };
+      const existingUser = {
+        id: UUID.USER,
+        email: 'sso@example.com',
+        sso_provider: null,
+        sso_subject: null,
+      };
       const tenant = makeTenant();
       prisma.tenant.findUnique.mockResolvedValue(tenant);
       prisma.user.findUnique.mockResolvedValue(existingUser as any);
-      prisma.user.update.mockResolvedValue({ ...existingUser, sso_provider: 'oidc', sso_subject: 'oidc:sso@example.com' } as any);
+      prisma.user.update.mockResolvedValue({
+        ...existingUser,
+        sso_provider: 'oidc',
+        sso_subject: 'oidc:sso@example.com',
+      } as any);
 
-      const result = await service.provisionSsoUser('sso@example.com', 'oidc', UUID.TENANT);
+      const result = await service.provisionSsoUser(
+        'sso@example.com',
+        'oidc',
+        UUID.TENANT,
+      );
 
       expect(prisma.user.update).toHaveBeenCalled();
     });
@@ -191,9 +218,18 @@ describe('SsoService', () => {
       const tenant = makeTenant();
       prisma.tenant.findUnique.mockResolvedValue(tenant);
       prisma.user.findUnique.mockResolvedValue(null);
-      prisma.user.create.mockResolvedValue({ id: UUID.USER, email: 'sso@example.com' } as any);
+      prisma.user.create.mockResolvedValue({
+        id: UUID.USER,
+        email: 'sso@example.com',
+      } as any);
 
-      const result = await service.provisionSsoUser('sso@example.com', 'oidc', UUID.TENANT, 'New', 'User');
+      const result = await service.provisionSsoUser(
+        'sso@example.com',
+        'oidc',
+        UUID.TENANT,
+        'New',
+        'User',
+      );
 
       expect(prisma.user.create).toHaveBeenCalled();
       expect(result.email).toBe('sso@example.com');
@@ -203,7 +239,10 @@ describe('SsoService', () => {
       const tenant = makeTenant();
       prisma.tenant.findUnique.mockResolvedValue(tenant);
       prisma.user.findUnique.mockResolvedValue(null);
-      prisma.user.create.mockResolvedValue({ id: UUID.USER, email: 'sso@example.com' } as any);
+      prisma.user.create.mockResolvedValue({
+        id: UUID.USER,
+        email: 'sso@example.com',
+      } as any);
 
       await service.provisionSsoUser('sso@example.com', 'oidc', 'test-tenant');
 
@@ -266,7 +305,9 @@ describe('SsoService', () => {
     it('should throw UnauthorizedException when no email found', () => {
       const saml = `<saml2:Response><saml2:Assertion></saml2:Assertion></saml2:Response>`;
 
-      expect(() => service.parseSamlResponse(saml)).toThrow(UnauthorizedException);
+      expect(() => service.parseSamlResponse(saml)).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

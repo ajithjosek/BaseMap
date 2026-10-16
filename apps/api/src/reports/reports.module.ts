@@ -7,6 +7,6 @@ import { PdfExportService } from './pdf-export.service';
 
 @Module({
   providers: [ReportsService, CustomReportsService, PdfExportService],
-  controllers: [ReportsController, CustomReportsController]
+  controllers: [ReportsController, CustomReportsController],
 })
 export class ReportsModule {}

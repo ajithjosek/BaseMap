@@ -9,7 +9,10 @@ export class TechnologyComponentsService {
     this.db = this.prisma as any;
   }
 
-  async findAll(tenantId: string, filters?: { type?: string; environment?: string }) {
+  async findAll(
+    tenantId: string,
+    filters?: { type?: string; environment?: string },
+  ) {
     const where: any = { tenant_id: tenantId };
     if (filters?.type) where.component_type = filters.type;
     if (filters?.environment) where.environment = filters.environment;
@@ -24,12 +27,16 @@ export class TechnologyComponentsService {
         },
         dependencies_to: {
           include: {
-            from_component: { select: { id: true, name: true, component_type: true } },
+            from_component: {
+              select: { id: true, name: true, component_type: true },
+            },
           },
         },
         dependencies_from: {
           include: {
-            to_component: { select: { id: true, name: true, component_type: true } },
+            to_component: {
+              select: { id: true, name: true, component_type: true },
+            },
           },
         },
       },
@@ -48,12 +55,16 @@ export class TechnologyComponentsService {
         },
         dependencies_to: {
           include: {
-            from_component: { select: { id: true, name: true, component_type: true } },
+            from_component: {
+              select: { id: true, name: true, component_type: true },
+            },
           },
         },
         dependencies_from: {
           include: {
-            to_component: { select: { id: true, name: true, component_type: true } },
+            to_component: {
+              select: { id: true, name: true, component_type: true },
+            },
           },
         },
       },
@@ -82,8 +93,12 @@ export class TechnologyComponentsService {
         eol_date: dto.eol_date ? new Date(dto.eol_date) : null,
         data_classification: dto.data_classification,
         retention_policy: dto.retention_policy,
-        row_count_estimate: dto.row_count_estimate ? BigInt(dto.row_count_estimate) : null,
-        storage_size_gb: dto.storage_size_gb ? Number(dto.storage_size_gb) : null,
+        row_count_estimate: dto.row_count_estimate
+          ? BigInt(dto.row_count_estimate)
+          : null,
+        storage_size_gb: dto.storage_size_gb
+          ? Number(dto.storage_size_gb)
+          : null,
         custom_attributes: dto.custom_attributes || {},
       },
     });
@@ -94,19 +109,29 @@ export class TechnologyComponentsService {
 
     const data: any = {};
     if (dto.name !== undefined) data.name = dto.name;
-    if (dto.component_type !== undefined) data.component_type = dto.component_type;
+    if (dto.component_type !== undefined)
+      data.component_type = dto.component_type;
     if (dto.environment !== undefined) data.environment = dto.environment;
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.host !== undefined) data.host = dto.host;
     if (dto.ip_address !== undefined) data.ip_address = dto.ip_address;
     if (dto.cloud_region !== undefined) data.cloud_region = dto.cloud_region;
-    if (dto.resource_specs !== undefined) data.resource_specs = dto.resource_specs;
-    if (dto.software_details !== undefined) data.software_details = dto.software_details;
-    if (dto.eol_date !== undefined) data.eol_date = dto.eol_date ? new Date(dto.eol_date) : null;
-    if (dto.data_classification !== undefined) data.data_classification = dto.data_classification;
-    if (dto.retention_policy !== undefined) data.retention_policy = dto.retention_policy;
-    if (dto.storage_size_gb !== undefined) data.storage_size_gb = dto.storage_size_gb ? Number(dto.storage_size_gb) : null;
-    if (dto.custom_attributes !== undefined) data.custom_attributes = dto.custom_attributes;
+    if (dto.resource_specs !== undefined)
+      data.resource_specs = dto.resource_specs;
+    if (dto.software_details !== undefined)
+      data.software_details = dto.software_details;
+    if (dto.eol_date !== undefined)
+      data.eol_date = dto.eol_date ? new Date(dto.eol_date) : null;
+    if (dto.data_classification !== undefined)
+      data.data_classification = dto.data_classification;
+    if (dto.retention_policy !== undefined)
+      data.retention_policy = dto.retention_policy;
+    if (dto.storage_size_gb !== undefined)
+      data.storage_size_gb = dto.storage_size_gb
+        ? Number(dto.storage_size_gb)
+        : null;
+    if (dto.custom_attributes !== undefined)
+      data.custom_attributes = dto.custom_attributes;
 
     return this.db.technologyComponent.update({
       where: { id },
@@ -119,7 +144,11 @@ export class TechnologyComponentsService {
     return this.db.technologyComponent.delete({ where: { id } });
   }
 
-  async linkToApplication(componentId: string, tenantId: string, applicationId: string) {
+  async linkToApplication(
+    componentId: string,
+    tenantId: string,
+    applicationId: string,
+  ) {
     await this.findOne(componentId, tenantId);
 
     const existing = await this.db.applicationComponent.findFirst({
@@ -139,7 +168,13 @@ export class TechnologyComponentsService {
     });
   }
 
-  async addDependency(tenantId: string, fromComponentId: string, toComponentId: string, type?: string, description?: string) {
+  async addDependency(
+    tenantId: string,
+    fromComponentId: string,
+    toComponentId: string,
+    type?: string,
+    description?: string,
+  ) {
     await this.findOne(fromComponentId, tenantId);
     await this.findOne(toComponentId, tenantId);
 
@@ -176,22 +211,25 @@ export class TechnologyComponentsService {
       throw new NotFoundException('Application not found');
     }
 
-    const components = app.application_components.map(ac => ac.component);
-    
+    const components = app.application_components.map((ac) => ac.component);
+
     const scores = {
       portability: this.calculatePortabilityScore(components),
       dependencyComplexity: this.calculateDependencyScore(components),
       dataResidency: this.calculateDataResidencyScore(components),
-      security: this.calculateSecurityScore(components, app.data_classification),
+      security: this.calculateSecurityScore(
+        components,
+        app.data_classification,
+      ),
       containerization: this.calculateContainerizationScore(components),
     };
 
     const totalScore = Math.round(
-      (scores.portability * 0.2) +
-      (scores.dependencyComplexity * 0.25) +
-      (scores.dataResidency * 0.15) +
-      (scores.security * 0.25) +
-      (scores.containerization * 0.15)
+      scores.portability * 0.2 +
+        scores.dependencyComplexity * 0.25 +
+        scores.dataResidency * 0.15 +
+        scores.security * 0.25 +
+        scores.containerization * 0.15,
     );
 
     let complexity = 'Low';
@@ -200,7 +238,7 @@ export class TechnologyComponentsService {
 
     await this.db.application.update({
       where: { id: applicationId },
-      data: { 
+      data: {
         cloud_readiness_score: totalScore,
         migration_complexity: complexity,
       },
@@ -214,30 +252,35 @@ export class TechnologyComponentsService {
   }
 
   private calculatePortabilityScore(components: any[]): number {
-    const cloudComponents = components.filter(c => 
-      c.component_type === 'Cloud Service' || c.cloud_region
+    const cloudComponents = components.filter(
+      (c) => c.component_type === 'Cloud Service' || c.cloud_region,
     ).length;
-    const onPremComponents = components.filter(c => 
-      c.component_type === 'Server' || c.component_type === 'Database'
+    const onPremComponents = components.filter(
+      (c) => c.component_type === 'Server' || c.component_type === 'Database',
     ).length;
 
     if (components.length === 0) return 50;
-    return Math.round((cloudComponents / (cloudComponents + onPremComponents || 1)) * 100);
+    return Math.round(
+      (cloudComponents / (cloudComponents + onPremComponents || 1)) * 100,
+    );
   }
 
   private calculateDependencyScore(components: any[]): number {
-    const hasDependencies = components.some(c => 
-      c.dependencies_from?.length > 0 || c.dependencies_to?.length > 0
+    const hasDependencies = components.some(
+      (c) => c.dependencies_from?.length > 0 || c.dependencies_to?.length > 0,
     );
     return hasDependencies ? 60 : 90;
   }
 
   private calculateDataResidencyScore(components: any[]): number {
-    const hasRegion = components.some(c => c.cloud_region);
+    const hasRegion = components.some((c) => c.cloud_region);
     return hasRegion ? 80 : 50;
   }
 
-  private calculateSecurityScore(components: any[], dataClassification: string): number {
+  private calculateSecurityScore(
+    components: any[],
+    dataClassification: string,
+  ): number {
     let baseScore = 70;
     if (dataClassification === 'Confidential') baseScore -= 20;
     if (dataClassification === 'Restricted') baseScore -= 30;
@@ -245,8 +288,9 @@ export class TechnologyComponentsService {
   }
 
   private calculateContainerizationScore(components: any[]): number {
-    const customAttrs = components.filter(c => 
-      c.custom_attributes?.containerized || c.custom_attributes?.kubernetes
+    const customAttrs = components.filter(
+      (c) =>
+        c.custom_attributes?.containerized || c.custom_attributes?.kubernetes,
     ).length;
     if (components.length === 0) return 50;
     return Math.round((customAttrs / components.length) * 100);

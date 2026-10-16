@@ -22,36 +22,41 @@ export class WorkflowsController {
 
   @Post()
   create(@Req() req: any, @Body() dto: any, @CurrentUser() user: any) {
-    return this.workflows.create((req as any).tenantId, dto, user);
+    return this.workflows.create(req.tenantId, dto, user);
   }
 
   @Get()
   list(@Req() req: any) {
-    return this.workflows.list((req as any).tenantId);
+    return this.workflows.list(req.tenantId);
   }
 
   @Get('runs')
   runs(@Req() req: any, @Query('workflow_id') workflowId?: string) {
-    return this.workflows.listRuns((req as any).tenantId, workflowId);
+    return this.workflows.listRuns(req.tenantId, workflowId);
   }
 
   @Get(':id')
   one(@Req() req: any, @Param('id') id: string) {
-    return this.workflows.get((req as any).tenantId, id);
+    return this.workflows.get(req.tenantId, id);
   }
 
   @Post(':id/run')
-  run(@Req() req: any, @Param('id') id: string, @Body() dto: any, @CurrentUser() user: any) {
-    return this.workflows.start((req as any).tenantId, id, dto, user);
+  run(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: any,
+    @CurrentUser() user: any,
+  ) {
+    return this.workflows.start(req.tenantId, id, dto, user);
   }
 
   @Put(':id')
   update(@Req() req: any, @Param('id') id: string, @Body() dto: any) {
-    return this.workflows.update((req as any).tenantId, id, dto);
+    return this.workflows.update(req.tenantId, id, dto);
   }
 
   @Delete(':id')
   remove(@Req() req: any, @Param('id') id: string) {
-    return this.workflows.remove((req as any).tenantId, id);
+    return this.workflows.remove(req.tenantId, id);
   }
 }

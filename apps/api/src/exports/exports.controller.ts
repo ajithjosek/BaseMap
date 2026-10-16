@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ExportsService } from './exports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -9,10 +19,7 @@ export class ExportsController {
   constructor(private readonly service: ExportsService) {}
 
   @Get('templates')
-  getTemplates(
-    @CurrentUser() user: any,
-    @Query('type') type?: string,
-  ) {
+  getTemplates(@CurrentUser() user: any, @Query('type') type?: string) {
     return this.service.getTemplates(user.tenantId, user.id, type);
   }
 
@@ -75,6 +82,10 @@ export class ExportsController {
     @Query('templateId') templateId: string,
     @Query('format') format: string,
   ) {
-    return this.service.generateReport(user.tenantId, templateId, format || 'json');
+    return this.service.generateReport(
+      user.tenantId,
+      templateId,
+      format || 'json',
+    );
   }
 }

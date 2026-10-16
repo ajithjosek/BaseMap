@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Patch,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -62,7 +74,12 @@ export class UsersController {
     @CurrentUser() user: any,
     @Body() dto: { roleId: string; businessUnitId: string },
   ) {
-    return this.usersService.removeRole(id, user.tenantId, dto.roleId, dto.businessUnitId);
+    return this.usersService.removeRole(
+      id,
+      user.tenantId,
+      dto.roleId,
+      dto.businessUnitId,
+    );
   }
 
   @Get('roles')

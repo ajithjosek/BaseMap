@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { GapsService } from './gaps.service';
 import { CreateGapDto, UpdateGapDto } from './dto/gap.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -20,7 +31,11 @@ export class GapsController {
     @Query('severity') severity?: string,
     @Query('capabilityId') capabilityId?: string,
   ) {
-    return this.gapsService.findAll(req.tenantId, { status, severity, capabilityId });
+    return this.gapsService.findAll(req.tenantId, {
+      status,
+      severity,
+      capabilityId,
+    });
   }
 
   @Get('stats')
@@ -29,11 +44,11 @@ export class GapsController {
   }
 
   @Get('trend')
-  getTrend(
-    @Req() req: any,
-    @Query('months') months?: string,
-  ) {
-    return this.gapsService.getGapTrend(req.tenantId, months ? parseInt(months) : 12);
+  getTrend(@Req() req: any, @Query('months') months?: string) {
+    return this.gapsService.getGapTrend(
+      req.tenantId,
+      months ? parseInt(months) : 12,
+    );
   }
 
   @Post('detect')
@@ -47,19 +62,12 @@ export class GapsController {
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Req() req: any,
-    @Body() dto: UpdateGapDto,
-  ) {
+  update(@Param('id') id: string, @Req() req: any, @Body() dto: UpdateGapDto) {
     return this.gapsService.update(id, req.tenantId, dto);
   }
 
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @Req() req: any,
-  ) {
+  remove(@Param('id') id: string, @Req() req: any) {
     return this.gapsService.remove(id, req.tenantId);
   }
 }

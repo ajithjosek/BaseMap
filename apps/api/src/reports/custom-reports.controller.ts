@@ -1,6 +1,21 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { CustomReportsService } from './custom-reports.service';
-import { CreateCustomReportDto, UpdateCustomReportDto, ExecuteReportDto } from './dto/custom-report.dto';
+import {
+  CreateCustomReportDto,
+  UpdateCustomReportDto,
+  ExecuteReportDto,
+} from './dto/custom-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('reports/custom')
@@ -29,7 +44,12 @@ export class CustomReportsController {
     @Req() req: any,
     @Body() dto: UpdateCustomReportDto,
   ) {
-    return this.customReportsService.update(id, req.tenantId, req.user?.id, dto);
+    return this.customReportsService.update(
+      id,
+      req.tenantId,
+      req.user?.id,
+      dto,
+    );
   }
 
   @Delete(':id')
@@ -57,6 +77,11 @@ export class CustomReportsController {
     @Req() req: any,
     @Body('isShared') isShared: boolean,
   ) {
-    return this.customReportsService.shareReport(id, req.tenantId, req.user?.id, isShared);
+    return this.customReportsService.shareReport(
+      id,
+      req.tenantId,
+      req.user?.id,
+      isShared,
+    );
   }
 }

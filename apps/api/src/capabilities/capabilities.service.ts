@@ -1,13 +1,26 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCapabilityDto, UpdateCapabilityDto, MapApplicationDto } from './dto/create-capability.dto';
+import {
+  CreateCapabilityDto,
+  UpdateCapabilityDto,
+  MapApplicationDto,
+} from './dto/create-capability.dto';
 import { parse } from 'csv-parse/sync';
 
 @Injectable()
 export class CapabilitiesService {
   constructor(private prisma: PrismaService) {}
 
-  private async checkCircularAndDepth(tenantId: string, newParentId: string | null | undefined, nodeId: string | null): Promise<number> {
+  private async checkCircularAndDepth(
+    tenantId: string,
+    newParentId: string | null | undefined,
+    nodeId: string | null,
+  ): Promise<number> {
     if (!newParentId) return 1;
     let currentId = newParentId;
     let parentLevel = 1;
@@ -15,30 +28,38 @@ export class CapabilitiesService {
 
     while (currentId) {
       count++;
-      if (count > 20) throw new BadRequestException('Tree too deep or circular');
+      if (count > 20)
+        throw new BadRequestException('Tree too deep or circular');
       if (currentId === nodeId) {
         throw new BadRequestException('Circular dependency detected');
       }
-      const parent = await this.prisma.capabilityNode.findUnique({ where: { id: currentId, tenant_id: tenantId } });
+      const parent = await this.prisma.capabilityNode.findUnique({
+        where: { id: currentId, tenant_id: tenantId },
+      });
       if (!parent) throw new BadRequestException('Parent not found');
-      
+
       currentId = parent.parent_id || '';
       if (currentId) parentLevel++;
     }
-    
+
     const newLevel = parentLevel + 1;
     if (newLevel > 4) {
-      throw new BadRequestException('Maximum hierarchy depth of 4 levels exceeded');
+      throw new BadRequestException(
+        'Maximum hierarchy depth of 4 levels exceeded',
+      );
     }
     return newLevel;
   }
 
-  private async getDescendantMaxDepth(tenantId: string, nodeId: string): Promise<number> {
+  private async getDescendantMaxDepth(
+    tenantId: string,
+    nodeId: string,
+  ): Promise<number> {
     const children = await this.prisma.capabilityNode.findMany({
-      where: { parent_id: nodeId, tenant_id: tenantId }
+      where: { parent_id: nodeId, tenant_id: tenantId },
     });
     if (children.length === 0) return 0;
-    
+
     let max = 0;
     for (const child of children) {
       const depth = await this.getDescendantMaxDepth(tenantId, child.id);
@@ -47,23 +68,31 @@ export class CapabilitiesService {
     return max + 1;
   }
 
-  private async updateDescendantsLevels(tenantId: string, nodeId: string, newLevel: number) {
+  private async updateDescendantsLevels(
+    tenantId: string,
+    nodeId: string,
+    newLevel: number,
+  ) {
     const children = await this.prisma.capabilityNode.findMany({
-      where: { parent_id: nodeId, tenant_id: tenantId }
+      where: { parent_id: nodeId, tenant_id: tenantId },
     });
     for (const child of children) {
       const childLevel = newLevel + 1;
       await this.prisma.capabilityNode.update({
         where: { id: child.id },
-        data: { level: childLevel }
+        data: { level: childLevel },
       });
       await this.updateDescendantsLevels(tenantId, child.id, childLevel);
     }
   }
 
   async create(tenantId: string, dto: CreateCapabilityDto) {
-    const level = await this.checkCircularAndDepth(tenantId, dto.parent_id, null);
-    
+    const level = await this.checkCircularAndDepth(
+      tenantId,
+      dto.parent_id,
+      null,
+    );
+
     return this.prisma.capabilityNode.create({
       data: {
         ...dto,
@@ -77,15 +106,12 @@ export class CapabilitiesService {
     const where = tenantId ? { tenant_id: tenantId } : {};
     return this.prisma.capabilityNode.findMany({
       where,
-      orderBy: [
-        { level: 'asc' },
-        { name: 'asc' }
-      ],
+      orderBy: [{ level: 'asc' }, { name: 'asc' }],
       include: {
         _count: {
-          select: { applications: true }
-        }
-      }
+          select: { applications: true },
+        },
+      },
     });
   }
 
@@ -96,19 +122,19 @@ export class CapabilitiesService {
       orderBy: { name: 'asc' },
       include: {
         _count: {
-          select: { applications: true }
-        }
-      }
+          select: { applications: true },
+        },
+      },
     });
 
     const nodeMap = new Map();
     const roots: any[] = [];
 
-    allNodes.forEach(node => {
+    allNodes.forEach((node) => {
       nodeMap.set(node.id, { ...node, children: [] });
     });
 
-    allNodes.forEach(node => {
+    allNodes.forEach((node) => {
       const nodeWithChildren = nodeMap.get(node.id);
       if (node.parent_id && nodeMap.has(node.parent_id)) {
         nodeMap.get(node.parent_id).children.push(nodeWithChildren);
@@ -128,10 +154,10 @@ export class CapabilitiesService {
         children: true,
         applications: {
           include: {
-            application: true
-          }
-        }
-      }
+            application: true,
+          },
+        },
+      },
     });
 
     if (!node) throw new NotFoundException('Capability not found');
@@ -139,7 +165,9 @@ export class CapabilitiesService {
   }
 
   async update(id: string, dto: UpdateCapabilityDto, tenantId: string) {
-    const existing = await this.prisma.capabilityNode.findUnique({ where: { id } });
+    const existing = await this.prisma.capabilityNode.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException('Capability not found');
 
     if (existing.is_locked && dto.is_locked === undefined) {
@@ -148,10 +176,16 @@ export class CapabilitiesService {
 
     let level = existing.level;
     if (dto.parent_id !== undefined && dto.parent_id !== existing.parent_id) {
-      const newLevel = await this.checkCircularAndDepth(tenantId, dto.parent_id, id);
+      const newLevel = await this.checkCircularAndDepth(
+        tenantId,
+        dto.parent_id,
+        id,
+      );
       const descendantDepth = await this.getDescendantMaxDepth(tenantId, id);
       if (newLevel + descendantDepth > 4) {
-        throw new BadRequestException('Moving this node exceeds the maximum depth of 4 for some of its descendants');
+        throw new BadRequestException(
+          'Moving this node exceeds the maximum depth of 4 for some of its descendants',
+        );
       }
       level = newLevel;
     }
@@ -161,7 +195,7 @@ export class CapabilitiesService {
       data: {
         ...dto,
         level,
-        ...(dto.parent_id === null ? { parent_id: null } : {})
+        ...(dto.parent_id === null ? { parent_id: null } : {}),
       } as any,
     });
 
@@ -173,12 +207,15 @@ export class CapabilitiesService {
   }
 
   async remove(id: string, tenantId: string) {
-    const existing = await this.prisma.capabilityNode.findUnique({ where: { id, tenant_id: tenantId } });
+    const existing = await this.prisma.capabilityNode.findUnique({
+      where: { id, tenant_id: tenantId },
+    });
     if (!existing) throw new NotFoundException('Capability not found');
-    if (existing.is_locked) throw new ForbiddenException('Cannot delete a locked capability');
+    if (existing.is_locked)
+      throw new ForbiddenException('Cannot delete a locked capability');
 
     // Cascading delete is not automatic in schema without parent relation onDelete: Cascade?
-    // Wait, let's check schema: `children CapabilityNode[] @relation("CapToCap")`. 
+    // Wait, let's check schema: `children CapabilityNode[] @relation("CapToCap")`.
     // It does not have onDelete: Cascade. We need to implement bulkDelete recursively or linearly.
     const nodesToDelete = await this.getDescendantIds(tenantId, id);
     nodesToDelete.push(id);
@@ -187,19 +224,22 @@ export class CapabilitiesService {
     await this.prisma.capabilityNode.deleteMany({
       where: {
         id: { in: nodesToDelete },
-        tenant_id: tenantId
-      }
+        tenant_id: tenantId,
+      },
     });
 
     return { success: true, count: nodesToDelete.length };
   }
 
-  private async getDescendantIds(tenantId: string, nodeId: string): Promise<string[]> {
+  private async getDescendantIds(
+    tenantId: string,
+    nodeId: string,
+  ): Promise<string[]> {
     const children = await this.prisma.capabilityNode.findMany({
       where: { parent_id: nodeId, tenant_id: tenantId },
-      select: { id: true }
+      select: { id: true },
     });
-    
+
     let ids: string[] = [];
     for (const child of children) {
       ids.push(child.id);
@@ -209,14 +249,17 @@ export class CapabilitiesService {
   }
 
   async importFromCsv(tenantId: string, csvContent: string) {
-    const records = parse(csvContent, { columns: true, skip_empty_lines: true }) as any[];
-    
+    const records = parse(csvContent, {
+      columns: true,
+      skip_empty_lines: true,
+    }) as Record<string, string>[];
+
     let imported = 0;
     // Format expected: Level 1, Level 2, Level 3, Level 4, Description
     for (const record of records) {
       let parentId: string | null = null;
       let level = 1;
-      
+
       for (let i = 1; i <= 4; i++) {
         const name = record[`Level ${i}`]?.trim();
         if (!name) break;
@@ -226,8 +269,8 @@ export class CapabilitiesService {
             tenant_id: tenantId,
             name,
             parent_id: parentId,
-            level
-          }
+            level,
+          },
         });
 
         if (!node) {
@@ -237,13 +280,16 @@ export class CapabilitiesService {
               name,
               level,
               parent_id: parentId,
-              description: i === 4 || !record[`Level ${i+1}`] ? record['Description'] : undefined,
-              strategic_importance: 'Medium'
-            }
+              description:
+                i === 4 || !record[`Level ${i + 1}`]
+                  ? record['Description']
+                  : undefined,
+              strategic_importance: 'Medium',
+            },
           });
           imported++;
         }
-        
+
         parentId = node.id;
         level++;
       }
@@ -251,14 +297,19 @@ export class CapabilitiesService {
     return { success: true, imported };
   }
 
-  async mapApplication(capabilityId: string, dto: MapApplicationDto, tenantId: string, userId: string) {
+  async mapApplication(
+    capabilityId: string,
+    dto: MapApplicationDto,
+    tenantId: string,
+    userId: string,
+  ) {
     const record = await this.prisma.applicationCapability.upsert({
       where: {
         tenant_id_application_id_capability_id: {
           tenant_id: tenantId,
           application_id: dto.application_id,
           capability_id: capabilityId,
-        }
+        },
       },
       update: {
         support_level: dto.support_level,
@@ -268,7 +319,7 @@ export class CapabilitiesService {
         capability_id: capabilityId,
         support_level: dto.support_level,
         tenant_id: tenantId,
-      }
+      },
     });
 
     await this.prisma.auditLog.create({
@@ -277,22 +328,31 @@ export class CapabilitiesService {
         user_id: userId,
         entity_type: 'ApplicationCapability',
         action: 'CREATE/UPDATE',
-        changes: { capabilityId, applicationId: dto.application_id, support_level: dto.support_level } as any,
-      }
+        changes: {
+          capabilityId,
+          applicationId: dto.application_id,
+          support_level: dto.support_level,
+        } as any,
+      },
     });
 
     return record;
   }
 
-  async unmapApplication(capabilityId: string, applicationId: string, tenantId: string, userId: string) {
+  async unmapApplication(
+    capabilityId: string,
+    applicationId: string,
+    tenantId: string,
+    userId: string,
+  ) {
     const record = await this.prisma.applicationCapability.delete({
       where: {
         tenant_id_application_id_capability_id: {
           tenant_id: tenantId,
           application_id: applicationId,
           capability_id: capabilityId,
-        }
-      }
+        },
+      },
     });
 
     await this.prisma.auditLog.create({
@@ -302,15 +362,22 @@ export class CapabilitiesService {
         entity_type: 'ApplicationCapability',
         action: 'DELETE',
         changes: { capabilityId, applicationId } as any,
-      }
+      },
     });
 
     return record;
   }
 
-  async getC2AMatrix(tenantId: string, filters?: { businessUnitId?: string; lifecycleState?: string; riskScore?: string }) {
+  async getC2AMatrix(
+    tenantId: string,
+    filters?: {
+      businessUnitId?: string;
+      lifecycleState?: string;
+      riskScore?: string;
+    },
+  ) {
     const appWhere: any = { tenant_id: tenantId };
-    
+
     if (filters?.businessUnitId) {
       appWhere.business_unit_id = filters.businessUnitId;
     }
@@ -329,7 +396,13 @@ export class CapabilitiesService {
     const [applications, capabilities] = await Promise.all([
       this.prisma.application.findMany({
         where: appWhere,
-        select: { id: true, name: true, lifecycle_state: true, risk_score: true, business_unit_id: true },
+        select: {
+          id: true,
+          name: true,
+          lifecycle_state: true,
+          risk_score: true,
+          business_unit_id: true,
+        },
       }),
       this.prisma.capabilityNode.findMany({
         where: { tenant_id: tenantId },
@@ -337,8 +410,8 @@ export class CapabilitiesService {
       }),
     ]);
 
-    const appIds = applications.map(a => a.id);
-    const capIds = capabilities.map(c => c.id);
+    const appIds = applications.map((a) => a.id);
+    const capIds = capabilities.map((c) => c.id);
 
     const mappings = await this.prisma.applicationCapability.findMany({
       where: {
@@ -349,7 +422,7 @@ export class CapabilitiesService {
     });
 
     const matrix: Record<string, Record<string, string>> = {};
-    
+
     for (const app of applications) {
       matrix[app.id] = {};
       for (const cap of capabilities) {
@@ -358,8 +431,12 @@ export class CapabilitiesService {
     }
 
     for (const mapping of mappings) {
-      if (matrix[mapping.application_id] && matrix[mapping.application_id][mapping.capability_id] !== undefined) {
-        matrix[mapping.application_id][mapping.capability_id] = mapping.support_level;
+      if (
+        matrix[mapping.application_id] &&
+        matrix[mapping.application_id][mapping.capability_id] !== undefined
+      ) {
+        matrix[mapping.application_id][mapping.capability_id] =
+          mapping.support_level;
       }
     }
 
@@ -387,7 +464,10 @@ export class CapabilitiesService {
 
     for (const cap of capabilities) {
       const directApps = cap._count.applications;
-      const childApps = cap.children.reduce((sum: number, child: any) => sum + child._count.applications, 0);
+      const childApps = cap.children.reduce(
+        (sum: number, child: any) => sum + child._count.applications,
+        0,
+      );
       const totalApps = directApps + childApps;
 
       if (totalApps === 0) {

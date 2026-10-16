@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsEnum, IsUUID, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateInterfaceDto {
   @IsString()

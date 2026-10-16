@@ -21,32 +21,36 @@ export class CapabilityKpisController {
 
   @Get()
   list(@Req() req: any, @Query('capability_id') capabilityId?: string) {
-    return this.kpis.list((req as any).tenantId, capabilityId);
+    return this.kpis.list(req.tenantId, capabilityId);
   }
 
   @Get(':id/values')
-  values(@Req() req: any, @Param('id') id: string, @Query('limit') limit?: string) {
-    return this.kpis.values((req as any).tenantId, id, limit ? Number(limit) : 30);
+  values(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.kpis.values(req.tenantId, id, limit ? Number(limit) : 30);
   }
 
   @Get(':id/trend')
   trend(@Req() req: any, @Param('id') id: string) {
-    return this.kpis.trend((req as any).tenantId, id);
+    return this.kpis.trend(req.tenantId, id);
   }
 
   @Post(':id/values')
   recordValue(@Req() req: any, @Param('id') id: string, @Body() dto: any) {
-    return this.kpis.recordValue((req as any).tenantId, id, dto);
+    return this.kpis.recordValue(req.tenantId, id, dto);
   }
 
   @Put(':id')
   update(@Req() req: any, @Param('id') id: string, @Body() dto: any) {
-    return this.kpis.update((req as any).tenantId, id, dto);
+    return this.kpis.update(req.tenantId, id, dto);
   }
 
   @Delete(':id')
   remove(@Req() req: any, @Param('id') id: string) {
-    return this.kpis.remove((req as any).tenantId, id);
+    return this.kpis.remove(req.tenantId, id);
   }
 }
 
@@ -57,11 +61,15 @@ export class CapabilityScopedKpisController {
 
   @Get()
   list(@Req() req: any, @Param('capabilityId') capabilityId: string) {
-    return this.kpis.list((req as any).tenantId, capabilityId);
+    return this.kpis.list(req.tenantId, capabilityId);
   }
 
   @Post()
-  create(@Req() req: any, @Param('capabilityId') capabilityId: string, @Body() dto: any) {
-    return this.kpis.create((req as any).tenantId, capabilityId, dto);
+  create(
+    @Req() req: any,
+    @Param('capabilityId') capabilityId: string,
+    @Body() dto: any,
+  ) {
+    return this.kpis.create(req.tenantId, capabilityId, dto);
   }
 }

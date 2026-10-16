@@ -1,4 +1,10 @@
-import { Controller, Post, Body, UnauthorizedException, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -14,7 +20,7 @@ export class AuthController {
   async login(@Body() loginDto: any, @Req() req: any) {
     const tenantId = req.headers['x-tenant-id'] || loginDto.tenantId;
     if (!tenantId) {
-       throw new UnauthorizedException('Tenant ID is required');
+      throw new UnauthorizedException('Tenant ID is required');
     }
 
     let user;
@@ -26,7 +32,9 @@ export class AuthController {
       );
     } catch (err: any) {
       if (err.status === 404) {
-        throw new UnauthorizedException(err.response?.message || 'Invalid credentials');
+        throw new UnauthorizedException(
+          err.response?.message || 'Invalid credentials',
+        );
       }
       throw err;
     }

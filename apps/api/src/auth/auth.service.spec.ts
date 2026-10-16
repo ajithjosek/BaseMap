@@ -1,10 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPrismaMock } from '../../test/__mocks__/prisma.mock';
-import { makeUser, makeTenant, makeUserRole, UUID } from '../../test/__fixtures__/fixtures';
+import {
+  makeUser,
+  makeTenant,
+  makeUserRole,
+  UUID,
+} from '../../test/__fixtures__/fixtures';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
@@ -50,7 +59,9 @@ describe('AuthService', () => {
       prisma.tenant.findUnique.mockResolvedValue(null);
       prisma.user.findUnique.mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
-      prisma.user.create.mockResolvedValue(makeUser({ id: UUID.USER, email: registerDto.email }));
+      prisma.user.create.mockResolvedValue(
+        makeUser({ id: UUID.USER, email: registerDto.email }),
+      );
       prisma.userRole.findMany.mockResolvedValue([]);
       prisma.tenant.findUnique.mockResolvedValue(makeTenant());
 
@@ -94,7 +105,9 @@ describe('AuthService', () => {
       prisma.tenant.findUnique.mockResolvedValue(null);
       prisma.user.findUnique.mockResolvedValue(makeUser());
 
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -105,7 +118,11 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.validateUser(user.email, 'password', UUID.TENANT);
+      const result = await service.validateUser(
+        user.email,
+        'password',
+        UUID.TENANT,
+      );
 
       expect(result).toBeDefined();
       expect(result.email).toBe(user.email);
@@ -117,7 +134,11 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue(makeUser());
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validateUser('test@example.com', 'wrong', UUID.TENANT);
+      const result = await service.validateUser(
+        'test@example.com',
+        'wrong',
+        UUID.TENANT,
+      );
 
       expect(result).toBeNull();
     });
@@ -134,7 +155,9 @@ describe('AuthService', () => {
     it('should resolve slug tenant before lookup', async () => {
       const slugTenant = makeTenant();
       prisma.tenant.findUnique.mockResolvedValue(slugTenant);
-      prisma.user.findUnique.mockResolvedValue(makeUser({ tenant_id: slugTenant.id }));
+      prisma.user.findUnique.mockResolvedValue(
+        makeUser({ tenant_id: slugTenant.id }),
+      );
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       await service.validateUser('test@example.com', 'password', 'test-tenant');
@@ -173,14 +196,20 @@ describe('AuthService', () => {
   describe('refreshToken', () => {
     it('should return new tokens on valid refresh token', async () => {
       const user = makeUser();
-      (jwtService.verify as jest.Mock).mockReturnValue({ sub: user.id, email: user.email, tenantId: UUID.TENANT });
+      (jwtService.verify as jest.Mock).mockReturnValue({
+        sub: user.id,
+        email: user.email,
+        tenantId: UUID.TENANT,
+      });
       prisma.user.findUnique.mockResolvedValue(user);
       prisma.userRole.findMany.mockResolvedValue([]);
 
       const result = await service.refreshToken('valid-refresh-token');
 
       expect(result.access_token).toBe('mock-jwt-token');
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: user.id } });
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: user.id },
+      });
     });
 
     it('should throw UnauthorizedException on invalid token', async () => {
@@ -188,14 +217,20 @@ describe('AuthService', () => {
         throw new Error('invalid');
       });
 
-      await expect(service.refreshToken('invalid-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken('invalid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException when user not found', async () => {
-      (jwtService.verify as jest.Mock).mockReturnValue({ sub: 'nonexistent-id' });
+      (jwtService.verify as jest.Mock).mockReturnValue({
+        sub: 'nonexistent-id',
+      });
       prisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.refreshToken('valid-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken('valid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

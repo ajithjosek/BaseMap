@@ -26,7 +26,11 @@ describe('InterfacesService', () => {
 
   describe('create', () => {
     it('should create an interface', async () => {
-      const dto = { name: 'New Interface', interface_type: 'REST API' as const, status: 'Operational' as const };
+      const dto = {
+        name: 'New Interface',
+        interface_type: 'REST API' as const,
+        status: 'Operational' as const,
+      };
       const expected = makeInterface({ name: 'New Interface' });
       prisma.interface.create.mockResolvedValue(expected);
 
@@ -39,7 +43,10 @@ describe('InterfacesService', () => {
 
   describe('findAll', () => {
     it('should return all interfaces for tenant', async () => {
-      const ifaces = [makeInterface(), makeInterface({ id: 'iface-2', name: 'Interface 2' })];
+      const ifaces = [
+        makeInterface(),
+        makeInterface({ id: 'iface-2', name: 'Interface 2' }),
+      ];
       prisma.interface.findMany.mockResolvedValue(ifaces);
 
       const result = await service.findAll(UUID.TENANT);
@@ -56,7 +63,9 @@ describe('InterfacesService', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             OR: expect.arrayContaining([
-              expect.objectContaining({ name: expect.objectContaining({ contains: 'test' }) }),
+              expect.objectContaining({
+                name: expect.objectContaining({ contains: 'test' }),
+              }),
             ]),
           }),
         }),
@@ -88,16 +97,22 @@ describe('InterfacesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.interface.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('should update an interface', async () => {
       prisma.interface.findUnique.mockResolvedValue(makeInterface());
-      prisma.interface.update.mockResolvedValue(makeInterface({ name: 'Updated' }));
+      prisma.interface.update.mockResolvedValue(
+        makeInterface({ name: 'Updated' }),
+      );
 
-      const result = await service.update(UUID.IFACE, UUID.TENANT, { name: 'Updated' } as any);
+      const result = await service.update(UUID.IFACE, UUID.TENANT, {
+        name: 'Updated',
+      });
 
       expect(result.name).toBe('Updated');
     });
@@ -105,7 +120,9 @@ describe('InterfacesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.interface.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', UUID.TENANT, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', UUID.TENANT, {} as any),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -122,17 +139,19 @@ describe('InterfacesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.interface.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent', UUID.TENANT)).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent', UUID.TENANT)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('getStats', () => {
     it('should return interface statistics', async () => {
       prisma.interface.count
-        .mockResolvedValueOnce(10)  // total
-        .mockResolvedValueOnce(7)   // operational
-        .mockResolvedValueOnce(2)   // degraded
-        .mockResolvedValueOnce(1);  // down
+        .mockResolvedValueOnce(10) // total
+        .mockResolvedValueOnce(7) // operational
+        .mockResolvedValueOnce(2) // degraded
+        .mockResolvedValueOnce(1); // down
       prisma.interfaceIncident.count.mockResolvedValue(3);
 
       const result = await service.getStats(UUID.TENANT);
@@ -149,9 +168,16 @@ describe('InterfacesService', () => {
     it('should resolve an incident with notes', async () => {
       const incident = { id: 'inc-1', status: 'Open' };
       prisma.interfaceIncident.findUnique.mockResolvedValue(incident as any);
-      prisma.interfaceIncident.update.mockResolvedValue({ ...incident, status: 'Resolved' } as any);
+      prisma.interfaceIncident.update.mockResolvedValue({
+        ...incident,
+        status: 'Resolved',
+      } as any);
 
-      const result = await service.resolveIncident('inc-1', UUID.TENANT, 'Fixed the issue');
+      const result = await service.resolveIncident(
+        'inc-1',
+        UUID.TENANT,
+        'Fixed the issue',
+      );
 
       expect(prisma.interfaceIncident.update).toHaveBeenCalledWith({
         where: { id: 'inc-1' },

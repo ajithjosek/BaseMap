@@ -31,14 +31,14 @@ describe('Capabilities E2E', () => {
       .compile();
 
     app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-    app.use(
-      (req: any, _res: any, next: any) => {
-        const tenantId = req.headers['x-tenant-id'];
-        if (tenantId) req.tenantId = tenantId;
-        next();
-      },
+    app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
     );
+    app.use((req: any, _res: any, next: any) => {
+      const tenantId = req.headers['x-tenant-id'];
+      if (tenantId) req.tenantId = tenantId;
+      next();
+    });
     await app.init();
   });
 
@@ -48,20 +48,39 @@ describe('Capabilities E2E', () => {
     prisma.capabilityNode.findMany.mockReset().mockResolvedValue([]);
     prisma.capabilityNode.findUnique.mockReset().mockResolvedValue(null);
     prisma.capabilityNode.findFirst.mockReset().mockResolvedValue(null);
-    prisma.capabilityNode.create.mockReset().mockImplementation(({ data }: any) => Promise.resolve({ id: UUID.CAP, ...data }));
-    prisma.capabilityNode.update.mockReset().mockImplementation(({ where, data }: any) => Promise.resolve({ id: where?.id, ...data }));
-    prisma.capabilityNode.deleteMany.mockReset().mockResolvedValue({ count: 0 });
+    prisma.capabilityNode.create
+      .mockReset()
+      .mockImplementation(({ data }: any) =>
+        Promise.resolve({ id: UUID.CAP, ...data }),
+      );
+    prisma.capabilityNode.update
+      .mockReset()
+      .mockImplementation(({ where, data }: any) =>
+        Promise.resolve({ id: where?.id, ...data }),
+      );
+    prisma.capabilityNode.deleteMany
+      .mockReset()
+      .mockResolvedValue({ count: 0 });
     prisma.capabilityNode.count.mockReset().mockResolvedValue(0);
     prisma.applicationCapability.findMany.mockReset().mockResolvedValue([]);
-    prisma.applicationCapability.upsert.mockReset().mockImplementation(({ create: c }: any) => Promise.resolve({ id: 'ac-1', ...c }));
-    prisma.applicationCapability.delete.mockReset().mockResolvedValue({} as any);
+    prisma.applicationCapability.upsert
+      .mockReset()
+      .mockImplementation(({ create: c }: any) =>
+        Promise.resolve({ id: 'ac-1', ...c }),
+      );
+    prisma.applicationCapability.delete
+      .mockReset()
+      .mockResolvedValue({} as any);
     prisma.auditLog.create.mockReset().mockResolvedValue({} as any);
     prisma.application.findMany.mockReset().mockResolvedValue([]);
   });
 
   describe('GET /capabilities', () => {
     it('should return 200 with capabilities', async () => {
-      const caps = [makeCapabilityNode(), makeCapabilityNode({ id: 'cap-2', name: 'Cap 2' })];
+      const caps = [
+        makeCapabilityNode(),
+        makeCapabilityNode({ id: 'cap-2', name: 'Cap 2' }),
+      ];
       prisma.capabilityNode.findMany.mockResolvedValue(caps);
 
       const res = await request(app.getHttpServer())
@@ -78,9 +97,7 @@ describe('Capabilities E2E', () => {
       prisma.capabilityNode.findMany.mockResolvedValue([]);
       prisma.capabilityGap.findMany.mockResolvedValue([]);
 
-      await request(app.getHttpServer())
-        .get('/capabilities/gaps')
-        .expect(200);
+      await request(app.getHttpServer()).get('/capabilities/gaps').expect(200);
     });
   });
 
@@ -119,7 +136,9 @@ describe('Capabilities E2E', () => {
   describe('PATCH /capabilities/:id', () => {
     it('should return 200 with updated capability', async () => {
       prisma.capabilityNode.findUnique.mockResolvedValue(makeCapabilityNode());
-      prisma.capabilityNode.update.mockResolvedValue(makeCapabilityNode({ name: 'Updated' }));
+      prisma.capabilityNode.update.mockResolvedValue(
+        makeCapabilityNode({ name: 'Updated' }),
+      );
 
       const res = await request(app.getHttpServer())
         .patch(`/capabilities/${UUID.CAP}`)

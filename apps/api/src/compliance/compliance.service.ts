@@ -22,11 +22,14 @@ export class ComplianceService {
     });
   }
 
-  async createFramework(tenantId: string, data: {
-    name: string;
-    framework_type: string;
-    description?: string;
-  }) {
+  async createFramework(
+    tenantId: string,
+    data: {
+      name: string;
+      framework_type: string;
+      description?: string;
+    },
+  ) {
     return this.db.complianceFramework.create({
       data: {
         tenant_id: tenantId,
@@ -46,13 +49,16 @@ export class ComplianceService {
     });
   }
 
-  async createControl(frameworkId: string, data: {
-    control_id: string;
-    name: string;
-    description?: string;
-    risk_level?: string;
-    owner?: string;
-  }) {
+  async createControl(
+    frameworkId: string,
+    data: {
+      control_id: string;
+      name: string;
+      description?: string;
+      risk_level?: string;
+      owner?: string;
+    },
+  ) {
     return this.db.complianceControl.create({
       data: {
         framework_id: frameworkId,
@@ -90,7 +96,7 @@ export class ComplianceService {
 
     let totalControls = 0;
     let compliant = 0;
-    let nonCompliant = 0;
+    const nonCompliant = 0;
     let highRisk = 0;
     let mediumRisk = 0;
     let lowRisk = 0;
@@ -107,7 +113,8 @@ export class ComplianceService {
       }
     }
 
-    const avgCompliance = totalControls > 0 ? Math.round((compliant / totalControls) * 100) : 0;
+    const avgCompliance =
+      totalControls > 0 ? Math.round((compliant / totalControls) * 100) : 0;
 
     return {
       total_frameworks: frameworks.length,
@@ -132,15 +139,18 @@ export class ComplianceService {
     });
   }
 
-  async createSecurityAssessment(tenantId: string, data: {
-    entity_type: string;
-    entity_id: string;
-    assessment_type: string;
-    score: number;
-    max_score?: number;
-    findings?: any[];
-    vulnerabilities?: any[];
-  }) {
+  async createSecurityAssessment(
+    tenantId: string,
+    data: {
+      entity_type: string;
+      entity_id: string;
+      assessment_type: string;
+      score: number;
+      max_score?: number;
+      findings?: any[];
+      vulnerabilities?: any[];
+    },
+  ) {
     return this.db.securityAssessment.create({
       data: {
         tenant_id: tenantId,
@@ -161,27 +171,43 @@ export class ComplianceService {
       orderBy: { assessed_at: 'desc' },
     });
 
-    const byEntity: Record<string, { score: number; max: number; date: Date }> = {};
+    const byEntity: Record<string, { score: number; max: number; date: Date }> =
+      {};
     for (const a of assessments) {
       const key = `${a.entity_type}-${a.entity_id}`;
-      if (!byEntity[key] || new Date(a.assessed_at) > new Date(byEntity[key].date)) {
-        byEntity[key] = { score: a.score, max: a.max_score, date: a.assessed_at };
+      if (
+        !byEntity[key] ||
+        new Date(a.assessed_at) > new Date(byEntity[key].date)
+      ) {
+        byEntity[key] = {
+          score: a.score,
+          max: a.max_score,
+          date: a.assessed_at,
+        };
       }
     }
 
     const scores = Object.values(byEntity);
-    const avgScore = scores.length > 0 
-      ? Math.round(scores.reduce((sum, s) => sum + (s.score / s.max * 100), 0) / scores.length)
-      : 0;
+    const avgScore =
+      scores.length > 0
+        ? Math.round(
+            scores.reduce((sum, s) => sum + (s.score / s.max) * 100, 0) /
+              scores.length,
+          )
+        : 0;
 
     return {
       average_score: avgScore,
       assessed_entities: scores.length,
       score_breakdown: {
-        critical: scores.filter(s => (s.score / s.max * 100) < 40).length,
-        high: scores.filter(s => (s.score / s.max * 100) >= 40 && (s.score / s.max * 100) < 60).length,
-        medium: scores.filter(s => (s.score / s.max * 100) >= 60 && (s.score / s.max * 100) < 80).length,
-        low: scores.filter(s => (s.score / s.max * 100) >= 80).length,
+        critical: scores.filter((s) => (s.score / s.max) * 100 < 40).length,
+        high: scores.filter(
+          (s) => (s.score / s.max) * 100 >= 40 && (s.score / s.max) * 100 < 60,
+        ).length,
+        medium: scores.filter(
+          (s) => (s.score / s.max) * 100 >= 60 && (s.score / s.max) * 100 < 80,
+        ).length,
+        low: scores.filter((s) => (s.score / s.max) * 100 >= 80).length,
       },
     };
   }

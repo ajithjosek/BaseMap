@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { TechnologyComponentsService } from './technology-components.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -6,7 +16,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @Controller('technology-components')
 @UseGuards(JwtAuthGuard)
 export class TechnologyComponentsController {
-  constructor(private readonly componentsService: TechnologyComponentsService) {}
+  constructor(
+    private readonly componentsService: TechnologyComponentsService,
+  ) {}
 
   @Get()
   findAll(
@@ -43,7 +55,11 @@ export class TechnologyComponentsController {
     @Param('applicationId') applicationId: string,
     @CurrentUser() user: any,
   ) {
-    return this.componentsService.linkToApplication(id, user.tenantId, applicationId);
+    return this.componentsService.linkToApplication(
+      id,
+      user.tenantId,
+      applicationId,
+    );
   }
 
   @Delete(':id/unlink/:applicationId')
@@ -70,7 +86,10 @@ export class TechnologyComponentsController {
   }
 
   @Delete('dependencies/:dependencyId')
-  removeDependency(@Param('dependencyId') id: string, @CurrentUser() user: any) {
+  removeDependency(
+    @Param('dependencyId') id: string,
+    @CurrentUser() user: any,
+  ) {
     return this.componentsService.removeDependency(id, user.tenantId);
   }
 

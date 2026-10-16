@@ -70,7 +70,8 @@ class Tokenizer {
   constructor(private readonly src: string) {}
 
   private peek(): string {
-    while (this.pos < this.src.length && /\s/.test(this.src[this.pos])) this.pos++;
+    while (this.pos < this.src.length && /\s/.test(this.src[this.pos]))
+      this.pos++;
     return this.src[this.pos];
   }
 
@@ -124,7 +125,10 @@ class Tokenizer {
     }
     // identifier / operator / keyword
     let out = '';
-    while (this.pos < this.src.length && /[A-Za-z0-9_.]/.test(this.src[this.pos])) {
+    while (
+      this.pos < this.src.length &&
+      /[A-Za-z0-9_.]/.test(this.src[this.pos])
+    ) {
       out += this.src[this.pos];
       this.pos++;
     }
@@ -155,8 +159,7 @@ export class ExpressionParser {
   private peek(): { type: string; value: Any } | null {
     return this.tokens[this.tkPos] ?? null;
   }
-  private eat(): { type: string; value: Any } |
-null {
+  private eat(): { type: string; value: Any } | null {
     return this.tokens[this.tkPos++];
   }
 
@@ -192,7 +195,10 @@ null {
   }
 
   private unary(): Any {
-    if (this.peek() && (this.peek()!.type === 'not' || this.peek()!.value === '!')) {
+    if (
+      this.peek() &&
+      (this.peek()!.type === 'not' || this.peek()!.value === '!')
+    ) {
       this.eat();
       return { type: 'not', operand: this.unary() };
     }
@@ -208,11 +214,19 @@ null {
       return inner;
     }
     // comparison: token op value
-    const opTok: { type: string; value: Any } | null = this.peek() && OPERATORS.includes(String(this.peek()!.value)) ? this.peek() : null;
+    const opTok: { type: string; value: Any } | null =
+      this.peek() && OPERATORS.includes(String(this.peek()!.value))
+        ? this.peek()
+        : null;
     if (opTok) {
       this.eat(); // op
       const valueTok = this.eat();
-      return { type: 'predicate', field: String(t.value), op: String(opTok.value), value: valueTok?.value };
+      return {
+        type: 'predicate',
+        field: String(t.value),
+        op: String(opTok.value),
+        value: valueTok?.value,
+      };
     }
     // bare value -> its truthiness
     return { type: 'literal', value: t.value };
@@ -232,7 +246,11 @@ null {
       case 'not':
         return !ExpressionParser.evaluate(root.operand, ctx);
       case 'predicate':
-        return applyOp(root.op, toComparable(resolvePath(ctx, root.field)), toComparable(root.value));
+        return applyOp(
+          root.op,
+          toComparable(resolvePath(ctx, root.field)),
+          toComparable(root.value),
+        );
       default:
         return !!ExpressionParser.evaluate(root, ctx);
     }

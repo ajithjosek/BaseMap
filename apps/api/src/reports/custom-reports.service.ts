@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCustomReportDto, UpdateCustomReportDto, ExecuteReportDto } from './dto/custom-report.dto';
+import {
+  CreateCustomReportDto,
+  UpdateCustomReportDto,
+  ExecuteReportDto,
+} from './dto/custom-report.dto';
 
 @Injectable()
 export class CustomReportsService {
@@ -34,14 +38,12 @@ export class CustomReportsService {
     const reports = await this.db.customReport.findMany({
       where: {
         tenant_id: tenantId,
-        OR: [
-          { user_id: userId },
-          { is_shared: true },
-          { is_public: true },
-        ],
+        OR: [{ user_id: userId }, { is_shared: true }, { is_public: true }],
       },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true } },
+        user: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
       orderBy: { updated_at: 'desc' },
     });
@@ -52,19 +54,27 @@ export class CustomReportsService {
     const report = await this.db.customReport.findUnique({
       where: { id, tenant_id: tenantId },
       include: {
-        user: { select: { id: true, first_name: true, last_name: true, email: true } },
+        user: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
     if (!report) throw new NotFoundException('Custom report not found');
     return report;
   }
 
-  async update(id: string, tenantId: string, userId: string, dto: UpdateCustomReportDto) {
+  async update(
+    id: string,
+    tenantId: string,
+    userId: string,
+    dto: UpdateCustomReportDto,
+  ) {
     const existing = await this.db.customReport.findUnique({
       where: { id, tenant_id: tenantId },
     });
     if (!existing) throw new NotFoundException('Custom report not found');
-    if (existing.user_id !== userId) throw new NotFoundException('Not authorized to update this report');
+    if (existing.user_id !== userId)
+      throw new NotFoundException('Not authorized to update this report');
 
     return this.db.customReport.update({
       where: { id },
@@ -80,7 +90,8 @@ export class CustomReportsService {
       where: { id, tenant_id: tenantId },
     });
     if (!existing) throw new NotFoundException('Custom report not found');
-    if (existing.user_id !== userId) throw new NotFoundException('Not authorized to delete this report');
+    if (existing.user_id !== userId)
+      throw new NotFoundException('Not authorized to delete this report');
 
     await this.db.customReport.delete({ where: { id } });
     return { success: true };
@@ -88,26 +99,51 @@ export class CustomReportsService {
 
   async executeReport(id: string, tenantId: string, dto?: ExecuteReportDto) {
     const report = await this.findOne(id, tenantId);
-    
-    const filters = dto?.filters || report.filters as any[] || [];
-    const groupBy = dto?.group_by || report.group_by as string[] || [];
-    const aggregations = dto?.aggregations || report.aggregations as any[] || [];
-    const columns = report.columns as string[] || [];
+
+    const filters = dto?.filters || (report.filters as any[]) || [];
+    const groupBy = dto?.group_by || (report.group_by as string[]) || [];
+    const aggregations =
+      dto?.aggregations || (report.aggregations as any[]) || [];
+    const columns = (report.columns as string[]) || [];
 
     let queryResult: any[] = [];
-    
+
     switch (report.entity_type) {
       case 'application':
-        queryResult = await this.executeApplicationQuery(tenantId, filters, groupBy, aggregations, columns);
+        queryResult = await this.executeApplicationQuery(
+          tenantId,
+          filters,
+          groupBy,
+          aggregations,
+          columns,
+        );
         break;
       case 'capability':
-        queryResult = await this.executeCapabilityQuery(tenantId, filters, groupBy, aggregations, columns);
+        queryResult = await this.executeCapabilityQuery(
+          tenantId,
+          filters,
+          groupBy,
+          aggregations,
+          columns,
+        );
         break;
       case 'cost':
-        queryResult = await this.executeCostQuery(tenantId, filters, groupBy, aggregations, columns);
+        queryResult = await this.executeCostQuery(
+          tenantId,
+          filters,
+          groupBy,
+          aggregations,
+          columns,
+        );
         break;
       default:
-        queryResult = await this.executeApplicationQuery(tenantId, filters, groupBy, aggregations, columns);
+        queryResult = await this.executeApplicationQuery(
+          tenantId,
+          filters,
+          groupBy,
+          aggregations,
+          columns,
+        );
     }
 
     await this.db.customReport.update({
@@ -129,7 +165,7 @@ export class CustomReportsService {
     filters: any[],
     groupBy: string[],
     aggregations: any[],
-    columns: string[]
+    columns: string[],
   ) {
     const where: any = { tenant_id: tenantId };
 
@@ -159,18 +195,24 @@ export class CustomReportsService {
     });
 
     if (groupBy.length === 0) {
-      return apps.map(app => this.mapColumns(app, columns));
+      return apps.map((app) => this.mapColumns(app, columns));
     }
 
     const grouped: Record<string, any[]> = {};
     for (const app of apps) {
-      const key = groupBy.map(g => {
-        if (g === 'business_unit') return app.business_unit?.name || 'Unassigned';
-        if (g === 'lifecycle') return app.lifecycle_state;
-        if (g === 'owner') return app.owner ? `${app.owner.first_name} ${app.owner.last_name}` : 'Unassigned';
-        return app[g as keyof typeof app] || 'Unknown';
-      }).join('::');
-      
+      const key = groupBy
+        .map((g) => {
+          if (g === 'business_unit')
+            return app.business_unit?.name || 'Unassigned';
+          if (g === 'lifecycle') return app.lifecycle_state;
+          if (g === 'owner')
+            return app.owner
+              ? `${app.owner.first_name} ${app.owner.last_name}`
+              : 'Unassigned';
+          return app[g as keyof typeof app] || 'Unknown';
+        })
+        .join('::');
+
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(app);
     }
@@ -178,17 +220,21 @@ export class CustomReportsService {
     const result = Object.entries(grouped).map(([key, items]) => {
       const row: any = {};
       const keyParts = key.split('::');
-      groupBy.forEach((g, i) => row[g] = keyParts[i]);
+      groupBy.forEach((g, i) => (row[g] = keyParts[i]));
 
       for (const agg of aggregations) {
         if (agg.type === 'count') row[agg.alias || 'count'] = items.length;
         if (agg.type === 'sum' && agg.field === 'cost') {
-          const total = items.reduce((sum, app) => 
-            sum + app.costs.reduce((s, c) => s + Number(c.amount), 0), 0);
+          const total = items.reduce(
+            (sum, app) =>
+              sum + app.costs.reduce((s, c) => s + Number(c.amount), 0),
+            0,
+          );
           row[agg.alias || 'total_cost'] = total;
         }
         if (agg.type === 'avg' && agg.field === 'risk') {
-          const avgRisk = items.reduce((sum, app) => sum + app.risk_score, 0) / items.length;
+          const avgRisk =
+            items.reduce((sum, app) => sum + app.risk_score, 0) / items.length;
           row[agg.alias || 'avg_risk'] = Math.round(avgRisk);
         }
       }
@@ -204,10 +250,10 @@ export class CustomReportsService {
     filters: any[],
     groupBy: string[],
     aggregations: any[],
-    columns: string[]
+    columns: string[],
   ) {
     const where: any = { tenant_id: tenantId };
-    
+
     const capabilities = await this.prisma.capabilityNode.findMany({
       where,
       include: {
@@ -216,7 +262,7 @@ export class CustomReportsService {
       },
     });
 
-    return capabilities.map(cap => this.mapColumns(cap, columns));
+    return capabilities.map((cap) => this.mapColumns(cap, columns));
   }
 
   private async executeCostQuery(
@@ -224,10 +270,10 @@ export class CustomReportsService {
     filters: any[],
     groupBy: string[],
     aggregations: any[],
-    columns: string[]
+    columns: string[],
   ) {
     const where: any = { tenant_id: tenantId };
-    
+
     const costs = await this.prisma.applicationCost.findMany({
       where: { application: where },
       include: {
@@ -235,12 +281,12 @@ export class CustomReportsService {
       },
     });
 
-    return costs.map(cost => this.mapColumns(cost, columns));
+    return costs.map((cost) => this.mapColumns(cost, columns));
   }
 
   private mapColumns(item: any, columns: string[]) {
     if (!columns || columns.length === 0) return item;
-    
+
     const result: any = {};
     for (const col of columns) {
       result[col] = item[col];
@@ -250,16 +296,16 @@ export class CustomReportsService {
 
   async exportToCsv(id: string, tenantId: string) {
     const result = await this.executeReport(id, tenantId);
-    
+
     if (!result.data || result.data.length === 0) {
       return 'No data to export';
     }
 
     const headers = Object.keys(result.data[0]);
     const csvRows = [headers.join(',')];
-    
+
     for (const row of result.data) {
-      const values = headers.map(h => {
+      const values = headers.map((h) => {
         const val = row[h];
         if (val === null || val === undefined) return '';
         if (typeof val === 'string' && val.includes(',')) return `"${val}"`;
@@ -271,12 +317,18 @@ export class CustomReportsService {
     return csvRows.join('\n');
   }
 
-  async shareReport(id: string, tenantId: string, userId: string, isShared: boolean) {
+  async shareReport(
+    id: string,
+    tenantId: string,
+    userId: string,
+    isShared: boolean,
+  ) {
     const existing = await this.db.customReport.findUnique({
       where: { id, tenant_id: tenantId },
     });
     if (!existing) throw new NotFoundException('Custom report not found');
-    if (existing.user_id !== userId) throw new NotFoundException('Not authorized');
+    if (existing.user_id !== userId)
+      throw new NotFoundException('Not authorized');
 
     return this.db.customReport.update({
       where: { id },

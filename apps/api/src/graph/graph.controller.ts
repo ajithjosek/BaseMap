@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { GraphService } from './graph.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -23,10 +31,7 @@ export class GraphController {
   }
 
   @Get('impact/:appId')
-  async getImpactAnalysis(
-    @Req() req: any,
-    @Param('appId') appId: string,
-  ) {
+  async getImpactAnalysis(@Req() req: any, @Param('appId') appId: string) {
     return this.graphService.getImpactAnalysis(req.tenantId, appId);
   }
 

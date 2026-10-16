@@ -1,10 +1,29 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { versionAllowed } from './version-range';
 
-const CATEGORIES = ['language', 'database', 'os', 'cloud_provider', 'framework', 'tool'];
-const STATUSES = ['proposed', 'in_review', 'active', 'rejected', 'deprecated', 'retired'];
+const CATEGORIES = [
+  'language',
+  'database',
+  'os',
+  'cloud_provider',
+  'framework',
+  'tool',
+];
+const STATUSES = [
+  'proposed',
+  'in_review',
+  'active',
+  'rejected',
+  'deprecated',
+  'retired',
+];
 
 /** Allowed transitions for the standards approval/lifecycle state machine. */
 const TRANSITIONS: Record<string, string[]> = {
@@ -50,7 +69,8 @@ export class TechStandardsService {
       name: n,
       description: null,
     }));
-    if (fresh.length) await this.db.techStandardCategory.createMany({ data: fresh });
+    if (fresh.length)
+      await this.db.techStandardCategory.createMany({ data: fresh });
   }
 
   async listCategories(tenantId: string | undefined) {
@@ -67,7 +87,11 @@ export class TechStandardsService {
     const tenant = this.requireTenant(tenantId);
     if (!dto?.name) throw new BadRequestException('name is required');
     const cat = await this.db.techStandardCategory.create({
-      data: { tenant_id: tenant, name: dto.name.toLowerCase(), description: dto.description },
+      data: {
+        tenant_id: tenant,
+        name: dto.name.toLowerCase(),
+        description: dto.description,
+      },
     });
     return { category: cat };
   }
@@ -82,7 +106,9 @@ export class TechStandardsService {
       where: { id },
       data: {
         ...(dto.name ? { name: dto.name.toLowerCase() } : {}),
-        ...(dto.description !== undefined ? { description: dto.description } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description }
+          : {}),
       },
     });
     return { category: cat };
@@ -102,13 +128,15 @@ export class TechStandardsService {
 
   async create(tenantId: string | undefined, dto: any, actor: any) {
     const tenant = this.requireTenant(tenantId);
-    if (!dto?.name || !dto?.category) throw new BadRequestException('name and category required');
+    if (!dto?.name || !dto?.category)
+      throw new BadRequestException('name and category required');
     const standard = await this.db.techStandard.create({
       data: {
         tenant_id: tenant,
         name: dto.name,
         category: dto.category.toLowerCase(),
-        status: dto.status && STATUSES.includes(dto.status) ? dto.status : 'proposed',
+        status:
+          dto.status && STATUSES.includes(dto.status) ? dto.status : 'proposed',
         version_range: dto.version_range,
         sunset_date: dto.sunset_date ? new Date(dto.sunset_date) : null,
         notes: dto.notes,
@@ -133,7 +161,9 @@ export class TechStandardsService {
 
   async get(tenantId: string | undefined, id: string) {
     const tenant = this.requireTenant(tenantId);
-    const standard = await this.db.techStandard.findFirst({ where: { id, tenant_id: tenant } });
+    const standard = await this.db.techStandard.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!standard) throw new NotFoundException('Standard not found');
     return { standard };
   }
@@ -170,14 +200,22 @@ export class TechStandardsService {
     const { standard } = await this.get(tenant, id);
     const to = dto?.to;
     if (!to) throw new BadRequestException('Target status (to) is required');
-    if (!STATUSES.includes(to)) throw new BadRequestException(`Invalid status '${to}'`);
+    if (!STATUSES.includes(to))
+      throw new BadRequestException(`Invalid status '${to}'`);
     const allowed = TRANSITIONS[standard.status] || [];
     if (!allowed.includes(to)) {
-      throw new BadRequestException(`Cannot move '${standard.status}' -> '${to}'`);
+      throw new BadRequestException(
+        `Cannot move '${standard.status}' -> '${to}'`,
+      );
     }
     const updated = await this.db.techStandard.update({
       where: { id },
-      data: { status: to, notes: dto.note ? `${standard.notes || ''}\n[${standard.status}->${to}] ${dto.note}`.trim() : standard.notes },
+      data: {
+        status: to,
+        notes: dto.note
+          ? `${standard.notes || ''}\n[${standard.status}->${to}] ${dto.note}`.trim()
+          : standard.notes,
+      },
     });
     this.invalidateCache(tenant);
     return { standard: updated };
@@ -192,10 +230,16 @@ export class TechStandardsService {
     const retiredAge = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
 
     const active = await this.db.techStandard.findMany({
-      where: { status: { in: ['proposed', 'in_review', 'active'] }, sunset_date: { lte: today } },
+      where: {
+        status: { in: ['proposed', 'in_review', 'active'] },
+        sunset_date: { lte: today },
+      },
     });
     for (const s of active) {
-      await this.db.techStandard.update({ where: { id: s.id }, data: { status: 'deprecated' } });
+      await this.db.techStandard.update({
+        where: { id: s.id },
+        data: { status: 'deprecated' },
+      });
       this.invalidateCache(s.tenant_id);
     }
 
@@ -203,11 +247,16 @@ export class TechStandardsService {
       where: { status: 'deprecated', sunset_date: { lte: retiredAge } },
     });
     for (const s of deprecated) {
-      await this.db.techStandard.update({ where: { id: s.id }, data: { status: 'retired' } });
+      await this.db.techStandard.update({
+        where: { id: s.id },
+        data: { status: 'retired' },
+      });
       this.invalidateCache(s.tenant_id);
     }
 
-    this.logger.log(`Auto-retire: ${active.length} deprecated, ${deprecated.length} retired.`);
+    this.logger.log(
+      `Auto-retire: ${active.length} deprecated, ${deprecated.length} retired.`,
+    );
   }
 
   // ------------------------- 38.3 Compliance scoring -------------------------
@@ -219,7 +268,9 @@ export class TechStandardsService {
   }
 
   private getComponentVersion(component: any): string | undefined {
-    return component?.software_details?.version || component?.version || undefined;
+    return (
+      component?.software_details?.version || component?.version || undefined
+    );
   }
 
   /** Find the standard governing a component (name match preferred over category). */
@@ -227,7 +278,9 @@ export class TechStandardsService {
     const t = String(componentType || '').toLowerCase();
     const byName = standards.find((s) => String(s.name).toLowerCase() === t);
     if (byName) return byName;
-    return standards.find((s) => String(s.category).toLowerCase() === t) || null;
+    return (
+      standards.find((s) => String(s.category).toLowerCase() === t) || null
+    );
   }
 
   private classify(component: any, standards: any[]) {
@@ -236,12 +289,32 @@ export class TechStandardsService {
     const version = this.getComponentVersion(component);
     const inRange = versionAllowed(version, std.version_range);
     if (std.status === 'active') {
-      return { standard: std, status: inRange ? 'compliant' : 'non_compliant', reason: inRange ? null : 'version outside allowed range' };
+      return {
+        standard: std,
+        status: inRange ? 'compliant' : 'non_compliant',
+        reason: inRange ? null : 'version outside allowed range',
+      };
     }
-    if (std.status === 'deprecated') return { standard: std, status: 'nonstandard', reason: 'deprecated standard' };
-    if (std.status === 'retired') return { standard: std, status: 'nonstandard', reason: 'retired standard' };
-    if (std.status === 'in_review' || std.status === 'proposed') return { standard: std, status: 'pending', reason: `${std.status} standard` };
-    if (std.status === 'rejected') return { standard: std, status: 'not_covered' };
+    if (std.status === 'deprecated')
+      return {
+        standard: std,
+        status: 'nonstandard',
+        reason: 'deprecated standard',
+      };
+    if (std.status === 'retired')
+      return {
+        standard: std,
+        status: 'nonstandard',
+        reason: 'retired standard',
+      };
+    if (std.status === 'in_review' || std.status === 'proposed')
+      return {
+        standard: std,
+        status: 'pending',
+        reason: `${std.status} standard`,
+      };
+    if (std.status === 'rejected')
+      return { standard: std, status: 'not_covered' };
     return { standard: std, status: 'not_covered' };
   }
 
@@ -257,9 +330,14 @@ export class TechStandardsService {
     if (!application) throw new NotFoundException('Application not found');
 
     const components = await this.db.technologyComponent.findMany({
-      where: { tenant_id: tenant, applications: { some: { application_id: applicationId } } },
+      where: {
+        tenant_id: tenant,
+        applications: { some: { application_id: applicationId } },
+      },
     });
-    const standards = await this.db.techStandard.findMany({ where: { tenant_id: tenant } });
+    const standards = await this.db.techStandard.findMany({
+      where: { tenant_id: tenant },
+    });
 
     const rows = components.map((c: any) => ({
       component_id: c.id,
@@ -296,16 +374,26 @@ export class TechStandardsService {
       where: { tenant_id: tenant },
       select: { id: true, name: true },
     });
-    const standards = await this.db.techStandard.findMany({ where: { tenant_id: tenant } });
+    const standards = await this.db.techStandard.findMany({
+      where: { tenant_id: tenant },
+    });
 
     const byStatus: Record<string, number> = {};
-    for (const s of standards) byStatus[s.status] = (byStatus[s.status] || 0) + 1;
+    for (const s of standards)
+      byStatus[s.status] = (byStatus[s.status] || 0) + 1;
 
     const appRows = await Promise.all(
       applications.map(async (a: any) => {
         try {
           const sc = await this.scoreApplication(tenant, a.id);
-          return { application_id: a.id, name: a.name, score: sc.score, flagged: sc.flagged, compliant: sc.compliant, total: sc.total };
+          return {
+            application_id: a.id,
+            name: a.name,
+            score: sc.score,
+            flagged: sc.flagged,
+            compliant: sc.compliant,
+            total: sc.total,
+          };
         } catch {
           return null;
         }
@@ -315,11 +403,14 @@ export class TechStandardsService {
 
     const overall = covered.length
       ? Math.round(
-          (covered.reduce((sum, r: any) => sum + r.score, 0) / covered.length) * 1,
+          (covered.reduce((sum, r: any) => sum + r.score, 0) / covered.length) *
+            1,
         )
       : 100;
 
-    const flaggedApps = covered.filter((r: any) => r && (r.flagged > 0 || r.score < 100));
+    const flaggedApps = covered.filter(
+      (r: any) => r && (r.flagged > 0 || r.score < 100),
+    );
 
     return {
       standards_count: standards.length,
@@ -336,7 +427,9 @@ export class TechStandardsService {
       where: { tenant_id: tenant },
       include: { applications: { select: { application_id: true } } },
     });
-    const standards = await this.db.techStandard.findMany({ where: { tenant_id: tenant } });
+    const standards = await this.db.techStandard.findMany({
+      where: { tenant_id: tenant },
+    });
     return {
       components: components.map((c: any) => ({
         id: c.id,

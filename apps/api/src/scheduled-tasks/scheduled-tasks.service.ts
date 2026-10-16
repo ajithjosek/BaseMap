@@ -7,13 +7,16 @@ export class ScheduledTasksService {
   private readonly logger = new Logger(ScheduledTasksService.name);
   private db: any;
 
-  constructor(private prisma: PrismaService, private serviceNowService: ServiceNowService) {
+  constructor(
+    private prisma: PrismaService,
+    private serviceNowService: ServiceNowService,
+  ) {
     this.db = this.prisma as any;
   }
 
   async processRenewalAlerts() {
     this.logger.log('Processing renewal alerts...');
-    
+
     const now = new Date();
     const alerts = [
       { days: 90, type: 'renewal_90' },
@@ -24,7 +27,7 @@ export class ScheduledTasksService {
     for (const alert of alerts) {
       const targetDate = new Date(now);
       targetDate.setDate(targetDate.getDate() + alert.days);
-      
+
       const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
       const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
@@ -66,8 +69,10 @@ export class ScheduledTasksService {
               related_entity_id: app.id,
             },
           });
-          
-          this.logger.log(`Created ${alert.days}-day renewal alert for ${app.vendor}`);
+
+          this.logger.log(
+            `Created ${alert.days}-day renewal alert for ${app.vendor}`,
+          );
         }
       }
     }
@@ -75,7 +80,7 @@ export class ScheduledTasksService {
 
   async processAnnualReviews() {
     this.logger.log('Processing annual reviews...');
-    
+
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
@@ -106,7 +111,10 @@ export class ScheduledTasksService {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      if (!lastReviewNotification || new Date(lastReviewNotification.created_at) < sixMonthsAgo) {
+      if (
+        !lastReviewNotification ||
+        new Date(lastReviewNotification.created_at) < sixMonthsAgo
+      ) {
         const users = await this.db.user.findMany({
           where: { tenant_id: app.tenant_id, is_active: true },
           take: 1,
@@ -124,7 +132,7 @@ export class ScheduledTasksService {
               related_entity_id: app.id,
             },
           });
-          
+
           this.logger.log(`Created annual review reminder for ${app.vendor}`);
         }
       }
@@ -133,7 +141,7 @@ export class ScheduledTasksService {
 
   async processEOLAlerts() {
     this.logger.log('Processing EOL alerts...');
-    
+
     const alerts = [
       { days: 365, type: 'eol_12m' },
       { days: 180, type: 'eol_6m' },
@@ -144,7 +152,7 @@ export class ScheduledTasksService {
     for (const alert of alerts) {
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() + alert.days);
-      
+
       const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
       const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
@@ -182,8 +190,10 @@ export class ScheduledTasksService {
                 related_entity_id: app.id,
               },
             });
-            
-            this.logger.log(`Created EOL alert for ${app.name} (${alert.days} days)`);
+
+            this.logger.log(
+              `Created EOL alert for ${app.name} (${alert.days} days)`,
+            );
           }
         }
       }
@@ -222,7 +232,7 @@ export class ScheduledTasksService {
                 related_entity_id: comp.id,
               },
             });
-            
+
             this.logger.log(`Created EOL alert for component ${comp.name}`);
           }
         }
@@ -232,9 +242,9 @@ export class ScheduledTasksService {
 
   async processEOLRiskScoreCalculation() {
     this.logger.log('Calculating EOL risk scores...');
-    
+
     const tenants = await this.db.tenant.findMany({ select: { id: true } });
-    
+
     for (const tenant of tenants) {
       await this.calculateEOLRiskScores(tenant.id);
     }
@@ -254,13 +264,20 @@ export class ScheduledTasksService {
     const now = new Date();
 
     for (const app of apps) {
-      const daysRemaining = Math.ceil((new Date(app.eol_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysRemaining = Math.ceil(
+        (new Date(app.eol_date).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
       let riskScore = 0;
       if (daysRemaining < 0) riskScore = 100;
-      else if (daysRemaining <= 30) riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
-      else if (daysRemaining <= 90) riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
-      else if (daysRemaining <= 180) riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
-      else riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
+      else if (daysRemaining <= 30)
+        riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
+      else if (daysRemaining <= 90)
+        riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
+      else if (daysRemaining <= 180)
+        riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
+      else
+        riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
 
       await this.db.application.update({
         where: { id: app.id },
@@ -269,17 +286,26 @@ export class ScheduledTasksService {
     }
 
     for (const comp of components) {
-      const daysRemaining = Math.ceil((new Date(comp.eol_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysRemaining = Math.ceil(
+        (new Date(comp.eol_date).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
       let riskScore = 0;
       if (daysRemaining < 0) riskScore = 100;
-      else if (daysRemaining <= 30) riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
-      else if (daysRemaining <= 90) riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
-      else if (daysRemaining <= 180) riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
-      else riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
+      else if (daysRemaining <= 30)
+        riskScore = 80 + Math.round((30 - daysRemaining) * 0.5);
+      else if (daysRemaining <= 90)
+        riskScore = 60 + Math.round((90 - daysRemaining) * 0.3);
+      else if (daysRemaining <= 180)
+        riskScore = 40 + Math.round((180 - daysRemaining) * 0.2);
+      else
+        riskScore = Math.max(0, 20 - Math.round((daysRemaining - 180) * 0.1));
 
-      const existing = await this.db.technologyComponent.findUnique({ where: { id: comp.id } });
+      const existing = await this.db.technologyComponent.findUnique({
+        where: { id: comp.id },
+      });
       const currentAttrs = existing?.custom_attributes || {};
-      
+
       await this.db.technologyComponent.update({
         where: { id: comp.id },
         data: { custom_attributes: { ...currentAttrs, risk_score: riskScore } },
@@ -291,7 +317,7 @@ export class ScheduledTasksService {
 
   async processServiceNowSync() {
     this.logger.log('Processing scheduled ServiceNow syncs...');
-    
+
     const configs = await this.db.serviceNowConfig.findMany({
       where: {
         is_active: true,
@@ -306,12 +332,18 @@ export class ScheduledTasksService {
 
       switch (config.schedule) {
         case 'hourly':
-          if (!lastSync || (now.getTime() - new Date(lastSync).getTime()) > 60 * 60 * 1000) {
+          if (
+            !lastSync ||
+            now.getTime() - new Date(lastSync).getTime() > 60 * 60 * 1000
+          ) {
             shouldSync = true;
           }
           break;
         case 'daily':
-          if (!lastSync || new Date(lastSync).toDateString() !== now.toDateString()) {
+          if (
+            !lastSync ||
+            new Date(lastSync).toDateString() !== now.toDateString()
+          ) {
             shouldSync = true;
           }
           break;
@@ -326,7 +358,9 @@ export class ScheduledTasksService {
 
       if (shouldSync) {
         try {
-          this.logger.log(`Triggering scheduled sync for tenant ${config.tenant_id}`);
+          this.logger.log(
+            `Triggering scheduled sync for tenant ${config.tenant_id}`,
+          );
           await this.triggerSync(config);
         } catch (error: any) {
           this.logger.error(`Scheduled sync failed: ${error.message}`);
@@ -339,14 +373,20 @@ export class ScheduledTasksService {
   private async triggerSync(config: any) {
     try {
       await this.serviceNowService.triggerSync(config.tenant_id);
-      this.logger.log(`Scheduled sync completed for tenant ${config.tenant_id}`);
+      this.logger.log(
+        `Scheduled sync completed for tenant ${config.tenant_id}`,
+      );
     } catch (error: any) {
       this.logger.error(`Scheduled sync failed: ${error.message}`);
       throw error;
     }
   }
 
-  private async createSyncLog(tenantId: string, configId: string, syncType: string) {
+  private async createSyncLog(
+    tenantId: string,
+    configId: string,
+    syncType: string,
+  ) {
     const log = await this.db.serviceNowSyncLog.create({
       data: {
         tenant_id: tenantId,
@@ -364,7 +404,8 @@ export class ScheduledTasksService {
       where: { id: logId },
       data: {
         status,
-        records_total: (result.created || 0) + (result.updated || 0) + (result.skipped || 0),
+        records_total:
+          (result.created || 0) + (result.updated || 0) + (result.skipped || 0),
         records_created: result.created || 0,
         records_updated: result.updated || 0,
         records_skipped: result.skipped || 0,
@@ -396,23 +437,23 @@ export class ScheduledTasksService {
 
   async processWeeklyDigest() {
     this.logger.log('Sending weekly digest emails...');
-    
+
     // In a real implementation, we would group by tenant and send to admins.
     // We will just create a notification for demonstration to simulate the email logic.
     const tenants = await this.db.tenant.findMany({ select: { id: true } });
-    
+
     for (const tenant of tenants) {
       const activeApps = await this.db.application.count({
-        where: { tenant_id: tenant.id, lifecycle_state: 'Active' }
+        where: { tenant_id: tenant.id, lifecycle_state: 'Active' },
       });
       const atRiskApps = await this.db.application.count({
-        where: { tenant_id: tenant.id, risk_score: { gte: 70 } }
+        where: { tenant_id: tenant.id, risk_score: { gte: 70 } },
       });
-      
+
       const users = await this.db.user.findMany({
-        where: { tenant_id: tenant.id, is_active: true }
+        where: { tenant_id: tenant.id, is_active: true },
       });
-      
+
       for (const user of users) {
         // Send email via nodemailer (mocked here with notification)
         await this.db.notification.create({

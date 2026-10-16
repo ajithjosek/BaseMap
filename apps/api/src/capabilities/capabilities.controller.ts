@@ -1,6 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Query,
+} from '@nestjs/common';
 import { CapabilitiesService } from './capabilities.service';
-import { CreateCapabilityDto, UpdateCapabilityDto, MapApplicationDto } from './dto/create-capability.dto';
+import {
+  CreateCapabilityDto,
+  UpdateCapabilityDto,
+  MapApplicationDto,
+} from './dto/create-capability.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -10,7 +25,10 @@ export class CapabilitiesController {
   constructor(private readonly capabilitiesService: CapabilitiesService) {}
 
   @Post()
-  create(@CurrentUser() user: any, @Body() createCapabilityDto: CreateCapabilityDto) {
+  create(
+    @CurrentUser() user: any,
+    @Body() createCapabilityDto: CreateCapabilityDto,
+  ) {
     return this.capabilitiesService.create(user.tenantId, createCapabilityDto);
   }
 
@@ -36,7 +54,11 @@ export class CapabilitiesController {
     @Query('lifecycleState') lifecycleState?: string,
     @Query('riskScore') riskScore?: string,
   ) {
-    return this.capabilitiesService.getC2AMatrix(req.tenantId, { businessUnitId, lifecycleState, riskScore });
+    return this.capabilitiesService.getC2AMatrix(req.tenantId, {
+      businessUnitId,
+      lifecycleState,
+      riskScore,
+    });
   }
 
   @Get('coverage')
@@ -50,8 +72,16 @@ export class CapabilitiesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCapabilityDto: UpdateCapabilityDto, @CurrentUser() user: any) {
-    return this.capabilitiesService.update(id, updateCapabilityDto, user.tenantId);
+  update(
+    @Param('id') id: string,
+    @Body() updateCapabilityDto: UpdateCapabilityDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.capabilitiesService.update(
+      id,
+      updateCapabilityDto,
+      user.tenantId,
+    );
   }
 
   @Delete(':id')
@@ -60,13 +90,30 @@ export class CapabilitiesController {
   }
 
   @Post(':id/map')
-  mapApplication(@Param('id') id: string, @Body() dto: MapApplicationDto, @CurrentUser() user: any) {
-    return this.capabilitiesService.mapApplication(id, dto, user.tenantId, user.id);
+  mapApplication(
+    @Param('id') id: string,
+    @Body() dto: MapApplicationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.capabilitiesService.mapApplication(
+      id,
+      dto,
+      user.tenantId,
+      user.id,
+    );
   }
 
   @Delete(':id/map/:appId')
-  unmapApplication(@Param('id') id: string, @Param('appId') appId: string, @CurrentUser() user: any) {
-    return this.capabilitiesService.unmapApplication(id, appId, user.tenantId, user.id);
+  unmapApplication(
+    @Param('id') id: string,
+    @Param('appId') appId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.capabilitiesService.unmapApplication(
+      id,
+      appId,
+      user.tenantId,
+      user.id,
+    );
   }
 }
-

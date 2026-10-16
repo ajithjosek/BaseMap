@@ -38,7 +38,9 @@ describe('Auth E2E', () => {
     }).compile();
 
     app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
+    );
     jwtService = app.get(JwtService);
     await app.init();
   });
@@ -48,7 +50,11 @@ describe('Auth E2E', () => {
   beforeEach(() => {
     prisma.tenant.findUnique.mockReset().mockResolvedValue(null);
     prisma.user.findUnique.mockReset().mockResolvedValue(null);
-    prisma.user.create.mockReset().mockImplementation(({ data }: any) => Promise.resolve({ id: UUID.USER, ...data }));
+    prisma.user.create
+      .mockReset()
+      .mockImplementation(({ data }: any) =>
+        Promise.resolve({ id: UUID.USER, ...data }),
+      );
     prisma.userRole.findMany.mockReset().mockResolvedValue([]);
     (bcrypt.compare as jest.Mock).mockReset();
     (bcrypt.hash as jest.Mock).mockReset();
@@ -142,7 +148,7 @@ describe('Auth E2E', () => {
         sub: UUID.USER,
         email: 'test@example.com',
         tenantId: UUID.TENANT,
-      } as any);
+      });
       prisma.user.findUnique.mockResolvedValue(makeUser());
 
       const res = await request(app.getHttpServer())

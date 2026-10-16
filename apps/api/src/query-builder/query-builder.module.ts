@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
-import { QueryBuilderController, SharedController } from './query-builder.controller';
+import {
+  QueryBuilderController,
+  SharedController,
+} from './query-builder.controller';
 import { QueryBuilderService } from './query-builder.service';
 import { PrismaModule } from '../prisma/prisma.module';
 

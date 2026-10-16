@@ -28,7 +28,10 @@ export class BillingController {
 
   @Post('subscription')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  async ensureSubscription(@Body('customerId') customerId: string, @Body('plan') plan: string): Promise<any> {
+  async ensureSubscription(
+    @Body('customerId') customerId: string,
+    @Body('plan') plan: string,
+  ): Promise<any> {
     if (!customerId || !plan) {
       throw new BadRequestException('customerId and plan are required');
     }

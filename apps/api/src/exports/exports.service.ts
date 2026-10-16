@@ -35,7 +35,12 @@ export class ExportsService {
     });
   }
 
-  async updateTemplate(id: string, tenantId: string, userId: string, data: any) {
+  async updateTemplate(
+    id: string,
+    tenantId: string,
+    userId: string,
+    data: any,
+  ) {
     const template = await this.db.exportTemplate.findFirst({
       where: { id, tenant_id: tenantId, user_id: userId },
     });
@@ -99,7 +104,12 @@ export class ExportsService {
     });
   }
 
-  async updateScheduledExport(id: string, tenantId: string, userId: string, data: any) {
+  async updateScheduledExport(
+    id: string,
+    tenantId: string,
+    userId: string,
+    data: any,
+  ) {
     const export_ = await this.db.scheduledExport.findFirst({
       where: { id, tenant_id: tenantId, user_id: userId },
     });
@@ -164,14 +174,19 @@ export class ExportsService {
     });
     if (!template) throw new NotFoundException('Template not found');
 
-    const content = template.content as any;
+    const content = template.content;
     let data: any = {};
 
     switch (content.dataType) {
       case 'saas':
         data = await this.db.saaSApplication.findMany({
           where: { tenant_id: tenantId },
-          select: { vendor: true, annual_contract_value: true, use_case: true, contract_end_date: true },
+          select: {
+            vendor: true,
+            annual_contract_value: true,
+            use_case: true,
+            contract_end_date: true,
+          },
         });
         break;
       case 'applications':
@@ -183,7 +198,12 @@ export class ExportsService {
       case 'technology':
         data = await this.db.technologyComponent.findMany({
           where: { tenant_id: tenantId },
-          select: { name: true, component_type: true, status: true, eol_date: true },
+          select: {
+            name: true,
+            component_type: true,
+            status: true,
+            eol_date: true,
+          },
         });
         break;
       default:

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -72,7 +76,9 @@ export class UsersService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const passwordHash = dto.password ? await bcrypt.hash(dto.password, 10) : null;
+    const passwordHash = dto.password
+      ? await bcrypt.hash(dto.password, 10)
+      : null;
 
     return this.prisma.user.create({
       data: {
@@ -126,7 +132,11 @@ export class UsersService {
     return this.prisma.user.delete({ where: { id } });
   }
 
-  async assignRole(userId: string, tenantId: string, dto: { roleId: string; businessUnitId: string }) {
+  async assignRole(
+    userId: string,
+    tenantId: string,
+    dto: { roleId: string; businessUnitId: string },
+  ) {
     await this.findOne(userId, tenantId);
 
     return this.prisma.userRole.create({
@@ -142,7 +152,12 @@ export class UsersService {
     });
   }
 
-  async removeRole(userId: string, tenantId: string, roleId: string, businessUnitId: string) {
+  async removeRole(
+    userId: string,
+    tenantId: string,
+    roleId: string,
+    businessUnitId: string,
+  ) {
     await this.findOne(userId, tenantId);
 
     return this.prisma.userRole.delete({

@@ -12,10 +12,7 @@ describe('CostsService', () => {
     prisma = createPrismaMock();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CostsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [CostsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get(CostsService);
@@ -25,7 +22,13 @@ describe('CostsService', () => {
 
   describe('create', () => {
     it('should create a cost record', async () => {
-      const dto = { amount: 5000, currency: 'USD', cost_type: 'License', application_id: UUID.APP, effective_date: new Date() };
+      const dto = {
+        amount: 5000,
+        currency: 'USD',
+        cost_type: 'License',
+        application_id: UUID.APP,
+        effective_date: new Date(),
+      };
       const expected = makeCost({ amount: 5000 });
       prisma.applicationCost.create.mockResolvedValue(expected);
 

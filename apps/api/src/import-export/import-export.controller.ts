@@ -1,4 +1,16 @@
-import { Controller, Post, Body, Param, Get, UseGuards, Query, BadRequestException, NotFoundException, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  UseGuards,
+  Query,
+  BadRequestException,
+  NotFoundException,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImportExportService } from './import-export.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -8,9 +20,7 @@ import { PreviewImportDto, CreateExportDto } from './dto/import-export.dto';
 @Controller('import-export')
 @UseGuards(JwtAuthGuard)
 export class ImportExportController {
-  constructor(
-    private readonly importExportService: ImportExportService,
-  ) {}
+  constructor(private readonly importExportService: ImportExportService) {}
 
   @Post('import/preview')
   @UseInterceptors(FileInterceptor('file'))
@@ -29,7 +39,9 @@ export class ImportExportController {
     } else if (dto.fileType === 'xlsx' || dto.fileType === 'xls') {
       data = await this.importExportService.parseExcel(file.buffer);
     } else {
-      throw new BadRequestException('Invalid file type. Supported: csv, xlsx, xls');
+      throw new BadRequestException(
+        'Invalid file type. Supported: csv, xlsx, xls',
+      );
     }
 
     return this.importExportService.createImportJob(
@@ -45,14 +57,15 @@ export class ImportExportController {
 
   @Post('import/:id/process')
   async processImport(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.importExportService.processImportJob(id, user.tenantId, user.userId);
+    return this.importExportService.processImportJob(
+      id,
+      user.tenantId,
+      user.userId,
+    );
   }
 
   @Post('export')
-  async createExport(
-    @Body() dto: CreateExportDto,
-    @CurrentUser() user: any,
-  ) {
+  async createExport(@Body() dto: CreateExportDto, @CurrentUser() user: any) {
     return this.importExportService.createExportJob(
       user.tenantId,
       user.userId,
@@ -70,7 +83,10 @@ export class ImportExportController {
 
   @Get('export/:id/download')
   async downloadExport(@Param('id') id: string, @CurrentUser() user: any) {
-    const exportJob = await this.importExportService.getExportFile(id, user.tenantId);
+    const exportJob = await this.importExportService.getExportFile(
+      id,
+      user.tenantId,
+    );
     return { message: 'Export job completed', exportJob };
   }
 

@@ -41,7 +41,11 @@ export class ReportingService {
       this.prisma.tenant.count(),
       this.prisma.tenant.count({ where: { NOT: { plan: 'deleting' } } }),
       this.prisma.tenant.count({ where: { plan: 'deleting' } }),
-      this.prisma.tenant.groupBy({ by: ['plan'], _count: true, orderBy: { plan: 'asc' } }),
+      this.prisma.tenant.groupBy({
+        by: ['plan'],
+        _count: true,
+        orderBy: { plan: 'asc' },
+      }),
       this.prisma.tenant.count({ where: { created_at: { gte: since30d } } }),
       this.prisma.user.count(),
       this.prisma.user.count({ where: { is_active: true } }),
@@ -77,7 +81,10 @@ export class ReportingService {
       users: { total: totalUsers, active: activeUsers },
       applications: {
         total: totalApplications,
-        by_lifecycle: this.mapCounts(applicationsByLifecycle, 'lifecycle_state'),
+        by_lifecycle: this.mapCounts(
+          applicationsByLifecycle,
+          'lifecycle_state',
+        ),
       },
       costs: {
         total_usd: Number(costAgg._sum?.amount || 0),

@@ -9,7 +9,10 @@ export class AIRecommendationsService {
 
   private db: any;
 
-  async findAll(tenantId: string, filters?: { category?: string; priority?: string; resolved?: boolean }) {
+  async findAll(
+    tenantId: string,
+    filters?: { category?: string; priority?: string; resolved?: boolean },
+  ) {
     const where: any = { tenant_id: tenantId };
     if (filters?.category) where.category = filters.category;
     if (filters?.priority) where.priority = filters.priority;
@@ -46,7 +49,12 @@ export class AIRecommendationsService {
   async getDashboardSummary(tenantId: string) {
     const all = await this.db.aIRecommendation.findMany({
       where: { tenant_id: tenantId },
-      select: { category: true, priority: true, is_resolved: true, impact_score: true },
+      select: {
+        category: true,
+        priority: true,
+        is_resolved: true,
+        impact_score: true,
+      },
     });
 
     const byCategory: Record<string, number> = {};
@@ -83,11 +91,19 @@ export class AIRecommendationsService {
     });
 
     for (const comp of eolComponents) {
-      const daysUntilEOL = Math.ceil((new Date(comp.eol_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const daysUntilEOL = Math.ceil(
+        (new Date(comp.eol_date).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24),
+      );
       let priority = 'medium';
       let impact = 30;
-      if (daysUntilEOL <= 30) { priority = 'critical'; impact = 100; }
-      else if (daysUntilEOL <= 90) { priority = 'high'; impact = 70; }
+      if (daysUntilEOL <= 30) {
+        priority = 'critical';
+        impact = 100;
+      } else if (daysUntilEOL <= 90) {
+        priority = 'high';
+        impact = 70;
+      }
 
       insights.push({
         category: 'eol_risk',
@@ -107,11 +123,18 @@ export class AIRecommendationsService {
         active_users: { lt: 5 },
         total_seats: { gt: 10 },
       },
-      select: { id: true, vendor: true, annual_contract_value: true, total_seats: true, active_users: true },
+      select: {
+        id: true,
+        vendor: true,
+        annual_contract_value: true,
+        total_seats: true,
+        active_users: true,
+      },
     });
 
     for (const saas of lowUtilization) {
-      const utilization = ((saas.active_users || 0) / (saas.total_seats || 1)) * 100;
+      const utilization =
+        ((saas.active_users || 0) / (saas.total_seats || 1)) * 100;
       if (utilization < 30) {
         insights.push({
           category: 'underutilization',
@@ -134,11 +157,19 @@ export class AIRecommendationsService {
           lte: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         },
       },
-      select: { id: true, vendor: true, contract_end_date: true, annual_contract_value: true },
+      select: {
+        id: true,
+        vendor: true,
+        contract_end_date: true,
+        annual_contract_value: true,
+      },
     });
 
     for (const saas of expiringContracts) {
-      const daysUntil = Math.ceil((new Date(saas.contract_end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const daysUntil = Math.ceil(
+        (new Date(saas.contract_end_date).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24),
+      );
       insights.push({
         category: 'renewal',
         title: `${saas.vendor} contract expires in ${daysUntil} days`,

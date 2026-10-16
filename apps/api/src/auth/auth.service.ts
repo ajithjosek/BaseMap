@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -35,7 +40,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists in this tenant');
+      throw new ConflictException(
+        'User with this email already exists in this tenant',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -53,16 +60,22 @@ export class AuthService {
     return this.login(user);
   }
 
-  async validateUser(email: string, pass: string, tenantId: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+    tenantId: string,
+  ): Promise<any> {
     let actualTenantId = tenantId;
-    
+
     // Resolve slug to UUID if necessary
     if (tenantId && !this.isValidUuid(tenantId)) {
       const tenant = await this.prisma.tenant.findUnique({
         where: { slug: tenantId },
       });
       if (!tenant) {
-        throw new NotFoundException(`Tenant '${tenantId}' not found. Please run the seed to create tenants.`);
+        throw new NotFoundException(
+          `Tenant '${tenantId}' not found. Please run the seed to create tenants.`,
+        );
       }
       actualTenantId = tenant.id;
     }
@@ -77,10 +90,16 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with email '${email}' not found for tenant '${tenantId}'`);
+      throw new NotFoundException(
+        `User with email '${email}' not found for tenant '${tenantId}'`,
+      );
     }
 
-    if (user && user.password_hash && (await bcrypt.compare(pass, user.password_hash))) {
+    if (
+      user &&
+      user.password_hash &&
+      (await bcrypt.compare(pass, user.password_hash))
+    ) {
       const { password_hash, ...result } = user;
       return result;
     }
@@ -88,7 +107,8 @@ export class AuthService {
   }
 
   private isValidUuid(id: string) {
-    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const regex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return regex.test(id);
   }
 
@@ -101,7 +121,11 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload: JwtPayload = { email: user.email, sub: user.id, tenantId: user.tenant_id };
+    const payload: JwtPayload = {
+      email: user.email,
+      sub: user.id,
+      tenantId: user.tenant_id,
+    };
     const roles = await this.getRoleNames(user.id);
 
     return {
@@ -126,7 +150,7 @@ export class AuthService {
       const payload = this.jwtService.verify(token, {
         secret: process.env.JWT_REFRESH_SECRET || 'refreshSecret',
       });
-      
+
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });

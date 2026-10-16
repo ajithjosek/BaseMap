@@ -28,10 +28,7 @@ export class AuditLogsController {
   }
 
   @Get('stats')
-  getStats(
-    @CurrentUser() user: any,
-    @Query('days') days?: string,
-  ) {
+  getStats(@CurrentUser() user: any, @Query('days') days?: string) {
     return this.service.getStats(user.tenantId, days ? parseInt(days) : 30);
   }
 

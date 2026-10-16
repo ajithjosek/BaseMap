@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+  UseInterceptors,
+} from '@nestjs/common';
 import { InterfacesService } from './interfaces.service';
-import { CreateInterfaceDto, UpdateInterfaceDto, CreateIncidentDto } from './dto/interface.dto';
+import {
+  CreateInterfaceDto,
+  UpdateInterfaceDto,
+  CreateIncidentDto,
+} from './dto/interface.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
@@ -26,7 +42,13 @@ export class InterfacesController {
     @Query('sourceAppId') sourceAppId?: string,
     @Query('targetAppId') targetAppId?: string,
   ) {
-    return this.interfacesService.findAll(req.tenantId, { search, type, status, sourceAppId, targetAppId });
+    return this.interfacesService.findAll(req.tenantId, {
+      search,
+      type,
+      status,
+      sourceAppId,
+      targetAppId,
+    });
   }
 
   @Get('stats')
@@ -78,7 +100,12 @@ export class InterfacesController {
     @Req() req: any,
     @Body() dto: CreateIncidentDto,
   ) {
-    return this.interfacesService.createIncident(req.tenantId, id, dto, req.user?.id);
+    return this.interfacesService.createIncident(
+      req.tenantId,
+      id,
+      dto,
+      req.user?.id,
+    );
   }
 
   @Put('incidents/:incidentId/resolve')
@@ -87,6 +114,10 @@ export class InterfacesController {
     @Req() req: any,
     @Body('resolutionNotes') resolutionNotes: string,
   ) {
-    return this.interfacesService.resolveIncident(incidentId, req.tenantId, resolutionNotes);
+    return this.interfacesService.resolveIncident(
+      incidentId,
+      req.tenantId,
+      resolutionNotes,
+    );
   }
 }

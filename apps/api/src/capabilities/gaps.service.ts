@@ -29,9 +29,12 @@ export class GapsService {
     });
   }
 
-  async findAll(tenantId: string, filters?: { status?: string; severity?: string; capabilityId?: string }) {
+  async findAll(
+    tenantId: string,
+    filters?: { status?: string; severity?: string; capabilityId?: string },
+  ) {
     const where: any = { tenant_id: tenantId };
-    
+
     if (filters?.status) {
       where.status = filters.status;
     }
@@ -76,8 +79,12 @@ export class GapsService {
     if (!existing) throw new NotFoundException('Gap not found');
 
     const data: any = { ...dto };
-    
-    if (dto.status && dto.status !== existing.status && dto.status === 'Closed') {
+
+    if (
+      dto.status &&
+      dto.status !== existing.status &&
+      dto.status === 'Closed'
+    ) {
       data.closed_at = new Date();
     }
 
@@ -104,8 +111,12 @@ export class GapsService {
   async getGapStats(tenantId: string) {
     const [total, open, closed, bySeverity] = await Promise.all([
       this.db.capabilityGap.count({ where: { tenant_id: tenantId } }),
-      this.db.capabilityGap.count({ where: { tenant_id: tenantId, status: 'Open' } }),
-      this.db.capabilityGap.count({ where: { tenant_id: tenantId, status: 'Closed' } }),
+      this.db.capabilityGap.count({
+        where: { tenant_id: tenantId, status: 'Open' },
+      }),
+      this.db.capabilityGap.count({
+        where: { tenant_id: tenantId, status: 'Closed' },
+      }),
       this.db.capabilityGap.groupBy({
         by: ['severity'],
         where: { tenant_id: tenantId, status: 'Open' },
@@ -120,7 +131,7 @@ export class GapsService {
       bySeverity: bySeverity.reduce((acc, item) => {
         acc[item.severity] = item._count;
         return acc;
-      }, {} as Record<string, number>),
+      }, {}),
     };
   }
 
@@ -138,11 +149,13 @@ export class GapsService {
     });
 
     const gaps: string[] = [];
-    
+
     for (const cap of capabilities) {
       const hasApp = cap._count.applications > 0;
-      const childrenHaveApps = cap.children.some((c: any) => c._count.applications > 0);
-      
+      const childrenHaveApps = cap.children.some(
+        (c: any) => c._count.applications > 0,
+      );
+
       if (!hasApp && !childrenHaveApps) {
         gaps.push(cap.id);
       }
@@ -161,7 +174,9 @@ export class GapsService {
       });
 
       if (!existingGap) {
-        const cap = await this.prisma.capabilityNode.findUnique({ where: { id: capId } });
+        const cap = await this.prisma.capabilityNode.findUnique({
+          where: { id: capId },
+        });
         if (cap) {
           const gap = await this.db.capabilityGap.create({
             data: {
@@ -169,7 +184,8 @@ export class GapsService {
               capability_id: capId,
               title: `Gap: ${cap.name} has no applications mapped`,
               description: `Capability "${cap.name}" at level ${cap.level} has no applications supporting it.`,
-              impact: 'This capability is not being fulfilled by any application in the portfolio.',
+              impact:
+                'This capability is not being fulfilled by any application in the portfolio.',
               severity: cap.level === 1 ? 'High' : 'Medium',
             },
           });

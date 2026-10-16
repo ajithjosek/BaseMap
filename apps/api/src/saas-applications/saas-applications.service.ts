@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -51,9 +55,15 @@ export class SaaSApplicationsService {
         product_url: dto.product_url,
         use_case: dto.use_case,
         pricing_model: dto.pricing_model,
-        annual_contract_value: dto.annual_contract_value ? Number(dto.annual_contract_value) : null,
-        contract_start_date: dto.contract_start_date ? new Date(dto.contract_start_date) : null,
-        contract_end_date: dto.contract_end_date ? new Date(dto.contract_end_date) : null,
+        annual_contract_value: dto.annual_contract_value
+          ? Number(dto.annual_contract_value)
+          : null,
+        contract_start_date: dto.contract_start_date
+          ? new Date(dto.contract_start_date)
+          : null,
+        contract_end_date: dto.contract_end_date
+          ? new Date(dto.contract_end_date)
+          : null,
         auto_renewal: dto.auto_renewal ?? false,
         total_seats: dto.total_seats ? parseInt(dto.total_seats) : null,
         data_residency: dto.data_residency,
@@ -72,12 +82,23 @@ export class SaaSApplicationsService {
     if (dto.product_url !== undefined) data.product_url = dto.product_url;
     if (dto.use_case !== undefined) data.use_case = dto.use_case;
     if (dto.pricing_model !== undefined) data.pricing_model = dto.pricing_model;
-    if (dto.annual_contract_value !== undefined) data.annual_contract_value = dto.annual_contract_value ? Number(dto.annual_contract_value) : null;
-    if (dto.contract_start_date !== undefined) data.contract_start_date = dto.contract_start_date ? new Date(dto.contract_start_date) : null;
-    if (dto.contract_end_date !== undefined) data.contract_end_date = dto.contract_end_date ? new Date(dto.contract_end_date) : null;
+    if (dto.annual_contract_value !== undefined)
+      data.annual_contract_value = dto.annual_contract_value
+        ? Number(dto.annual_contract_value)
+        : null;
+    if (dto.contract_start_date !== undefined)
+      data.contract_start_date = dto.contract_start_date
+        ? new Date(dto.contract_start_date)
+        : null;
+    if (dto.contract_end_date !== undefined)
+      data.contract_end_date = dto.contract_end_date
+        ? new Date(dto.contract_end_date)
+        : null;
     if (dto.auto_renewal !== undefined) data.auto_renewal = dto.auto_renewal;
-    if (dto.total_seats !== undefined) data.total_seats = dto.total_seats ? parseInt(dto.total_seats) : null;
-    if (dto.data_residency !== undefined) data.data_residency = dto.data_residency;
+    if (dto.total_seats !== undefined)
+      data.total_seats = dto.total_seats ? parseInt(dto.total_seats) : null;
+    if (dto.data_residency !== undefined)
+      data.data_residency = dto.data_residency;
     if (dto.has_dpa !== undefined) data.has_dpa = dto.has_dpa;
     if (dto.is_shadow_it !== undefined) data.is_shadow_it = dto.is_shadow_it;
 
@@ -105,22 +126,35 @@ export class SaaSApplicationsService {
       },
     });
 
-    const totalSpend = apps.reduce((sum, app) => sum + Number(app.annual_contract_value || 0), 0);
-    const shadowItCount = apps.filter(app => app.is_shadow_it).length;
-    const totalSeats = apps.reduce((sum, app) => sum + (app.total_seats || 0), 0);
-    const activeUsers = apps.reduce((sum, app) => sum + (app.active_users || 0), 0);
+    const totalSpend = apps.reduce(
+      (sum, app) => sum + Number(app.annual_contract_value || 0),
+      0,
+    );
+    const shadowItCount = apps.filter((app) => app.is_shadow_it).length;
+    const totalSeats = apps.reduce(
+      (sum, app) => sum + (app.total_seats || 0),
+      0,
+    );
+    const activeUsers = apps.reduce(
+      (sum, app) => sum + (app.active_users || 0),
+      0,
+    );
 
     const now = new Date();
-    const upcomingRenewals = apps.filter(app => {
+    const upcomingRenewals = apps.filter((app) => {
       if (!app.contract_end_date) return false;
-      const daysUntil = Math.ceil((new Date(app.contract_end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntil = Math.ceil(
+        (new Date(app.contract_end_date).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
       return daysUntil > 0 && daysUntil <= 90;
     }).length;
 
     const byVendor: Record<string, number> = {};
     for (const app of apps) {
       const vendor = app.pricing_model || 'Unknown';
-      byVendor[vendor] = (byVendor[vendor] || 0) + Number(app.annual_contract_value || 0);
+      byVendor[vendor] =
+        (byVendor[vendor] || 0) + Number(app.annual_contract_value || 0);
     }
 
     return {
@@ -128,7 +162,8 @@ export class SaaSApplicationsService {
       total_spend: totalSpend,
       total_seats: totalSeats,
       active_users: activeUsers,
-      utilization_rate: totalSeats > 0 ? Math.round((activeUsers / totalSeats) * 100) : 0,
+      utilization_rate:
+        totalSeats > 0 ? Math.round((activeUsers / totalSeats) * 100) : 0,
       shadow_it_count: shadowItCount,
       upcoming_renewals: upcomingRenewals,
       spend_by_pricing_model: byVendor,
@@ -158,14 +193,17 @@ export class SaaSApplicationsService {
       orderBy: { contract_end_date: 'asc' },
     });
 
-    return apps.map(app => ({
+    return apps.map((app) => ({
       id: app.id,
       vendor: app.vendor,
       renewal_date: app.contract_end_date,
       contract_value: app.annual_contract_value,
       auto_renewal: app.auto_renewal,
-      days_until_renewal: app.contract_end_date 
-        ? Math.ceil((new Date(app.contract_end_date).getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      days_until_renewal: app.contract_end_date
+        ? Math.ceil(
+            (new Date(app.contract_end_date).getTime() - startDate.getTime()) /
+              (1000 * 60 * 60 * 24),
+          )
         : null,
     }));
   }
@@ -181,11 +219,11 @@ export class SaaSApplicationsService {
       },
     });
 
-    return apps.map(app => {
+    return apps.map((app) => {
       const total = app.total_seats || 0;
       const active = app.active_users || 0;
       const rate = total > 0 ? Math.round((active / total) * 100) : 0;
-      
+
       let status = 'green';
       if (rate > 90) status = 'red';
       else if (rate < 70) status = 'yellow';
@@ -214,27 +252,43 @@ export class SaaSApplicationsService {
       },
     });
 
-    return apps.filter(app => 
-      app.last_login_check_date && new Date(app.last_login_check_date) < thresholdDate
+    return apps.filter(
+      (app) =>
+        app.last_login_check_date &&
+        new Date(app.last_login_check_date) < thresholdDate,
     );
   }
 
   generateInactiveUsersCSV(apps: any[]): string {
-    const headers = ['Vendor', 'Application ID', 'Last Login Check', 'Days Inactive'];
-    const rows = apps.map(app => {
-      const lastCheck = app.last_login_check_date ? new Date(app.last_login_check_date) : null;
-      const daysInactive = lastCheck ? Math.floor((Date.now() - lastCheck.getTime()) / (1000 * 60 * 60 * 24)) : 'N/A';
+    const headers = [
+      'Vendor',
+      'Application ID',
+      'Last Login Check',
+      'Days Inactive',
+    ];
+    const rows = apps.map((app) => {
+      const lastCheck = app.last_login_check_date
+        ? new Date(app.last_login_check_date)
+        : null;
+      const daysInactive = lastCheck
+        ? Math.floor((Date.now() - lastCheck.getTime()) / (1000 * 60 * 60 * 24))
+        : 'N/A';
       return [
         app.vendor || '',
         app.id || '',
         lastCheck ? lastCheck.toISOString().split('T')[0] : 'Never',
-        daysInactive
+        daysInactive,
       ].join(',');
     });
     return [headers.join(','), ...rows].join('\n');
   }
 
-  async updateSeats(id: string, tenantId: string, totalSeats: number, activeUsers: number) {
+  async updateSeats(
+    id: string,
+    tenantId: string,
+    totalSeats: number,
+    activeUsers: number,
+  ) {
     await this.findOne(id, tenantId);
     return this.prisma.saaSApplication.update({
       where: { id },
@@ -265,21 +319,39 @@ export class SaaSApplicationsService {
     for (const app of apps) {
       const value = Number(app.annual_contract_value || 0);
       totalSpend += value;
-      byVendor[app.vendor || 'Unknown'] = (byVendor[app.vendor || 'Unknown'] || 0) + value;
-      byCategory[app.use_case || 'Uncategorized'] = (byCategory[app.use_case || 'Uncategorized'] || 0) + value;
-      byBusinessUnit[app.business_unit || 'Unassigned'] = (byBusinessUnit[app.business_unit || 'Unassigned'] || 0) + value;
+      byVendor[app.vendor || 'Unknown'] =
+        (byVendor[app.vendor || 'Unknown'] || 0) + value;
+      byCategory[app.use_case || 'Uncategorized'] =
+        (byCategory[app.use_case || 'Uncategorized'] || 0) + value;
+      byBusinessUnit[app.business_unit || 'Unassigned'] =
+        (byBusinessUnit[app.business_unit || 'Unassigned'] || 0) + value;
     }
 
     return {
       total_spend: totalSpend,
       by_vendor: Object.entries(byVendor)
-        .map(([vendor, spend]) => ({ vendor, spend, percentage: totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0 }))
+        .map(([vendor, spend]) => ({
+          vendor,
+          spend,
+          percentage:
+            totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0,
+        }))
         .sort((a, b) => b.spend - a.spend),
       by_category: Object.entries(byCategory)
-        .map(([category, spend]) => ({ category, spend, percentage: totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0 }))
+        .map(([category, spend]) => ({
+          category,
+          spend,
+          percentage:
+            totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0,
+        }))
         .sort((a, b) => b.spend - a.spend),
       by_business_unit: Object.entries(byBusinessUnit)
-        .map(([bu, spend]) => ({ business_unit: bu, spend, percentage: totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0 }))
+        .map(([bu, spend]) => ({
+          business_unit: bu,
+          spend,
+          percentage:
+            totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0,
+        }))
         .sort((a, b) => b.spend - a.spend),
     };
   }
@@ -329,7 +401,10 @@ export class SaaSApplicationsService {
       }
     }
 
-    const yearly = Object.entries(yoy).map(([year, spend]) => ({ year, spend: Math.round(spend) }));
+    const yearly = Object.entries(yoy).map(([year, spend]) => ({
+      year,
+      spend: Math.round(spend),
+    }));
 
     return {
       monthly: trend,
@@ -353,11 +428,16 @@ export class SaaSApplicationsService {
     for (const app of apps) {
       const value = Number(app.annual_contract_value || 0);
       totalSpend += value;
-      vendorSpend[app.vendor || 'Unknown'] = (vendorSpend[app.vendor || 'Unknown'] || 0) + value;
+      vendorSpend[app.vendor || 'Unknown'] =
+        (vendorSpend[app.vendor || 'Unknown'] || 0) + value;
     }
 
     const sorted = Object.entries(vendorSpend)
-      .map(([vendor, spend]) => ({ vendor, spend, percentage: totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0 }))
+      .map(([vendor, spend]) => ({
+        vendor,
+        spend,
+        percentage: totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0,
+      }))
       .sort((a, b) => b.spend - a.spend);
 
     const topVendor = sorted[0];
@@ -365,9 +445,21 @@ export class SaaSApplicationsService {
 
     return {
       total_vendors: sorted.length,
-      top_vendor: topVendor ? { name: topVendor.vendor, spend: topVendor.spend, percentage: topVendor.percentage } : null,
-      top_3_percentage: totalSpend > 0 ? Math.round((top3Spend / totalSpend) * 100) : 0,
-      concentration_risk: topVendor && topVendor.percentage > 30 ? 'high' : topVendor && topVendor.percentage > 20 ? 'medium' : 'low',
+      top_vendor: topVendor
+        ? {
+            name: topVendor.vendor,
+            spend: topVendor.spend,
+            percentage: topVendor.percentage,
+          }
+        : null,
+      top_3_percentage:
+        totalSpend > 0 ? Math.round((top3Spend / totalSpend) * 100) : 0,
+      concentration_risk:
+        topVendor && topVendor.percentage > 30
+          ? 'high'
+          : topVendor && topVendor.percentage > 20
+            ? 'medium'
+            : 'low',
       all_vendors: sorted,
     };
   }
@@ -388,12 +480,16 @@ export class SaaSApplicationsService {
     });
 
     const now = new Date();
-    const trends = apps.map(app => {
+    const trends = apps.map((app) => {
       const history: any[] = [];
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const simulatedActive = app.active_users || Math.floor((app.total_seats || 10) * (0.5 + Math.random() * 0.4));
-        const rate = app.total_seats ? Math.round((simulatedActive / app.total_seats) * 100) : 0;
+        const simulatedActive =
+          app.active_users ||
+          Math.floor((app.total_seats || 10) * (0.5 + Math.random() * 0.4));
+        const rate = app.total_seats
+          ? Math.round((simulatedActive / app.total_seats) * 100)
+          : 0;
         history.push({
           month: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
           utilization_rate: rate,

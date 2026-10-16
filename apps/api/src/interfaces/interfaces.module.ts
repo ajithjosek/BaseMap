@@ -4,6 +4,6 @@ import { InterfacesController } from './interfaces.controller';
 
 @Module({
   providers: [InterfacesService],
-  controllers: [InterfacesController]
+  controllers: [InterfacesController],
 })
 export class InterfacesModule {}

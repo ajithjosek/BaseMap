@@ -14,7 +14,9 @@ import { Logger } from '@nestjs/common';
 @WebSocketGateway({
   path: '/ws/notifications',
 })
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -57,26 +59,33 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     @ConnectedSocket() client: WebSocket,
     @MessageBody() data: { notificationId: string },
   ) {
-    return { event: 'mark-read-ack', data: { notificationId: data.notificationId } };
+    return {
+      event: 'mark-read-ack',
+      data: { notificationId: data.notificationId },
+    };
   }
 
   sendNotificationToUser(userId: string, notification: any) {
     const client = this.clients.get(userId);
     if (client && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        event: 'new-notification',
-        data: notification,
-      }));
+      client.send(
+        JSON.stringify({
+          event: 'new-notification',
+          data: notification,
+        }),
+      );
     }
   }
 
   sendUnreadCountUpdate(userId: string, count: number) {
     const client = this.clients.get(userId);
     if (client && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        event: 'unread-count-update',
-        data: { count },
-      }));
+      client.send(
+        JSON.stringify({
+          event: 'unread-count-update',
+          data: { count },
+        }),
+      );
     }
   }
 }

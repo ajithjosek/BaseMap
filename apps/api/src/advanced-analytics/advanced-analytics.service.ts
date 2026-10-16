@@ -112,7 +112,8 @@ export class AdvancedAnalyticsService {
     let totalSaaSSpend = 0;
     for (const s of saas) {
       const cat = s.use_case || 'Other';
-      saasByCategory[cat] = (saasByCategory[cat] || 0) + Number(s.annual_contract_value || 0);
+      saasByCategory[cat] =
+        (saasByCategory[cat] || 0) + Number(s.annual_contract_value || 0);
       totalSaaSSpend += Number(s.annual_contract_value || 0);
     }
 
@@ -125,12 +126,17 @@ export class AdvancedAnalyticsService {
 
     const appsByState: Record<string, number> = {};
     for (const a of applications) {
-      appsByState[a.lifecycle_state] = (appsByState[a.lifecycle_state] || 0) + 1;
+      appsByState[a.lifecycle_state] =
+        (appsByState[a.lifecycle_state] || 0) + 1;
     }
 
     return {
       saas_spend: { total: totalSaaSSpend, by_category: saasByCategory },
-      technology: { total: tech.length, by_type: techByType, by_status: techByStatus },
+      technology: {
+        total: tech.length,
+        by_type: techByType,
+        by_status: techByStatus,
+      },
       applications: { total: applications.length, by_state: appsByState },
     };
   }
@@ -138,7 +144,11 @@ export class AdvancedAnalyticsService {
   async getCostTrend(tenantId: string, months: number = 12) {
     const saasApps = await this.db.saaSApplication.findMany({
       where: { tenant_id: tenantId },
-      select: { vendor: true, annual_contract_value: true, contract_start_date: true },
+      select: {
+        vendor: true,
+        annual_contract_value: true,
+        contract_start_date: true,
+      },
     });
 
     const costs = await this.db.applicationCost.findMany({
@@ -150,7 +160,8 @@ export class AdvancedAnalyticsService {
     const monthlyCosts: Record<string, number> = {};
     for (const c of costs) {
       const monthKey = c.cost_date?.toISOString().slice(0, 7) || 'unknown';
-      monthlyCosts[monthKey] = (monthlyCosts[monthKey] || 0) + Number(c.amount || 0);
+      monthlyCosts[monthKey] =
+        (monthlyCosts[monthKey] || 0) + Number(c.amount || 0);
     }
 
     const trend = Object.entries(monthlyCosts)

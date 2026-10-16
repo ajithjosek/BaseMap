@@ -79,7 +79,9 @@ export class CertReviewsService {
       await this.db.accessCertificationItem.createMany({ data: items });
     }
 
-    this.logger.log(`Created certification cycle "${dto.name}" with ${items.length} items`);
+    this.logger.log(
+      `Created certification cycle "${dto.name}" with ${items.length} items`,
+    );
     return this.getCycle(tenant, cert.id);
   }
 
@@ -94,9 +96,14 @@ export class CertReviewsService {
       by: ['certification_id'],
       _count: true,
     });
-    const countMap = new Map(counts.map((c: any) => [c.certification_id, c._count]));
+    const countMap = new Map(
+      counts.map((c: any) => [c.certification_id, c._count]),
+    );
 
-    return cycles.map((c: any) => ({ ...c, item_count: countMap.get(c.id) || 0 }));
+    return cycles.map((c: any) => ({
+      ...c,
+      item_count: countMap.get(c.id) || 0,
+    }));
   }
 
   async getCycle(tenantId: string | undefined, id: string) {
@@ -133,7 +140,10 @@ export class CertReviewsService {
     );
     return items.map((i: any) => ({
       ...i,
-      cycle: { id: i.certification_id, name: certById.get(i.certification_id)?.name },
+      cycle: {
+        id: i.certification_id,
+        name: certById.get(i.certification_id)?.name,
+      },
     }));
   }
 
@@ -201,7 +211,9 @@ export class CertReviewsService {
         });
       }
       if (overdueCerts.length) {
-        this.logger.log(`Escalated pending items for ${overdueCerts.length} cycle(s)`);
+        this.logger.log(
+          `Escalated pending items for ${overdueCerts.length} cycle(s)`,
+        );
       }
     } catch (error) {
       this.logger.error('Error escalating overdue items:', error);

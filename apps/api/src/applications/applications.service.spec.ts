@@ -13,7 +13,9 @@ describe('ApplicationsService', () => {
 
   beforeEach(async () => {
     prisma = createPrismaMock();
-    notificationsService = { sendLifecycleChangeNotification: jest.fn().mockResolvedValue(undefined) };
+    notificationsService = {
+      sendLifecycleChangeNotification: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -34,7 +36,7 @@ describe('ApplicationsService', () => {
       const expected = makeApplication({ name: 'New App' });
       prisma.application.create.mockResolvedValue(expected);
 
-      const result = await service.create(UUID.TENANT, dto as any);
+      const result = await service.create(UUID.TENANT, dto);
 
       expect(prisma.application.create).toHaveBeenCalledWith({
         data: { ...dto, tenant_id: UUID.TENANT },
@@ -45,7 +47,10 @@ describe('ApplicationsService', () => {
 
   describe('findAll', () => {
     it('should return paginated results', async () => {
-      const apps = [makeApplication(), makeApplication({ id: 'app-2', name: 'App 2' })];
+      const apps = [
+        makeApplication(),
+        makeApplication({ id: 'app-2', name: 'App 2' }),
+      ];
       prisma.application.findMany.mockResolvedValue(apps);
       prisma.application.count.mockResolvedValue(2);
 
@@ -81,7 +86,9 @@ describe('ApplicationsService', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             OR: expect.arrayContaining([
-              expect.objectContaining({ name: expect.objectContaining({ contains: 'test' }) }),
+              expect.objectContaining({
+                name: expect.objectContaining({ contains: 'test' }),
+              }),
             ]),
           }),
         }),
@@ -92,7 +99,10 @@ describe('ApplicationsService', () => {
       prisma.application.findMany.mockResolvedValue([]);
       prisma.application.count.mockResolvedValue(0);
 
-      await service.findAll({ lifecycle: ['Active', 'Maintenance'] }, UUID.TENANT);
+      await service.findAll(
+        { lifecycle: ['Active', 'Maintenance'] },
+        UUID.TENANT,
+      );
 
       expect(prisma.application.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -145,16 +155,20 @@ describe('ApplicationsService', () => {
     it('should throw NotFoundException for missing id', async () => {
       prisma.application.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('should update an existing application', async () => {
       prisma.application.findFirst.mockResolvedValue(makeApplication());
-      prisma.application.update.mockResolvedValue(makeApplication({ name: 'Updated' }));
+      prisma.application.update.mockResolvedValue(
+        makeApplication({ name: 'Updated' }),
+      );
 
-      const result = await service.update(UUID.APP, { name: 'Updated' } as any);
+      const result = await service.update(UUID.APP, { name: 'Updated' });
 
       expect(result.name).toBe('Updated');
     });
@@ -162,14 +176,18 @@ describe('ApplicationsService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.application.findFirst.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', {} as any)).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('remove', () => {
     it('should soft-delete an application', async () => {
       prisma.application.findFirst.mockResolvedValue(makeApplication());
-      prisma.application.update.mockResolvedValue(makeApplication({ deleted_at: new Date() }));
+      prisma.application.update.mockResolvedValue(
+        makeApplication({ deleted_at: new Date() }),
+      );
 
       await service.remove(UUID.APP);
 
@@ -182,7 +200,9 @@ describe('ApplicationsService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.application.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -204,7 +224,10 @@ describe('ApplicationsService', () => {
     it('should allow valid transition (Planning → Active)', async () => {
       const app = makeApplication({ lifecycle_state: 'Planning' });
       prisma.application.findFirst.mockResolvedValue(app);
-      prisma.application.update.mockResolvedValue({ ...app, lifecycle_state: 'Active' });
+      prisma.application.update.mockResolvedValue({
+        ...app,
+        lifecycle_state: 'Active',
+      });
       prisma.auditLog.create.mockResolvedValue({} as any);
 
       const result = await service.transitionLifecycle(
@@ -215,7 +238,9 @@ describe('ApplicationsService', () => {
 
       expect(result.lifecycle_state).toBe('Active');
       expect(prisma.auditLog.create).toHaveBeenCalled();
-      expect(notificationsService.sendLifecycleChangeNotification).toHaveBeenCalled();
+      expect(
+        notificationsService.sendLifecycleChangeNotification,
+      ).toHaveBeenCalled();
     });
 
     it('should reject invalid transition (Retired → Active)', async () => {
@@ -223,14 +248,21 @@ describe('ApplicationsService', () => {
       prisma.application.findFirst.mockResolvedValue(app);
 
       await expect(
-        service.transitionLifecycle(UUID.APP, { target_state: 'Active' }, UUID.USER),
+        service.transitionLifecycle(
+          UUID.APP,
+          { target_state: 'Active' },
+          UUID.USER,
+        ),
       ).rejects.toThrow('Invalid lifecycle transition');
     });
 
     it('should allow Retirement → Active transition', async () => {
       const app = makeApplication({ lifecycle_state: 'Retirement' });
       prisma.application.findFirst.mockResolvedValue(app);
-      prisma.application.update.mockResolvedValue({ ...app, lifecycle_state: 'Active' });
+      prisma.application.update.mockResolvedValue({
+        ...app,
+        lifecycle_state: 'Active',
+      });
       prisma.auditLog.create.mockResolvedValue({} as any);
 
       const result = await service.transitionLifecycle(

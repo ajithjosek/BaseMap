@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CapabilitiesService } from './capabilities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPrismaMock } from '../../test/__mocks__/prisma.mock';
@@ -39,9 +43,14 @@ describe('CapabilitiesService', () => {
     it('should set level 2 when parent is level 1', async () => {
       const parent = makeCapabilityNode({ id: 'parent-id', level: 1 });
       prisma.capabilityNode.findUnique.mockResolvedValue(parent);
-      prisma.capabilityNode.create.mockResolvedValue(makeCapabilityNode({ level: 2 }));
+      prisma.capabilityNode.create.mockResolvedValue(
+        makeCapabilityNode({ level: 2 }),
+      );
 
-      const result = await service.create(UUID.TENANT, { name: 'Child', parent_id: 'parent-id' } as any);
+      const result = await service.create(UUID.TENANT, {
+        name: 'Child',
+        parent_id: 'parent-id',
+      } as any);
 
       expect(result.level).toBe(2);
     });
@@ -50,7 +59,10 @@ describe('CapabilitiesService', () => {
       prisma.capabilityNode.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.create(UUID.TENANT, { name: 'X', parent_id: 'nonexistent' } as any),
+        service.create(UUID.TENANT, {
+          name: 'X',
+          parent_id: 'nonexistent',
+        } as any),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -77,7 +89,11 @@ describe('CapabilitiesService', () => {
   describe('getTree', () => {
     it('should build tree structure from flat list', async () => {
       const root = makeCapabilityNode({ id: 'root', parent_id: null });
-      const child = makeCapabilityNode({ id: 'child', parent_id: 'root', level: 2 });
+      const child = makeCapabilityNode({
+        id: 'child',
+        parent_id: 'root',
+        level: 2,
+      });
       prisma.capabilityNode.findMany.mockResolvedValue([root, child]);
 
       const result = await service.getTree(UUID.TENANT);
@@ -89,7 +105,10 @@ describe('CapabilitiesService', () => {
     });
 
     it('should handle orphaned nodes as roots', async () => {
-      const orphan = makeCapabilityNode({ id: 'orphan', parent_id: 'nonexistent' });
+      const orphan = makeCapabilityNode({
+        id: 'orphan',
+        parent_id: 'nonexistent',
+      });
       prisma.capabilityNode.findMany.mockResolvedValue([orphan]);
 
       const result = await service.getTree(UUID.TENANT);
@@ -112,7 +131,9 @@ describe('CapabilitiesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.capabilityNode.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -120,9 +141,16 @@ describe('CapabilitiesService', () => {
     it('should update an existing capability', async () => {
       const existing = makeCapabilityNode();
       prisma.capabilityNode.findUnique.mockResolvedValue(existing);
-      prisma.capabilityNode.update.mockResolvedValue({ ...existing, name: 'Updated' });
+      prisma.capabilityNode.update.mockResolvedValue({
+        ...existing,
+        name: 'Updated',
+      });
 
-      const result = await service.update(UUID.CAP, { name: 'Updated' } as any, UUID.TENANT);
+      const result = await service.update(
+        UUID.CAP,
+        { name: 'Updated' },
+        UUID.TENANT,
+      );
 
       expect(result.name).toBe('Updated');
     });
@@ -130,7 +158,9 @@ describe('CapabilitiesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.capabilityNode.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', {} as any, UUID.TENANT)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', {} as any, UUID.TENANT),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException when capability is locked', async () => {
@@ -145,9 +175,16 @@ describe('CapabilitiesService', () => {
     it('should allow unlocking a locked capability', async () => {
       const locked = makeCapabilityNode({ is_locked: true });
       prisma.capabilityNode.findUnique.mockResolvedValue(locked);
-      prisma.capabilityNode.update.mockResolvedValue({ ...locked, is_locked: false });
+      prisma.capabilityNode.update.mockResolvedValue({
+        ...locked,
+        is_locked: false,
+      });
 
-      const result = await service.update(UUID.CAP, { is_locked: false } as any, UUID.TENANT);
+      const result = await service.update(
+        UUID.CAP,
+        { is_locked: false },
+        UUID.TENANT,
+      );
 
       expect(result.is_locked).toBe(false);
     });
@@ -169,14 +206,18 @@ describe('CapabilitiesService', () => {
     it('should throw NotFoundException when not found', async () => {
       prisma.capabilityNode.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent', UUID.TENANT)).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent', UUID.TENANT)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException when locked', async () => {
       const locked = makeCapabilityNode({ is_locked: true });
       prisma.capabilityNode.findUnique.mockResolvedValue(locked);
 
-      await expect(service.remove(UUID.CAP, UUID.TENANT)).rejects.toThrow(ForbiddenException);
+      await expect(service.remove(UUID.CAP, UUID.TENANT)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should cascade delete descendants', async () => {
@@ -198,7 +239,13 @@ describe('CapabilitiesService', () => {
     it('should return applications, capabilities, and mapping matrix', async () => {
       const apps = [{ id: 'app-1', name: 'App 1' }];
       const caps = [{ id: 'cap-1', name: 'Cap 1' }];
-      const mappings = [{ application_id: 'app-1', capability_id: 'cap-1', support_level: 'Full' }];
+      const mappings = [
+        {
+          application_id: 'app-1',
+          capability_id: 'cap-1',
+          support_level: 'Full',
+        },
+      ];
 
       prisma.application.findMany.mockResolvedValue(apps as any);
       prisma.capabilityNode.findMany.mockResolvedValue(caps as any);

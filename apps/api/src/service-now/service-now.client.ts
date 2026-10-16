@@ -19,7 +19,7 @@ export class ServiceNowClient {
       },
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -47,18 +47,21 @@ export class ServiceNowClient {
           client_id: this.config.clientId,
           client_secret: this.config.clientSecret,
         },
-      }
+      },
     );
 
     return response.data.access_token;
   }
 
-  async query(table: string, params: {
-    sysparm_limit?: number;
-    sysparm_offset?: number;
-    sysparm_query?: string;
-    sysparm_fields?: string;
-  } = {}): Promise<ServiceNowQueryResult> {
+  async query(
+    table: string,
+    params: {
+      sysparm_limit?: number;
+      sysparm_offset?: number;
+      sysparm_query?: string;
+      sysparm_fields?: string;
+    } = {},
+  ): Promise<ServiceNowQueryResult> {
     if (!this.client) throw new Error('ServiceNow client not initialized');
 
     const response = await this.client.get(`/${table}`, {
@@ -98,7 +101,8 @@ export class ServiceNowClient {
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    if (!this.client) return { success: false, message: 'Client not initialized' };
+    if (!this.client)
+      return { success: false, message: 'Client not initialized' };
 
     try {
       await this.client.get('/cmdb_ci?sysparm_limit=1');
@@ -106,7 +110,10 @@ export class ServiceNowClient {
     } catch (error: any) {
       return {
         success: false,
-        message: error.response?.data?.error?.message || error.message || 'Connection failed',
+        message:
+          error.response?.data?.error?.message ||
+          error.message ||
+          'Connection failed',
       };
     }
   }

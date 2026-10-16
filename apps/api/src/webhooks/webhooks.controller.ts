@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { WebhooksService } from './webhooks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -9,10 +19,7 @@ export class WebhooksController {
   constructor(private readonly service: WebhooksService) {}
 
   @Get()
-  findAll(
-    @CurrentUser() user: any,
-    @Query('provider') provider?: string,
-  ) {
+  findAll(@CurrentUser() user: any, @Query('provider') provider?: string) {
     return this.service.findAll(user.tenantId, provider);
   }
 
@@ -37,11 +44,7 @@ export class WebhooksController {
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-    @Body() data: any,
-  ) {
+  update(@Param('id') id: string, @CurrentUser() user: any, @Body() data: any) {
     return this.service.update(id, user.tenantId, data);
   }
 

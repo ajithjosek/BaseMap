@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AdvancedAnalyticsService } from './advanced-analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -9,10 +19,7 @@ export class AdvancedAnalyticsController {
   constructor(private readonly service: AdvancedAnalyticsService) {}
 
   @Get('widgets')
-  getWidgets(
-    @CurrentUser() user: any,
-    @Query('shared') shared?: string,
-  ) {
+  getWidgets(@CurrentUser() user: any, @Query('shared') shared?: string) {
     return this.service.getWidgets(user.id, user.tenantId, shared === 'true');
   }
 
@@ -36,11 +43,11 @@ export class AdvancedAnalyticsController {
   }
 
   @Get('budget')
-  getBudgetForecast(
-    @CurrentUser() user: any,
-    @Query('year') year?: string,
-  ) {
-    return this.service.getBudgetForecast(user.tenantId, year ? parseInt(year) : undefined);
+  getBudgetForecast(@CurrentUser() user: any, @Query('year') year?: string) {
+    return this.service.getBudgetForecast(
+      user.tenantId,
+      year ? parseInt(year) : undefined,
+    );
   }
 
   @Post('budget')
@@ -54,10 +61,10 @@ export class AdvancedAnalyticsController {
   }
 
   @Get('cost-trend')
-  getCostTrend(
-    @CurrentUser() user: any,
-    @Query('months') months?: string,
-  ) {
-    return this.service.getCostTrend(user.tenantId, months ? parseInt(months) : 12);
+  getCostTrend(@CurrentUser() user: any, @Query('months') months?: string) {
+    return this.service.getCostTrend(
+      user.tenantId,
+      months ? parseInt(months) : 12,
+    );
   }
 }

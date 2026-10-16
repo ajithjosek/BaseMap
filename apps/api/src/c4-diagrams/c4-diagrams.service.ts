@@ -23,7 +23,8 @@ export class C4DiagramsService {
   async create(tenantId: string | undefined, dto: any, actor: any) {
     const tenant = this.requireTenant(tenantId);
     if (!dto?.name) throw new BadRequestException('name is required');
-    const level = dto.level && C4_LEVELS.includes(dto.level) ? dto.level : 'level1';
+    const level =
+      dto.level && C4_LEVELS.includes(dto.level) ? dto.level : 'level1';
     const diagram = await this.db.c4Diagram.create({
       data: {
         tenant_id: tenant,
@@ -56,7 +57,9 @@ export class C4DiagramsService {
 
   async get(tenantId: string | undefined, id: string) {
     const tenant = this.requireTenant(tenantId);
-    const diagram = await this.db.c4Diagram.findFirst({ where: { id, tenant_id: tenant } });
+    const diagram = await this.db.c4Diagram.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!diagram) throw new NotFoundException('Diagram not found');
     return { diagram };
   }
@@ -67,7 +70,9 @@ export class C4DiagramsService {
    */
   async save(tenantId: string | undefined, id: string, dto: any, actor: any) {
     const tenant = this.requireTenant(tenantId);
-    const diagram = await this.db.c4Diagram.findFirst({ where: { id, tenant_id: tenant } });
+    const diagram = await this.db.c4Diagram.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!diagram) throw new NotFoundException('Diagram not found');
     if (dto?.canvas_data === undefined) {
       throw new BadRequestException('canvas_data is required');
@@ -87,11 +92,15 @@ export class C4DiagramsService {
       data: {
         canvas_data: dto.canvas_data,
         ...(dto.name ? { name: dto.name } : {}),
-        ...(dto.level && C4_LEVELS.includes(dto.level) ? { level: dto.level } : {}),
+        ...(dto.level && C4_LEVELS.includes(dto.level)
+          ? { level: dto.level }
+          : {}),
       },
     });
 
-    const total = await this.db.c4DiagramVersion.count({ where: { diagram_id: id } });
+    const total = await this.db.c4DiagramVersion.count({
+      where: { diagram_id: id },
+    });
     if (total > 50) {
       const stale = await this.db.c4DiagramVersion.findMany({
         where: { diagram_id: id },
@@ -112,7 +121,9 @@ export class C4DiagramsService {
 
   async versions(tenantId: string | undefined, id: string) {
     const tenant = this.requireTenant(tenantId);
-    const diagram = await this.db.c4Diagram.findFirst({ where: { id, tenant_id: tenant } });
+    const diagram = await this.db.c4Diagram.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!diagram) throw new NotFoundException('Diagram not found');
     const versions = await this.db.c4DiagramVersion.findMany({
       where: { diagram_id: id },
@@ -122,7 +133,11 @@ export class C4DiagramsService {
   }
 
   /** Restore a past snapshot back onto the diagram as the working canvas. */
-  async restore(tenantId: string | undefined, diagramId: string, versionId: string) {
+  async restore(
+    tenantId: string | undefined,
+    diagramId: string,
+    versionId: string,
+  ) {
     const tenant = this.requireTenant(tenantId);
     const diagram = await this.db.c4Diagram.findFirst({
       where: { id: diagramId, tenant_id: tenant },
@@ -142,7 +157,9 @@ export class C4DiagramsService {
 
   async remove(tenantId: string | undefined, id: string) {
     const tenant = this.requireTenant(tenantId);
-    const diagram = await this.db.c4Diagram.findFirst({ where: { id, tenant_id: tenant } });
+    const diagram = await this.db.c4Diagram.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!diagram) throw new NotFoundException('Diagram not found');
     await this.db.c4DiagramVersion.deleteMany({ where: { diagram_id: id } });
     await this.db.c4Diagram.delete({ where: { id } });

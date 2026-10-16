@@ -23,7 +23,10 @@ describe('Applications E2E', () => {
       providers: [
         ApplicationsService,
         { provide: PrismaService, useValue: prisma },
-        { provide: NotificationsService, useValue: { sendLifecycleChangeNotification: jest.fn() } },
+        {
+          provide: NotificationsService,
+          useValue: { sendLifecycleChangeNotification: jest.fn() },
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -31,14 +34,14 @@ describe('Applications E2E', () => {
       .compile();
 
     app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-    app.use(
-      (req: any, _res: any, next: any) => {
-        const tenantId = req.headers['x-tenant-id'];
-        if (tenantId) req.tenantId = tenantId;
-        next();
-      },
+    app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
     );
+    app.use((req: any, _res: any, next: any) => {
+      const tenantId = req.headers['x-tenant-id'];
+      if (tenantId) req.tenantId = tenantId;
+      next();
+    });
     await app.init();
   });
 
@@ -48,15 +51,26 @@ describe('Applications E2E', () => {
     prisma.application.findMany.mockReset().mockResolvedValue([]);
     prisma.application.findFirst.mockReset().mockResolvedValue(null);
     prisma.application.count.mockReset().mockResolvedValue(0);
-    prisma.application.create.mockReset().mockImplementation(({ data }: any) => Promise.resolve({ id: UUID.APP, ...data }));
-    prisma.application.update.mockReset().mockImplementation(({ where, data }: any) => Promise.resolve({ id: where?.id, ...data }));
+    prisma.application.create
+      .mockReset()
+      .mockImplementation(({ data }: any) =>
+        Promise.resolve({ id: UUID.APP, ...data }),
+      );
+    prisma.application.update
+      .mockReset()
+      .mockImplementation(({ where, data }: any) =>
+        Promise.resolve({ id: where?.id, ...data }),
+      );
     prisma.application.updateMany.mockReset().mockResolvedValue({ count: 0 });
     prisma.auditLog.create.mockReset().mockResolvedValue({} as any);
   });
 
   describe('GET /applications', () => {
     it('should return 200 with paginated applications', async () => {
-      const apps = [makeApplication(), makeApplication({ id: 'app-2', name: 'App 2' })];
+      const apps = [
+        makeApplication(),
+        makeApplication({ id: 'app-2', name: 'App 2' }),
+      ];
       prisma.application.findMany.mockResolvedValue(apps);
       prisma.application.count.mockResolvedValue(2);
 
@@ -115,7 +129,9 @@ describe('Applications E2E', () => {
   describe('PATCH /applications/:id', () => {
     it('should return 200 with updated application', async () => {
       prisma.application.findFirst.mockResolvedValue(makeApplication());
-      prisma.application.update.mockResolvedValue(makeApplication({ name: 'Updated' }));
+      prisma.application.update.mockResolvedValue(
+        makeApplication({ name: 'Updated' }),
+      );
 
       const res = await request(app.getHttpServer())
         .patch(`/applications/${UUID.APP}`)
@@ -129,7 +145,9 @@ describe('Applications E2E', () => {
   describe('DELETE /applications/:id', () => {
     it('should return 200 on soft delete', async () => {
       prisma.application.findFirst.mockResolvedValue(makeApplication());
-      prisma.application.update.mockResolvedValue(makeApplication({ deleted_at: new Date() }));
+      prisma.application.update.mockResolvedValue(
+        makeApplication({ deleted_at: new Date() }),
+      );
 
       await request(app.getHttpServer())
         .delete(`/applications/${UUID.APP}`)

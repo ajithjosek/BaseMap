@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { QueryBuilderService } from './query-builder.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -19,7 +29,11 @@ export class QueryBuilderController {
 
   @Post('execute')
   executeQuery(@CurrentUser() user: any, @Body() config: any) {
-    return this.queryBuilderService.executeQuery(user.tenantId, user.userId, config);
+    return this.queryBuilderService.executeQuery(
+      user.tenantId,
+      user.userId,
+      config,
+    );
   }
 
   @Get('insights')
@@ -29,17 +43,29 @@ export class QueryBuilderController {
 
   @Post('insights')
   saveInsight(@CurrentUser() user: any, @Body() data: any) {
-    return this.queryBuilderService.saveInsight(user.tenantId, user.userId, data);
+    return this.queryBuilderService.saveInsight(
+      user.tenantId,
+      user.userId,
+      data,
+    );
   }
 
   @Delete('insights/:id')
   deleteInsight(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.queryBuilderService.deleteInsight(id, user.tenantId, user.userId);
+    return this.queryBuilderService.deleteInsight(
+      id,
+      user.tenantId,
+      user.userId,
+    );
   }
 
   @Get('history')
   getHistory(@CurrentUser() user: any, @Query('limit') limit?: string) {
-    return this.queryBuilderService.getQueryHistory(user.tenantId, user.userId, limit ? parseInt(limit) : 20);
+    return this.queryBuilderService.getQueryHistory(
+      user.tenantId,
+      user.userId,
+      limit ? parseInt(limit) : 20,
+    );
   }
 }
 

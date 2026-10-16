@@ -1,4 +1,12 @@
-import { IsString, IsDecimal, IsOptional, IsEnum, IsInt, IsDateString, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsDecimal,
+  IsOptional,
+  IsEnum,
+  IsInt,
+  IsDateString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateCostDto {
   @IsUUID()

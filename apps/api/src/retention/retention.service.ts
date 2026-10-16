@@ -36,7 +36,11 @@ export class RetentionService {
     const have = new Set(existing.map((r: any) => r.entity_type));
     const fresh = Object.entries(DEFAULT_RETENTION)
       .filter(([entity_type]) => !have.has(entity_type))
-      .map(([entity_type, retention_days]) => ({ entity_type, retention_days, enabled: true }));
+      .map(([entity_type, retention_days]) => ({
+        entity_type,
+        retention_days,
+        enabled: true,
+      }));
 
     if (fresh.length) {
       await this.db.retentionPolicy.createMany({ data: fresh });
@@ -104,13 +108,18 @@ export class RetentionService {
       const target = PURGE_TARGETS[policy.entity_type];
       if (!target) continue;
 
-      const cutoff = new Date(now.getTime() - policy.retention_days * 24 * 60 * 60 * 1000);
+      const cutoff = new Date(
+        now.getTime() - policy.retention_days * 24 * 60 * 60 * 1000,
+      );
       try {
         const result = await this.prisma.$executeRawUnsafe(
           `DELETE FROM "${target.table}" WHERE "${target.column}" < $1::timestamptz`,
           cutoff,
         );
-        summary.push({ entity_type: policy.entity_type, deleted: Number(result) });
+        summary.push({
+          entity_type: policy.entity_type,
+          deleted: Number(result),
+        });
       } catch (error: any) {
         this.logger.error(
           `Retention purge failed for ${policy.entity_type}: ${error.message}`,

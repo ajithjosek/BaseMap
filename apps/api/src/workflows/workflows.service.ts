@@ -7,7 +7,15 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { evaluateCondition } from './condition-evaluator';
 
-const STEP_TYPES = ['start', 'approval', 'condition', 'parallel', 'notification', 'task', 'end'];
+const STEP_TYPES = [
+  'start',
+  'approval',
+  'condition',
+  'parallel',
+  'notification',
+  'task',
+  'end',
+];
 
 interface TraceEntry {
   step_id: string;
@@ -51,7 +59,9 @@ export class WorkflowsService {
     });
     if (Array.isArray(dto.steps) && dto.steps.length) {
       await this.db.workflowStep.createMany({
-        data: dto.steps.map((s: any, i: number) => this.stepRow(workflow.id, s, i)),
+        data: dto.steps.map((s: any, i: number) =>
+          this.stepRow(workflow.id, s, i),
+        ),
       });
     }
     return { workflow: await this.get(tenantId, workflow.id) };
@@ -94,7 +104,9 @@ export class WorkflowsService {
 
   async update(tenantId: string | undefined, id: string, dto: any) {
     const tenant = this.requireTenant(tenantId);
-    const existing = await this.db.workflow.findFirst({ where: { id, tenant_id: tenant } });
+    const existing = await this.db.workflow.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!existing) throw new NotFoundException('Workflow not found');
 
     await this.db.workflow.update({
@@ -108,7 +120,8 @@ export class WorkflowsService {
     });
 
     if (dto.steps) {
-      if (!Array.isArray(dto.steps)) throw new BadRequestException('steps must be an array');
+      if (!Array.isArray(dto.steps))
+        throw new BadRequestException('steps must be an array');
       await this.db.workflowStep.deleteMany({ where: { workflow_id: id } });
       if (dto.steps.length) {
         await this.db.workflowStep.createMany({
@@ -121,7 +134,9 @@ export class WorkflowsService {
 
   async remove(tenantId: string | undefined, id: string) {
     const tenant = this.requireTenant(tenantId);
-    const existing = await this.db.workflow.findFirst({ where: { id, tenant_id: tenant } });
+    const existing = await this.db.workflow.findFirst({
+      where: { id, tenant_id: tenant },
+    });
     if (!existing) throw new NotFoundException('Workflow not found');
     await this.db.workflowStep.deleteMany({ where: { workflow_id: id } });
     await this.db.workflow.delete({ where: { id } });
@@ -130,7 +145,12 @@ export class WorkflowsService {
 
   // ------------------------- Execution (37.3 / 37.4) -------------------------
 
-  async start(tenantId: string | undefined, workflowId: string, dto: any, actor: any) {
+  async start(
+    tenantId: string | undefined,
+    workflowId: string,
+    dto: any,
+    actor: any,
+  ) {
     const tenant = this.requireTenant(tenantId);
     const workflow = await this.db.workflow.findFirst({
       where: { id: workflowId, tenant_id: tenant },
@@ -206,7 +226,15 @@ export class WorkflowsService {
     }
 
     if (step.step_type === 'approval') {
-      return { ...base, approvals: [{ role: step.config?.approver_role ?? 'approver', outcome: 'pending' }] };
+      return {
+        ...base,
+        approvals: [
+          {
+            role: step.config?.approver_role ?? 'approver',
+            outcome: 'pending',
+          },
+        ],
+      };
     }
 
     return base;
@@ -225,9 +253,12 @@ export class WorkflowsService {
   async listRuns(tenantId: string | undefined, workflowId?: string) {
     const tenant = this.requireTenant(tenantId);
     const scoped = workflowId
-      ? await this.db.workflow.findFirst({ where: { id: workflowId, tenant_id: tenant } })
+      ? await this.db.workflow.findFirst({
+          where: { id: workflowId, tenant_id: tenant },
+        })
       : true;
-    if (workflowId && !scoped) throw new NotFoundException('Workflow not found');
+    if (workflowId && !scoped)
+      throw new NotFoundException('Workflow not found');
     const instances = await this.db.workflowInstance.findMany({
       where: workflowId ? { workflow_id: workflowId } : {},
       orderBy: { started_at: 'desc' },

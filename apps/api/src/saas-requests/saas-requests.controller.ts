@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { SaaSRequestsService } from './saas-requests.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -14,12 +24,18 @@ export class SaaSRequestsController {
     @Query('state') state?: string,
     @Query('role') role?: string,
   ) {
-    return this.saasRequestsService.findAll(user.tenantId, user.userId, { state, role });
+    return this.saasRequestsService.findAll(user.tenantId, user.userId, {
+      state,
+      role,
+    });
   }
 
   @Get('pending-approvals')
   getPendingApprovals(@CurrentUser() user: any) {
-    return this.saasRequestsService.getPendingApprovals(user.tenantId, user.userId);
+    return this.saasRequestsService.getPendingApprovals(
+      user.tenantId,
+      user.userId,
+    );
   }
 
   @Get(':id')
@@ -38,7 +54,9 @@ export class SaaSRequestsController {
     @CurrentUser() user: any,
     @Body('comment') comment?: string,
   ) {
-    return this.saasRequestsService.approve(id, user.tenantId, user.userId, { comment });
+    return this.saasRequestsService.approve(id, user.tenantId, user.userId, {
+      comment,
+    });
   }
 
   @Put(':id/reject')
@@ -47,7 +65,9 @@ export class SaaSRequestsController {
     @CurrentUser() user: any,
     @Body('comment') comment: string,
   ) {
-    return this.saasRequestsService.reject(id, user.tenantId, user.userId, { comment });
+    return this.saasRequestsService.reject(id, user.tenantId, user.userId, {
+      comment,
+    });
   }
 
   @Put(':id/request-changes')
@@ -56,6 +76,11 @@ export class SaaSRequestsController {
     @CurrentUser() user: any,
     @Body('comment') comment: string,
   ) {
-    return this.saasRequestsService.requestChanges(id, user.tenantId, user.userId, { comment });
+    return this.saasRequestsService.requestChanges(
+      id,
+      user.tenantId,
+      user.userId,
+      { comment },
+    );
   }
 }

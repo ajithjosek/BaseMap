@@ -26,11 +26,16 @@ function cmp(a: string | undefined | null, b: string): number {
   return 0;
 }
 
-export function versionAllowed(version: string | undefined | null, range: string | undefined | null): boolean {
+export function versionAllowed(
+  version: string | undefined | null,
+  range: string | undefined | null,
+): boolean {
   if (!range || range.trim() === '*' || range.trim() === '') return true;
   const r = range.trim();
 
-  const m = r.match(/^([<>]?=?).*?\s*([0-9]+(?:\.[0-9]+){0,3})(?:\s*-\s*([0-9]+(?:\.[0-9]+){0,3}))?$/);
+  const m = r.match(
+    /^([<>]?=?).*?\s*([0-9]+(?:\.[0-9]+){0,3})(?:\s*-\s*([0-9]+(?:\.[0-9]+){0,3}))?$/,
+  );
   if (!m) return true; // unknown range format -> don't block
 
   const low = m[2];
@@ -60,5 +65,7 @@ export function versionAllowed(version: string | undefined | null, range: string
 
 /** Whether a bare version string equals the constraint's minimum (for eq). */
 export function normalizedVersion(version?: string | null): string {
-  return String(version || '').trim().replace(/^[vVrR]/, '');
+  return String(version || '')
+    .trim()
+    .replace(/^[vVrR]/, '');
 }

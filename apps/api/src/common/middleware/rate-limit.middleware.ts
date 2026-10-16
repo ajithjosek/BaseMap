@@ -55,7 +55,10 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     const { tokens, last } = await this.readBucket(key, quota, now);
     const remaining = Math.floor(tokens);
-    const retryAfter = Math.max(1, Math.ceil((quota - remaining) / Math.max(quota / 60, 1)));
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((quota - remaining) / Math.max(quota / 60, 1)),
+    );
 
     res.setHeader('X-RateLimit-Limit', String(quota));
     res.setHeader('X-RateLimit-Remaining', String(Math.max(0, remaining)));
@@ -72,7 +75,11 @@ export class RateLimitMiddleware implements NestMiddleware {
       );
     }
 
-    await this.writeBucket(key, { tokens: remaining - 1, last }, Math.max(quota, 60));
+    await this.writeBucket(
+      key,
+      { tokens: remaining - 1, last },
+      Math.max(quota, 60),
+    );
 
     if (this.buckets.size > 10000) {
       for (const [k, v] of this.buckets) {
@@ -96,7 +103,10 @@ export class RateLimitMiddleware implements NestMiddleware {
           const { tokens, last } = JSON.parse(raw);
           const refill = quota / 60;
           const elapsed = Math.max(0, (now - last) / 1000);
-          return { tokens: Math.min(quota, tokens + elapsed * refill), last: now };
+          return {
+            tokens: Math.min(quota, tokens + elapsed * refill),
+            last: now,
+          };
         }
       } catch {
         // fall through to memory
@@ -106,7 +116,10 @@ export class RateLimitMiddleware implements NestMiddleware {
     if (bucket) {
       const refill = quota / 60;
       const elapsed = (now - bucket.last) / 1000;
-      return { tokens: Math.min(quota, bucket.tokens + elapsed * refill), last: now };
+      return {
+        tokens: Math.min(quota, bucket.tokens + elapsed * refill),
+        last: now,
+      };
     }
     return { tokens: quota, last: now };
   }
@@ -118,7 +131,12 @@ export class RateLimitMiddleware implements NestMiddleware {
   ) {
     if (this.redis) {
       try {
-        await this.redis.set(`rl:${key}`, JSON.stringify(bucket), 'EX', ttlSeconds);
+        await this.redis.set(
+          `rl:${key}`,
+          JSON.stringify(bucket),
+          'EX',
+          ttlSeconds,
+        );
         return;
       } catch {
         // fall through to memory

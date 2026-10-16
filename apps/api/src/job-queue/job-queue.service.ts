@@ -28,15 +28,15 @@ export class JobQueueService implements OnModuleInit, OnModuleDestroy {
       'import-export',
       async (job: Job) => {
         const { type, jobId, tenantId, userId } = job.data;
-        
+
         if (type === 'import') {
           return { status: 'import-processed', jobId };
         }
-        
+
         if (type === 'export') {
           return { status: 'export-processed', jobId };
         }
-        
+
         throw new Error(`Unknown job type: ${type}`);
       },
       { connection: this.connection },

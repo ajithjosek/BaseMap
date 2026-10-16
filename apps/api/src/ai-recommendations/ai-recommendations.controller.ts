@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AIRecommendationsService } from './ai-recommendations.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -18,7 +26,8 @@ export class AIRecommendationsController {
     return this.service.findAll(user.tenantId, {
       category,
       priority,
-      resolved: resolved === 'true' ? true : resolved === 'false' ? false : undefined,
+      resolved:
+        resolved === 'true' ? true : resolved === 'false' ? false : undefined,
     });
   }
 
@@ -34,9 +43,9 @@ export class AIRecommendationsController {
 
   @Post('generate-and-save')
   generateAndSave(@CurrentUser() user: any) {
-    return this.service.generateInsights(user.tenantId).then(insights =>
-      this.service.bulkCreate(user.tenantId, insights)
-    );
+    return this.service
+      .generateInsights(user.tenantId)
+      .then((insights) => this.service.bulkCreate(user.tenantId, insights));
   }
 
   @Get(':id')

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ServiceNowClient } from './service-now.client';
 import { ServiceNowFieldMapping } from './service-now.types';
@@ -65,7 +69,9 @@ export class ServiceNowService {
     });
   }
 
-  async testConnection(tenantId: string): Promise<{ success: boolean; message: string }> {
+  async testConnection(
+    tenantId: string,
+  ): Promise<{ success: boolean; message: string }> {
     const config = await this.db.serviceNowConfig.findUnique({
       where: { tenant_id: tenantId },
     });
@@ -106,7 +112,7 @@ export class ServiceNowService {
 
     try {
       const result = await this.syncCMDB(tenantId, config, logId);
-      
+
       await this.db.serviceNowConfig.update({
         where: { id: config.id },
         data: {
@@ -132,7 +138,10 @@ export class ServiceNowService {
   }
 
   private async syncCMDB(tenantId: string, config: any, logId: string) {
-    const fieldMapping = config.field_mapping as Record<string, ServiceNowFieldMapping>;
+    const fieldMapping = config.field_mapping as Record<
+      string,
+      ServiceNowFieldMapping
+    >;
     let totalCreated = 0;
     let totalUpdated = 0;
     let totalSkipped = 0;
@@ -150,7 +159,12 @@ export class ServiceNowService {
 
         for (const record of response.result) {
           try {
-            const result = await this.processRecord(tenantId, record, config, fieldMapping);
+            const result = await this.processRecord(
+              tenantId,
+              record,
+              config,
+              fieldMapping,
+            );
             if (result.created) totalCreated++;
             else if (result.updated) totalUpdated++;
             else totalSkipped++;
@@ -176,7 +190,12 @@ export class ServiceNowService {
     };
   }
 
-  private async processRecord(tenantId: string, record: any, config: any, fieldMapping: any) {
+  private async processRecord(
+    tenantId: string,
+    record: any,
+    config: any,
+    fieldMapping: any,
+  ) {
     const mappedData = this.applyFieldMapping(record, fieldMapping);
 
     const existing = await this.db.application.findFirst({
@@ -222,18 +241,25 @@ export class ServiceNowService {
 
     if (!fieldMapping) return result;
 
-    for (const [targetField, mapping] of Object.entries(fieldMapping as Record<string, any>)) {
+    for (const [targetField, mapping] of Object.entries(
+      fieldMapping as Record<string, any>,
+    )) {
       const sourceValue = record[mapping.sourceField];
-      
+
       if (sourceValue === undefined || sourceValue === null) {
         result[targetField] = mapping.defaultValue;
         continue;
       }
 
-      let value: any = typeof sourceValue === 'object' ? sourceValue.display_value || sourceValue.value : sourceValue;
+      let value: any =
+        typeof sourceValue === 'object'
+          ? sourceValue.display_value || sourceValue.value
+          : sourceValue;
 
-      if (mapping.transform === 'uppercase') value = String(value).toUpperCase();
-      else if (mapping.transform === 'lowercase') value = String(value).toLowerCase();
+      if (mapping.transform === 'uppercase')
+        value = String(value).toUpperCase();
+      else if (mapping.transform === 'lowercase')
+        value = String(value).toLowerCase();
       else if (mapping.transform === 'number') value = parseFloat(value) || 0;
 
       result[targetField] = value;
@@ -256,7 +282,11 @@ export class ServiceNowService {
     });
   }
 
-  private async createSyncLog(tenantId: string, configId: string, syncType: string) {
+  private async createSyncLog(
+    tenantId: string,
+    configId: string,
+    syncType: string,
+  ) {
     const log = await this.db.serviceNowSyncLog.create({
       data: {
         tenant_id: tenantId,

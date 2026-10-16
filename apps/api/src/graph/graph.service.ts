@@ -12,19 +12,21 @@ export class GraphService {
   ) {}
 
   async syncPostgresToNeo4j(tenantId: string) {
-    this.logger.log(`Starting PostgreSQL to Neo4j sync for tenant: ${tenantId}`);
-    
+    this.logger.log(
+      `Starting PostgreSQL to Neo4j sync for tenant: ${tenantId}`,
+    );
+
     // Clear existing data for this tenant
     await this.neo4jService.write(
       `MATCH (n {tenantId: $tenantId}) DETACH DELETE n`,
-      { tenantId }
+      { tenantId },
     );
 
     // Sync Applications
     const apps = await this.prismaService.application.findMany({
       where: { tenant_id: tenantId },
     });
-    
+
     for (const app of apps) {
       await this.neo4jService.write(
         `CREATE (a:Application {
@@ -40,7 +42,7 @@ export class GraphService {
           name: app.name,
           lifecycle: app.lifecycle_state,
           risk: app.risk_score,
-        }
+        },
       );
     }
 
@@ -62,7 +64,7 @@ export class GraphService {
           tenantId: tenantId,
           name: cap.name,
           level: cap.level,
-        }
+        },
       );
     }
 
@@ -79,7 +81,7 @@ export class GraphService {
           appId: link.application_id,
           capId: link.capability_id,
           level: link.support_level,
-        }
+        },
       );
     }
 
@@ -103,7 +105,7 @@ export class GraphService {
             id: intf.id,
             name: intf.name,
             protocol: intf.protocol || 'Unknown',
-          }
+          },
         );
       }
     }
@@ -117,7 +119,7 @@ export class GraphService {
       `MATCH path = (a:Application {id: $appId})-[:SENDS_DATA_TO*1..${hops}]-(b:Application)
        WHERE a.tenantId = $tenantId AND b.tenantId = $tenantId
        RETURN nodes(path) AS nodes, relationships(path) AS edges`,
-      { appId, tenantId }
+      { appId, tenantId },
     );
     return this.formatGraphResult(result);
   }
@@ -128,7 +130,7 @@ export class GraphService {
       `MATCH path = (a:Application {id: $appId})-[:SENDS_DATA_TO*1..5]->(downstream:Application)
        WHERE a.tenantId = $tenantId
        RETURN nodes(path) AS nodes, relationships(path) AS edges`,
-      { appId, tenantId }
+      { appId, tenantId },
     );
     return this.formatGraphResult(result);
   }
@@ -138,7 +140,7 @@ export class GraphService {
       `MATCH path = (a:Application)-[:SENDS_DATA_TO*1..5]->(a)
        WHERE a.tenantId = $tenantId
        RETURN nodes(path) AS nodes, relationships(path) AS edges`,
-      { tenantId }
+      { tenantId },
     );
     return this.formatGraphResult(result);
   }
@@ -148,7 +150,7 @@ export class GraphService {
       `MATCH (n {tenantId: $tenantId})
        OPTIONAL MATCH (n)-[r]->(m {tenantId: $tenantId})
        RETURN n AS nodes, r AS edges`,
-      { tenantId }
+      { tenantId },
     );
     return this.formatGraphResult(result);
   }
@@ -160,22 +162,25 @@ export class GraphService {
     for (const record of result.records) {
       const nodes = record.get('nodes');
       const edges = record.get('edges');
-      
+
       if (Array.isArray(nodes)) {
-        nodes.forEach((n: any) => nodesMap.set(n.identity.toString(), n.properties));
+        nodes.forEach((n: any) =>
+          nodesMap.set(n.identity.toString(), n.properties),
+        );
       } else if (nodes) {
         nodesMap.set(nodes.identity.toString(), nodes.properties);
       }
 
       if (Array.isArray(edges)) {
         edges.forEach((e: any) => {
-           if (e) edgesMap.set(e.identity.toString(), {
-             id: e.properties.id || e.identity.toString(),
-             source: e.start.toString(),
-             target: e.end.toString(),
-             type: e.type,
-             ...e.properties
-           });
+          if (e)
+            edgesMap.set(e.identity.toString(), {
+              id: e.properties.id || e.identity.toString(),
+              source: e.start.toString(),
+              target: e.end.toString(),
+              type: e.type,
+              ...e.properties,
+            });
         });
       } else if (edges) {
         edgesMap.set(edges.identity.toString(), {
@@ -183,14 +188,14 @@ export class GraphService {
           source: edges.start.toString(),
           target: edges.end.toString(),
           type: edges.type,
-          ...edges.properties
+          ...edges.properties,
         });
       }
     }
 
     return {
-      nodes: Array.from(nodesMap.values()).map(n => ({ id: n.id, data: n })),
-      edges: Array.from(edgesMap.values())
+      nodes: Array.from(nodesMap.values()).map((n) => ({ id: n.id, data: n })),
+      edges: Array.from(edgesMap.values()),
     };
   }
 }

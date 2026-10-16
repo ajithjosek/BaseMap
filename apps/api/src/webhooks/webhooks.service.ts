@@ -32,13 +32,16 @@ export class WebhooksService {
     return webhook;
   }
 
-  async create(tenantId: string, data: {
-    name: string;
-    provider: string;
-    webhook_url: string;
-    secret_key?: string;
-    events?: string[];
-  }) {
+  async create(
+    tenantId: string,
+    data: {
+      name: string;
+      provider: string;
+      webhook_url: string;
+      secret_key?: string;
+      events?: string[];
+    },
+  ) {
     return this.db.webhookConfig.create({
       data: {
         tenant_id: tenantId,
@@ -52,13 +55,17 @@ export class WebhooksService {
     });
   }
 
-  async update(id: string, tenantId: string, data: {
-    name?: string;
-    webhook_url?: string;
-    secret_key?: string;
-    events?: string[];
-    is_active?: boolean;
-  }) {
+  async update(
+    id: string,
+    tenantId: string,
+    data: {
+      name?: string;
+      webhook_url?: string;
+      secret_key?: string;
+      events?: string[];
+      is_active?: boolean;
+    },
+  ) {
     await this.findOne(id, tenantId);
 
     return this.db.webhookConfig.update({
@@ -80,7 +87,7 @@ export class WebhooksService {
 
   async test(id: string, tenantId: string) {
     const webhook = await this.findOne(id, tenantId);
-    
+
     const testPayload = {
       event: 'test',
       timestamp: new Date().toISOString(),
@@ -97,12 +104,16 @@ export class WebhooksService {
           },
         }),
       );
-      return { success: true, message: 'Webhook test successful', status: response.status };
+      return {
+        success: true,
+        message: 'Webhook test successful',
+        status: response.status,
+      };
     } catch (error: any) {
-      return { 
-        success: false, 
-        message: 'Webhook test failed', 
-        error: error.response?.data || error.message 
+      return {
+        success: false,
+        message: 'Webhook test failed',
+        error: error.response?.data || error.message,
       };
     }
   }
@@ -137,7 +148,11 @@ export class WebhooksService {
         );
         results.push({ webhook_id: webhook.id, success: true });
       } catch (error) {
-        results.push({ webhook_id: webhook.id, success: false, error: error.message });
+        results.push({
+          webhook_id: webhook.id,
+          success: false,
+          error: error.message,
+        });
       }
     }
 

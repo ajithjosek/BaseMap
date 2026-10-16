@@ -35,7 +35,11 @@ export class BillingService {
     return this.enabled;
   }
 
-  async createCustomer(tenantId: string, email: string, name: string): Promise<any> {
+  async createCustomer(
+    tenantId: string,
+    email: string,
+    name: string,
+  ): Promise<any> {
     if (!this.enabled || !this.stripe) {
       return this.stubCustomer(tenantId, email, name);
     }
@@ -100,20 +104,29 @@ export class BillingService {
    * Validates and extracts the subscription event from an incoming Stripe
    * webhook. When disabled, returns null so consumers can skip gracefully.
    */
-  async handleWebhook(rawBody: string, signature: string): Promise<Stripe.Event | null> {
+  async handleWebhook(
+    rawBody: string,
+    signature: string,
+  ): Promise<Stripe.Event | null> {
     if (!this.enabled || !this.stripe) {
-      this.logger.warn('Received billing webhook while billing disabled; ignoring.');
+      this.logger.warn(
+        'Received billing webhook while billing disabled; ignoring.',
+      );
       return null;
     }
     const secret = process.env.STRIPE_WEBHOOK_SECRET || '';
     if (!secret) {
-      this.logger.warn('Missing STRIPE_WEBHOOK_SECRET; webhook signature unchecked.');
+      this.logger.warn(
+        'Missing STRIPE_WEBHOOK_SECRET; webhook signature unchecked.',
+      );
       return JSON.parse(rawBody) as Stripe.Event;
     }
     try {
       return this.stripe.webhooks.constructEvent(rawBody, signature, secret);
     } catch (err: any) {
-      this.logger.error(`Webhook signature verification failed: ${err?.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${err?.message}`,
+      );
       throw new Error('Invalid webhook signature');
     }
   }

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SaaSApplicationsService } from './saas-applications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -27,7 +38,10 @@ export class SaaSApplicationsController {
     @CurrentUser() user: any,
     @Query('months') months?: string,
   ) {
-    return this.saasService.getRenewalCalendar(user.tenantId, months ? parseInt(months) : 12);
+    return this.saasService.getRenewalCalendar(
+      user.tenantId,
+      months ? parseInt(months) : 12,
+    );
   }
 
   @Get('utilization')
@@ -36,11 +50,11 @@ export class SaaSApplicationsController {
   }
 
   @Get('inactive-users')
-  getInactiveUsers(
-    @CurrentUser() user: any,
-    @Query('days') days?: string,
-  ) {
-    return this.saasService.getInactiveUsers(user.tenantId, days ? parseInt(days) : 90);
+  getInactiveUsers(@CurrentUser() user: any, @Query('days') days?: string) {
+    return this.saasService.getInactiveUsers(
+      user.tenantId,
+      days ? parseInt(days) : 90,
+    );
   }
 
   @Get('inactive-users/export')
@@ -48,9 +62,12 @@ export class SaaSApplicationsController {
     @CurrentUser() user: any,
     @Query('days') days?: string,
   ) {
-    const data = await this.saasService.getInactiveUsers(user.tenantId, days ? parseInt(days) : 90);
+    const data = await this.saasService.getInactiveUsers(
+      user.tenantId,
+      days ? parseInt(days) : 90,
+    );
     const csv = this.saasService.generateInactiveUsersCSV(data);
-    
+
     return {
       data: csv,
       filename: `inactive-users-${new Date().toISOString().split('T')[0]}.csv`,
@@ -64,10 +81,7 @@ export class SaaSApplicationsController {
   }
 
   @Get('spend/trend')
-  getSpendTrend(
-    @CurrentUser() user: any,
-    @Query('period') period?: string,
-  ) {
+  getSpendTrend(@CurrentUser() user: any, @Query('period') period?: string) {
     return this.saasService.getSpendTrend(user.tenantId, period || 'monthly');
   }
 
@@ -106,7 +120,12 @@ export class SaaSApplicationsController {
     @Body('totalSeats') totalSeats: number,
     @Body('activeUsers') activeUsers: number,
   ) {
-    return this.saasService.updateSeats(id, user.tenantId, totalSeats, activeUsers);
+    return this.saasService.updateSeats(
+      id,
+      user.tenantId,
+      totalSeats,
+      activeUsers,
+    );
   }
 
   @Delete(':id')

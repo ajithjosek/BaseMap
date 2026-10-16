@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsArray, IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 
 export class CreateCustomReportDto {
   @IsString()

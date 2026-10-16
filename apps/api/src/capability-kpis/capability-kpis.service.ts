@@ -63,7 +63,9 @@ export class CapabilityKpisService {
   }
 
   private async requireKpi(tenantId: string, id: string) {
-    const kpi = await this.db.capabilityKpi.findFirst({ where: { id, tenant_id: tenantId } });
+    const kpi = await this.db.capabilityKpi.findFirst({
+      where: { id, tenant_id: tenantId },
+    });
     if (!kpi) throw new NotFoundException('KPI not found');
     return kpi;
   }
@@ -107,7 +109,8 @@ export class CapabilityKpisService {
     const tenant = this.requireTenant(tenantId);
     await this.requireKpi(tenant, id);
     const value = Number(dto?.value);
-    if (!Number.isFinite(value)) throw new BadRequestException('value is required');
+    if (!Number.isFinite(value))
+      throw new BadRequestException('value is required');
     const entry = await this.db.capabilityKpiValue.create({
       data: {
         kpi_id: id,

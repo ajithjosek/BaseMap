@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ComplianceService } from './compliance.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -9,10 +18,7 @@ export class ComplianceController {
   constructor(private readonly service: ComplianceService) {}
 
   @Get('frameworks')
-  getFrameworks(
-    @CurrentUser() user: any,
-    @Query('type') type?: string,
-  ) {
+  getFrameworks(@CurrentUser() user: any, @Query('type') type?: string) {
     return this.service.getFrameworks(user.tenantId, type);
   }
 

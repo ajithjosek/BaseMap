@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsInt, IsEnum, IsUUID, Min, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsEnum,
+  IsUUID,
+  Min,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateCapabilityDto {
   @IsString()
@@ -31,7 +39,9 @@ export class UpdateCapabilityDto {
   @IsOptional() @IsInt() @Min(1) level?: number;
   @IsOptional() @IsUUID() parent_id?: string | null;
   @IsOptional() @IsUUID() owner_id?: string | null;
-  @IsOptional() @IsEnum(['Low', 'Medium', 'High', 'Critical']) strategic_importance?: string;
+  @IsOptional()
+  @IsEnum(['Low', 'Medium', 'High', 'Critical'])
+  strategic_importance?: string;
   @IsOptional() @IsBoolean() is_locked?: boolean;
 }
 

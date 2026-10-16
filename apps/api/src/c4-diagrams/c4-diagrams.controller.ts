@@ -22,36 +22,45 @@ export class C4DiagramsController {
 
   @Post()
   create(@Req() req: any, @Body() dto: any, @CurrentUser() user: any) {
-    return this.c4.create((req as any).tenantId, dto, user);
+    return this.c4.create(req.tenantId, dto, user);
   }
 
   @Get()
   list(@Req() req: any, @Query('level') level?: string) {
-    return this.c4.list((req as any).tenantId, level);
+    return this.c4.list(req.tenantId, level);
   }
 
   @Get(':id')
   one(@Req() req: any, @Param('id') id: string) {
-    return this.c4.get((req as any).tenantId, id);
+    return this.c4.get(req.tenantId, id);
   }
 
   @Put(':id')
-  save(@Req() req: any, @Param('id') id: string, @Body() dto: any, @CurrentUser() user: any) {
-    return this.c4.save((req as any).tenantId, id, dto, user);
+  save(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: any,
+    @CurrentUser() user: any,
+  ) {
+    return this.c4.save(req.tenantId, id, dto, user);
   }
 
   @Get(':id/versions')
   versions(@Req() req: any, @Param('id') id: string) {
-    return this.c4.versions((req as any).tenantId, id);
+    return this.c4.versions(req.tenantId, id);
   }
 
   @Put(':id/versions/:versionId/restore')
-  restore(@Req() req: any, @Param('id') id: string, @Param('versionId') versionId: string) {
-    return this.c4.restore((req as any).tenantId, id, versionId);
+  restore(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Param('versionId') versionId: string,
+  ) {
+    return this.c4.restore(req.tenantId, id, versionId);
   }
 
   @Delete(':id')
   remove(@Req() req: any, @Param('id') id: string) {
-    return this.c4.remove((req as any).tenantId, id);
+    return this.c4.remove(req.tenantId, id);
   }
 }

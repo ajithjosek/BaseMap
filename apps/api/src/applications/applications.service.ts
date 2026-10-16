@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { CreateApplicationDto, UpdateApplicationDto } from './dto/create-application.dto';
+import {
+  CreateApplicationDto,
+  UpdateApplicationDto,
+} from './dto/create-application.dto';
 
 @Injectable()
 export class ApplicationsService {
@@ -20,16 +23,16 @@ export class ApplicationsService {
   }
 
   async findAll(query: any, tenantId?: string) {
-    const { 
-      page = 1, 
-      limit = 10, 
-      search, 
+    const {
+      page = 1,
+      limit = 10,
+      search,
       sort,
       lifecycle,
       business_unit_id,
       technology_type,
       risk_min,
-      risk_max
+      risk_max,
     } = query;
     const skip = (page - 1) * limit;
 
@@ -152,17 +155,19 @@ export class ApplicationsService {
 
   async transitionLifecycle(id: string, dto: any, userId: string) {
     const app = await this.findOne(id);
-    
+
     const validTransitions: Record<string, string[]> = {
-      'Planning': ['Active', 'Retirement'],
-      'Active': ['Maintenance', 'Retirement'],
-      'Maintenance': ['Active', 'Retirement'],
-      'Retirement': ['Retired', 'Active'],
-      'Retired': [],
+      Planning: ['Active', 'Retirement'],
+      Active: ['Maintenance', 'Retirement'],
+      Maintenance: ['Active', 'Retirement'],
+      Retirement: ['Retired', 'Active'],
+      Retired: [],
     };
 
     if (!validTransitions[app.lifecycle_state].includes(dto.target_state)) {
-      throw new Error(`Invalid lifecycle transition from ${app.lifecycle_state} to ${dto.target_state}`);
+      throw new Error(
+        `Invalid lifecycle transition from ${app.lifecycle_state} to ${dto.target_state}`,
+      );
     }
 
     const oldState = app.lifecycle_state;

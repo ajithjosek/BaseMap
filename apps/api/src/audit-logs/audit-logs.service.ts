@@ -28,14 +28,18 @@ export class AuditLogsService {
     if (filters?.user_id) where.user_id = filters.user_id;
     if (filters?.start_date || filters?.end_date) {
       where.action_timestamp = {};
-      if (filters?.start_date) where.action_timestamp.gte = new Date(filters.start_date);
-      if (filters?.end_date) where.action_timestamp.lte = new Date(filters.end_date);
+      if (filters?.start_date)
+        where.action_timestamp.gte = new Date(filters.start_date);
+      if (filters?.end_date)
+        where.action_timestamp.lte = new Date(filters.end_date);
     }
 
     const [logs, total] = await Promise.all([
       this.db.auditLog.findMany({
         where,
-        include: { user: { select: { first_name: true, last_name: true, email: true } } },
+        include: {
+          user: { select: { first_name: true, last_name: true, email: true } },
+        },
         orderBy: { action_timestamp: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
@@ -49,7 +53,9 @@ export class AuditLogsService {
   async findOne(id: string, tenantId: string) {
     const log = await this.db.auditLog.findFirst({
       where: { id, tenant_id: tenantId },
-      include: { user: { select: { first_name: true, last_name: true, email: true } } },
+      include: {
+        user: { select: { first_name: true, last_name: true, email: true } },
+      },
     });
     if (!log) throw new NotFoundException('Audit log not found');
     return log;
@@ -83,30 +89,39 @@ export class AuditLogsService {
     };
   }
 
-  async getEntityHistory(entityType: string, entityId: string, tenantId: string) {
+  async getEntityHistory(
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+  ) {
     return this.db.auditLog.findMany({
       where: {
         tenant_id: tenantId,
         entity_type: entityType,
         entity_id: entityId,
       },
-      include: { user: { select: { first_name: true, last_name: true, email: true } } },
+      include: {
+        user: { select: { first_name: true, last_name: true, email: true } },
+      },
       orderBy: { action_timestamp: 'desc' },
     });
   }
 
-  async create(tenantId: string, data: {
-    user_id?: string;
-    user_email?: string;
-    entity_type: string;
-    entity_id?: string;
-    entity_name?: string;
-    action: string;
-    changes?: any;
-    ip_address?: string;
-    user_agent?: string;
-    session_id?: string;
-  }) {
+  async create(
+    tenantId: string,
+    data: {
+      user_id?: string;
+      user_email?: string;
+      entity_type: string;
+      entity_id?: string;
+      entity_name?: string;
+      action: string;
+      changes?: any;
+      ip_address?: string;
+      user_agent?: string;
+      session_id?: string;
+    },
+  ) {
     return this.db.auditLog.create({
       data: {
         tenant_id: tenantId,

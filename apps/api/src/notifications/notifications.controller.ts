@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Delete, Param, UseGuards, Query, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  UseGuards,
+  Query,
+  Body,
+} from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { SendLifecycleChangeDto, SendEOLAlertDto } from './dto/notifications.dto';
+import {
+  SendLifecycleChangeDto,
+  SendEOLAlertDto,
+} from './dto/notifications.dto';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
@@ -35,12 +47,21 @@ export class NotificationsController {
 
   @Delete(':id')
   async deleteNotification(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.notificationsService.deleteNotification(id, user.userId, user.tenantId);
+    return this.notificationsService.deleteNotification(
+      id,
+      user.userId,
+      user.tenantId,
+    );
   }
 
   @Get('unread-count')
   async getUnreadCount(@CurrentUser() user: any) {
-    return { unreadCount: await this.notificationsService.getUnreadCount(user.userId, user.tenantId) };
+    return {
+      unreadCount: await this.notificationsService.getUnreadCount(
+        user.userId,
+        user.tenantId,
+      ),
+    };
   }
 
   @Post('send-lifecycle-change')

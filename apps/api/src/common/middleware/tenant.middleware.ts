@@ -8,11 +8,11 @@ export class TenantMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     let tenantId = req.headers['x-tenant-id'] as string;
-    
+
     // If it's a slug (not a UUID), resolve it
     if (tenantId && !this.isValidUuid(tenantId)) {
       const tenant = await this.prisma.tenant.findUnique({
-        where: { slug: tenantId }
+        where: { slug: tenantId },
       });
       if (tenant) {
         tenantId = tenant.id;
@@ -22,12 +22,13 @@ export class TenantMiddleware implements NestMiddleware {
     if (tenantId) {
       (req as any).tenantId = tenantId;
     }
-    
+
     next();
   }
 
   private isValidUuid(id: string) {
-    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const regex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return regex.test(id);
   }
 }

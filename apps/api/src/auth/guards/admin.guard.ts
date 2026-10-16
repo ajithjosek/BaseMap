@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -12,7 +17,7 @@ export class AdminGuard implements CanActivate {
 
     // For the platform scope, a tenant is identified via header; for super-admin
     // tenant-management operations we consider membership of the tenant's "Admin" role.
-    const tenantId = (request as any).tenantId || user.tenantId;
+    const tenantId = request.tenantId || user.tenantId;
     if (!tenantId) return false;
 
     const role = await this.prisma.role.findUnique({

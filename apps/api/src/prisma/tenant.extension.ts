@@ -12,19 +12,53 @@ export const tenantExtension = (tenantId?: string) => {
 
             // List of models that have tenant_id
             const modelsWithTenantId = [
-              'Organization', 'BusinessUnit', 'Application', 'ApplicationCost',
-              'CapabilityNode', 'ApplicationCapability', 'Interface',
-              'TechnologyComponent', 'SaaSApplication', 'User', 'Role',
-              'AuditLog', 'Comment'
+              'Organization',
+              'BusinessUnit',
+              'Application',
+              'ApplicationCost',
+              'CapabilityNode',
+              'ApplicationCapability',
+              'Interface',
+              'TechnologyComponent',
+              'SaaSApplication',
+              'User',
+              'Role',
+              'AuditLog',
+              'Comment',
             ];
 
             if (modelsWithTenantId.includes(model)) {
-              if (['findFirst', 'findMany', 'count', 'aggregate', 'groupBy'].includes(operation)) {
-                (args as any).where = { ...(args as any).where, tenant_id: tenantId };
-              } else if (['update', 'updateMany', 'upsert', 'delete', 'deleteMany'].includes(operation)) {
-                (args as any).where = { ...(args as any).where, tenant_id: tenantId };
+              if (
+                [
+                  'findFirst',
+                  'findMany',
+                  'count',
+                  'aggregate',
+                  'groupBy',
+                ].includes(operation)
+              ) {
+                (args as any).where = {
+                  ...(args as any).where,
+                  tenant_id: tenantId,
+                };
+              } else if (
+                [
+                  'update',
+                  'updateMany',
+                  'upsert',
+                  'delete',
+                  'deleteMany',
+                ].includes(operation)
+              ) {
+                (args as any).where = {
+                  ...(args as any).where,
+                  tenant_id: tenantId,
+                };
               } else if (operation === 'create') {
-                (args as any).data = { ...(args as any).data, tenant_id: tenantId };
+                (args as any).data = {
+                  ...(args as any).data,
+                  tenant_id: tenantId,
+                };
               }
             }
 
