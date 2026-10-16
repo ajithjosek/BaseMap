@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -6,7 +10,7 @@ export class SaaSRequestsService {
   private db: any;
 
   constructor(private prisma: PrismaService) {
-    this.db = this.db as any;
+    this.db = this.prisma as any;
   }
 
   private readonly WORKFLOW_STEPS = [
@@ -41,12 +45,22 @@ export class SaaSRequestsService {
       });
     }
 
-    await this.createNotification(tenantId, userId, request.id, 'Request Created', `Your SaaS request for ${dto.tool_name} has been submitted.`);
+    await this.createNotification(
+      tenantId,
+      userId,
+      request.id,
+      'Request Created',
+      `Your SaaS request for ${dto.tool_name} has been submitted.`,
+    );
 
     return request;
   }
 
-  async findAll(tenantId: string, userId: string, filters?: { state?: string; role?: string }) {
+  async findAll(
+    tenantId: string,
+    userId: string,
+    filters?: { state?: string; role?: string },
+  ) {
     const where: any = { tenant_id: tenantId };
 
     if (filters?.state) {
@@ -102,14 +116,21 @@ export class SaaSRequestsService {
     return request;
   }
 
-  async approve(id: string, tenantId: string, userId: string, dto: { comment?: string }) {
+  async approve(
+    id: string,
+    tenantId: string,
+    userId: string,
+    dto: { comment?: string },
+  ) {
     const request = await this.findOne(id, tenantId);
-    
+
     if (request.current_state !== 'pending') {
       throw new BadRequestException('Request is not in pending state');
     }
 
-    const currentStep = request.steps.find(s => s.step_number === request.current_step);
+    const currentStep = request.steps.find(
+      (s) => s.step_number === request.current_step,
+    );
     if (!currentStep) {
       throw new BadRequestException('No current step found');
     }
@@ -138,7 +159,13 @@ export class SaaSRequestsService {
         data: { status: 'pending' },
       });
 
-      await this.createNotification(tenantId, request.requester_id, id, 'Request Progressed', `Your request for ${request.tool_name} has moved to the next approval step.`);
+      await this.createNotification(
+        tenantId,
+        request.requester_id,
+        id,
+        'Request Progressed',
+        `Your request for ${request.tool_name} has moved to the next approval step.`,
+      );
     } else {
       await this.db.saaSRequest.update({
         where: { id },
@@ -164,25 +191,38 @@ export class SaaSRequestsService {
         },
       });
 
-      await this.createNotification(tenantId, request.requester_id, id, 'Request Approved', `Your SaaS request for ${request.tool_name} has been approved!`);
+      await this.createNotification(
+        tenantId,
+        request.requester_id,
+        id,
+        'Request Approved',
+        `Your SaaS request for ${request.tool_name} has been approved!`,
+      );
     }
 
     return this.findOne(id, tenantId);
   }
 
-  async reject(id: string, tenantId: string, userId: string, dto: { comment: string }) {
+  async reject(
+    id: string,
+    tenantId: string,
+    userId: string,
+    dto: { comment: string },
+  ) {
     if (!dto.comment) {
       throw new BadRequestException('Rejection comment is required');
     }
 
     const request = await this.findOne(id, tenantId);
-    
+
     if (request.current_state !== 'pending') {
       throw new BadRequestException('Request is not in pending state');
     }
 
-    const currentStep = request.steps.find(s => s.step_number === request.current_step);
-    
+    const currentStep = request.steps.find(
+      (s) => s.step_number === request.current_step,
+    );
+
     await this.db.saaSRequestStep.update({
       where: { id: currentStep?.id },
       data: {
@@ -202,24 +242,37 @@ export class SaaSRequestsService {
       },
     });
 
-    await this.createNotification(tenantId, request.requester_id, id, 'Request Rejected', `Your SaaS request for ${request.tool_name} has been rejected. Reason: ${dto.comment}`);
+    await this.createNotification(
+      tenantId,
+      request.requester_id,
+      id,
+      'Request Rejected',
+      `Your SaaS request for ${request.tool_name} has been rejected. Reason: ${dto.comment}`,
+    );
 
     return this.findOne(id, tenantId);
   }
 
-  async requestChanges(id: string, tenantId: string, userId: string, dto: { comment: string }) {
+  async requestChanges(
+    id: string,
+    tenantId: string,
+    userId: string,
+    dto: { comment: string },
+  ) {
     if (!dto.comment) {
       throw new BadRequestException('Change request comment is required');
     }
 
     const request = await this.findOne(id, tenantId);
-    
+
     if (request.current_state !== 'pending') {
       throw new BadRequestException('Request is not in pending state');
     }
 
-    const currentStep = request.steps.find(s => s.step_number === request.current_step);
-    
+    const currentStep = request.steps.find(
+      (s) => s.step_number === request.current_step,
+    );
+
     await this.db.saaSRequestStep.update({
       where: { id: currentStep?.id },
       data: {
@@ -239,7 +292,13 @@ export class SaaSRequestsService {
       },
     });
 
-    await this.createNotification(tenantId, request.requester_id, id, 'Changes Requested', `Please address the following feedback for your request: ${dto.comment}`);
+    await this.createNotification(
+      tenantId,
+      request.requester_id,
+      id,
+      'Changes Requested',
+      `Please address the following feedback for your request: ${dto.comment}`,
+    );
 
     return this.findOne(id, tenantId);
   }
@@ -270,7 +329,13 @@ export class SaaSRequestsService {
     return requests;
   }
 
-  private async createNotification(tenantId: string, userId: string, entityId: string, title: string, message: string) {
+  private async createNotification(
+    tenantId: string,
+    userId: string,
+    entityId: string,
+    title: string,
+    message: string,
+  ) {
     await this.db.notification.create({
       data: {
         tenant_id: tenantId,

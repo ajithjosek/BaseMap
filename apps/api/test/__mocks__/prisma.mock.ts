@@ -14,8 +14,9 @@ export function createPrismaMock() {
     interface_: createModelMock(),
     interfaceIncident: createModelMock(),
     technologyComponent: createModelMock(),
-    saasApplication: createModelMock(),
-    saasRequest: createModelMock(),
+    saaSApplication: createModelMock(),
+    saaSRequest: createModelMock(),
+    saaSRequestStep: createModelMock(),
     role: createModelMock(),
     permission: createModelMock(),
     userRole: createModelMock(),
@@ -70,13 +71,29 @@ function createModelMock() {
   const findMany = jest.fn().mockResolvedValue([]);
   const findUnique = jest.fn().mockResolvedValue(null);
   const findFirst = jest.fn().mockResolvedValue(null);
-  const create = jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'mock-id', ...data }));
-  const update = jest.fn().mockImplementation(({ where, data }) => Promise.resolve({ id: where?.id ?? 'mock-id', ...data }));
-  const delete_ = jest.fn().mockImplementation(({ where }) => Promise.resolve({ id: where?.id ?? 'mock-id' }));
+  const create = jest
+    .fn()
+    .mockImplementation(({ data }) =>
+      Promise.resolve({ id: 'mock-id', ...data }),
+    );
+  const update = jest
+    .fn()
+    .mockImplementation(({ where, data }) =>
+      Promise.resolve({ id: where?.id ?? 'mock-id', ...data }),
+    );
+  const delete_ = jest
+    .fn()
+    .mockImplementation(({ where }) =>
+      Promise.resolve({ id: where?.id ?? 'mock-id' }),
+    );
   const deleteMany = jest.fn().mockResolvedValue({ count: 0 });
   const updateMany = jest.fn().mockResolvedValue({ count: 0 });
   const count = jest.fn().mockResolvedValue(0);
-  const upsert = jest.fn().mockImplementation(({ create: c }) => Promise.resolve({ id: 'mock-id', ...c }));
+  const upsert = jest
+    .fn()
+    .mockImplementation(({ create: c }) =>
+      Promise.resolve({ id: 'mock-id', ...c }),
+    );
 
   return {
     findMany,
@@ -93,13 +110,29 @@ function createModelMock() {
       findMany.mockReset().mockResolvedValue([]);
       findUnique.mockReset().mockResolvedValue(null);
       findFirst.mockReset().mockResolvedValue(null);
-      create.mockReset().mockImplementation(({ data }: any) => Promise.resolve({ id: 'mock-id', ...data }));
-      update.mockReset().mockImplementation(({ where, data }: any) => Promise.resolve({ id: where?.id ?? 'mock-id', ...data }));
-      delete_.mockReset().mockImplementation(({ where }: any) => Promise.resolve({ id: where?.id ?? 'mock-id' }));
+      create
+        .mockReset()
+        .mockImplementation(({ data }: any) =>
+          Promise.resolve({ id: 'mock-id', ...data }),
+        );
+      update
+        .mockReset()
+        .mockImplementation(({ where, data }: any) =>
+          Promise.resolve({ id: where?.id ?? 'mock-id', ...data }),
+        );
+      delete_
+        .mockReset()
+        .mockImplementation(({ where }: any) =>
+          Promise.resolve({ id: where?.id ?? 'mock-id' }),
+        );
       deleteMany.mockReset().mockResolvedValue({ count: 0 });
       updateMany.mockReset().mockResolvedValue({ count: 0 });
       count.mockReset().mockResolvedValue(0);
-      upsert.mockReset().mockImplementation(({ create: c }: any) => Promise.resolve({ id: 'mock-id', ...c }));
+      upsert
+        .mockReset()
+        .mockImplementation(({ create: c }: any) =>
+          Promise.resolve({ id: 'mock-id', ...c }),
+        );
     },
   };
 }
