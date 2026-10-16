@@ -20,6 +20,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx prisma generate
       - run: npm run lint
       - run: npx tsc --noEmit
 
@@ -36,6 +37,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx prisma generate
       - run: npm test -- --coverage --ci
       - uses: actions/upload-artifact@v4
         if: always()
@@ -56,6 +58,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx prisma generate
       - run: npm run test:e2e -- --ci --forceExit
 
   web-lint-typecheck:

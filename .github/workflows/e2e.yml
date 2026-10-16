@@ -24,19 +24,26 @@ jobs:
         working-directory: tests/e2e
         run: npx playwright install --with-deps chromium firefox
 
+      - name: Build API
+        run: npm run build --workspace api
+
       - name: Build web
         run: npm run build
         working-directory: apps/web
+
+      - name: Generate Prisma client
+        working-directory: apps/api
+        run: npx prisma generate
 
       - name: Start services
         run: |
           docker compose up -d postgres
           sleep 10
-          cd apps/api && npx prisma migrate deploy || true
-          cd apps/api && npx prisma db seed || true
-          cd apps/api && PORT=4001 node dist/src/main &
-          cd apps/web && npx next start -p 3005 &
-          sleep 15
+          (cd apps/api && npx prisma migrate deploy)
+          (cd apps/api && npx prisma db seed)
+          (cd apps/api && PORT=4001 node dist/src/main) &
+          (cd apps/web && npx next start -p 3005) &
+          sleep 20
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/basemap?schema=public
 
