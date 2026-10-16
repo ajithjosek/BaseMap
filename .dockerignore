@@ -1,8 +1,34 @@
+# Dependencies
 node_modules
-.next
-dist
-.git
-.turbo
 apps/*/node_modules
-apps/*/dist
+
+# Build outputs
+.next
 apps/*/.next
+dist
+apps/*/dist
+.turbo
+apps/*/.turbo
+
+# VCS / CI
+.git
+.github
+.husky
+
+# Local tooling — must never be sent as build context
+.continue
+.agents
+.antigravitycli
+.opencode
+.vscode
+.idea
+
+# Repo extras that the images do not need
+tests
+docs
+charts
+generated_documents
+
+# Never bake local environment/secrets into an image (at any depth)
+**/.env
+**/.env.*
