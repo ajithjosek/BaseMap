@@ -35,15 +35,14 @@ const ROUTES = [
 
 test('all authenticated pages render', async ({ page }) => {
   await page.goto('/login');
-  await page.getByLabel(/email/i).fill(process.env.E2E_EMAIL || 'admin@basemap.io');
-  await page.getByLabel(/password/i).fill(process.env.E2E_PASSWORD || 'Admin123!');
-  await page.getByRole('button', { name: /sign in|login|log ?in/i }).click();
-  await page.waitForURL(/dashboard|^\/$/, { timeout: 15000 });
+  await page.getByLabel(/email/i).fill(process.env.E2E_EMAIL || 'admin@basemap.com');
+  await page.getByLabel(/password/i).fill(process.env.E2E_PASSWORD || 'admin123');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await page.waitForURL(/dashboard|\/$/, { timeout: 15000 });
 
   for (const route of ROUTES) {
     await test.step(`render ${route}`, async () => {
       await page.goto(route);
-      await page.waitForLoadState('networkidle');
       await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
     });
   }

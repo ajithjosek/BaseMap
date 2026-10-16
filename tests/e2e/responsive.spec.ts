@@ -13,17 +13,19 @@ async function loginMobile(page: any) {
   await page.goto(`${WEB_URL}/login`);
   await page.getByLabel(/email/i).fill(TEST_EMAIL);
   await page.getByLabel(/password/i).fill(TEST_PASSWORD);
-  await page.getByRole('button', { name: /sign in|login|log ?in/i }).click();
-  await page.waitForURL(/dashboard|^\/$/, { timeout: 15000 });
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await page.waitForURL(/dashboard|\/$/, { timeout: 15000 });
 }
+
+// The bottom nav is the only nav pinned to the bottom (the desktop sidebar uses a different class).
+const bottomNav = (page: any) => page.locator('nav.fixed.bottom-0');
 
 test.describe('mobile viewport', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('bottom navigation bar is visible', async ({ page }) => {
     await loginMobile(page);
-    const bottomNav = page.locator('nav').filter({ hasText: /home|more/i });
-    await expect(bottomNav).toBeVisible({ timeout: 10000 });
+    await expect(bottomNav(page)).toBeVisible({ timeout: 10000 });
   });
 
   test('desktop sidebar is hidden on mobile', async ({ page }) => {
@@ -39,7 +41,7 @@ test.describe('mobile viewport', () => {
 
   test('bottom nav tabs navigate to pages', async ({ page }) => {
     await loginMobile(page);
-    const appsTab = page.locator('nav a[href="/applications"]');
+    const appsTab = bottomNav(page).locator('a[href="/applications"]');
     if (await appsTab.isVisible()) {
       await appsTab.click();
       await expect(page).toHaveURL(/\/applications/, { timeout: 10000 });
@@ -48,10 +50,12 @@ test.describe('mobile viewport', () => {
 
   test('More sheet opens on bottom nav', async ({ page }) => {
     await loginMobile(page);
-    const moreBtn = page.locator('nav button').filter({ hasText: /more/i });
+    const moreBtn = bottomNav(page).locator('button').filter({ hasText: /more/i });
     if (await moreBtn.isVisible()) {
       await moreBtn.click();
-      await expect(page.getByText(/Capabilities|Settings/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('dialog').getByText(/Capabilities|Settings/i).first()).toBeVisible({
+        timeout: 5000,
+      });
     }
   });
 });

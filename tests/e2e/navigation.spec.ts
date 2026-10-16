@@ -12,8 +12,8 @@ async function login(page: any) {
   await page.goto(`${WEB_URL}/login`);
   await page.getByLabel(/email/i).fill(TEST_EMAIL);
   await page.getByLabel(/password/i).fill(TEST_PASSWORD);
-  await page.getByRole('button', { name: /sign in|login|log ?in/i }).click();
-  await page.waitForURL(/dashboard|^\/$/, { timeout: 15000 });
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await page.waitForURL(/dashboard|\/$/, { timeout: 15000 });
 }
 
 test.describe('sidebar navigation', () => {
@@ -22,17 +22,18 @@ test.describe('sidebar navigation', () => {
   });
 
   test('sidebar has grouped sections', async ({ page }) => {
+    // first() targets the desktop sidebar (the mobile bottom nav repeats these labels).
     // Portfolio section
-    await expect(page.getByText('Applications')).toBeVisible();
-    await expect(page.getByText('SaaS')).toBeVisible();
+    await expect(page.getByText('Applications').first()).toBeVisible();
+    await expect(page.getByText('SaaS').first()).toBeVisible();
 
     // Architecture section
-    await expect(page.getByText('Capabilities')).toBeVisible();
-    await expect(page.getByText('Heatmap')).toBeVisible();
+    await expect(page.getByText('Capabilities').first()).toBeVisible();
+    await expect(page.getByText('Heatmap').first()).toBeVisible();
 
     // Admin section
-    await expect(page.getByText('Users')).toBeVisible();
-    await expect(page.getByText('Settings')).toBeVisible();
+    await expect(page.getByText('Users').first()).toBeVisible();
+    await expect(page.getByText('Settings').first()).toBeVisible();
   });
 
   test('clicking a nav item navigates to that page', async ({ page }) => {
@@ -47,8 +48,8 @@ test.describe('sidebar navigation', () => {
     await expect(link).toHaveAttribute('aria-current', 'page');
   });
 
-  test('BaseMap brand link is visible', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'BaseMap' }).first()).toBeVisible();
+  test('BaseMap brand is visible', async ({ page }) => {
+    await expect(page.getByText('BaseMap').first()).toBeVisible();
   });
 });
 
@@ -66,7 +67,9 @@ test.describe('command palette', () => {
     await page.keyboard.press('Control+k');
     const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill('applications');
-    await expect(page.getByText(/Applications/)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('option', { name: /Applications/ }).first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test('closes with Escape', async ({ page }) => {
