@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { CapabilityTree } from '@/components/capabilities/capability-tree';
 import { CapabilityDetailPanel } from '@/components/capabilities/capability-detail-panel';
+import {
+  CreateCapabilityDialog,
+  CapabilityFormValues,
+} from '@/components/capabilities/create-capability-dialog';
 import { Button } from '@/components/ui/button';
 import { Plus, Download, Upload, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,9 +18,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { PageHeader } from '@/components/shared/page-header';
 
+function flattenCapabilities(nodes: any[], depth = 0): { id: string; name: string }[] {
+  return (nodes || []).flatMap((node) => [
+    { id: node.id, name: `${'  '.repeat(depth)}${node.name}` },
+    ...flattenCapabilities(node.children || [], depth + 1),
+  ]);
+}
+
 export default function CapabilitiesPage() {
   const t = useTranslations('capabilities');
   const [selectedCapability, setSelectedCapability] = useState<any>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [csvContent, setCsvContent] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -30,6 +42,8 @@ export default function CapabilitiesPage() {
       return response.data;
     },
   });
+
+  const parentOptions = useMemo(() => flattenCapabilities(tree || []), [tree]);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string, data: any }) => {
@@ -81,6 +95,22 @@ export default function CapabilitiesPage() {
     }
   });
 
+  const createMutation = useMutation({
+    mutationFn: async (values: CapabilityFormValues) => {
+      return api.post('/capabilities', values);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['capabilities-tree'] });
+      setIsCreateOpen(false);
+      toast.success(t('created_success'));
+    },
+    onError: (error: any) => {
+      toast.error(t('create_error'), {
+        description: error.response?.data?.message || t('unknown_error'),
+      });
+    },
+  });
+
   const handleSave = async (id: string, data: any) => {
     await updateMutation.mutateAsync({ id, data });
   };
@@ -103,7 +133,7 @@ export default function CapabilitiesPage() {
         <Button variant="outline">
           <Download className="mr-2 h-4 w-4" /> {t('export')}
         </Button>
-        <Button>
+        <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> {t('add_capability')}
         </Button>
       </PageHeader>
@@ -201,6 +231,15 @@ export default function CapabilitiesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CreateCapabilityDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSubmit={createMutation.mutate}
+        isPending={createMutation.isPending}
+        parentOptions={parentOptions}
+        defaultParentId={selectedCapability?.id ?? null}
+      />
     </div>
   );
 }
