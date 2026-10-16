@@ -20,7 +20,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    // Login/SSO endpoints return 401 on bad credentials; let the caller render
+    // the error instead of bouncing the page back to /login.
+    const isAuthRequest =
+      typeof error.config?.url === 'string' && error.config.url.includes('/auth/');
+
+    if (error.response?.status === 401 && !isAuthRequest && typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
       window.location.href = '/login';
     }
