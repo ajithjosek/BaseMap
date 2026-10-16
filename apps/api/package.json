@@ -7,13 +7,14 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "dev": "set PORT=4001 && nest start --watch",
+    "dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "set PORT=4001 && nest start",
-    "start:dev": "set PORT=4001 && nest start --watch",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "start:prod": "node dist/src/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -21,7 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@apollo/server": "^4.13.0",
+    "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
     "@aws-sdk/client-s3": "^3.1105.0",
     "@aws-sdk/s3-request-presigner": "^3.1105.0",
@@ -51,6 +52,7 @@
     "csv-parse": "^6.2.1",
     "graphql": "^16.14.0",
     "graphql-subscriptions": "^3.0.0",
+    "ioredis": "^5.10.1",
     "neo4j-driver": "^6.0.1",
     "nodemailer": "^8.0.7",
     "openid-client": "^6.8.4",
@@ -66,7 +68,8 @@
     "stripe": "^22.4.0",
     "swagger-ui-express": "^5.0.1",
     "ws": "^8.20.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

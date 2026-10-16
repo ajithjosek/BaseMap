@@ -49,7 +49,7 @@ cd apps/api
 npx prisma migrate deploy
 
 # Seed the database
-node run-seed.js
+npx prisma db seed
 ```
 
 ### Default Credentials

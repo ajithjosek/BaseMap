@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: "cmd /c \"set DATABASE_URL=postgresql://postgres:postgres@localhost:5432/basemap?schema=public && node --env-file=.env ../../node_modules/tsx/dist/cli.mjs prisma/seed.ts\"",
+    seed: "node --env-file=.env ../../node_modules/tsx/dist/cli.mjs prisma/seed.ts",
   },
   datasource: {
     url: process.env["DATABASE_URL"],
