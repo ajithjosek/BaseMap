@@ -63,7 +63,9 @@ import { redisStore } from 'cache-manager-redis-yet';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         store: await redisStore({
-          url: configService.get<string>('REDIS_URL') || 'redis://localhost:6379',
+          url:
+            configService.get<string>('REDIS_URL') ||
+            `redis://${configService.get<string>('REDIS_HOST', 'localhost')}:${configService.get<number>('REDIS_PORT', 6379)}`,
         }),
       }),
     }),
